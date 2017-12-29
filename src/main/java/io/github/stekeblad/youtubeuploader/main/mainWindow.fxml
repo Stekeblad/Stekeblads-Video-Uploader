@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.youtubeuploader.main.mainController">
+    <ToolBar prefHeight="40.0" prefWidth="1088.0">
+        <Button id="aButt" fx:id="buttDoThing" mnemonicParsing="false" onAction="#onDoThingClicked" text="Button" />
+      <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsPressed" text="Settings" />
+    </ToolBar>
+    <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" prefHeight="464.0" prefWidth="1070.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="350.0" />
+    <Button fx:id="buttonPickFile" layoutX="58.0" layoutY="240.0" mnemonicParsing="false" onAction="#onPickFile" text="Pick files" AnchorPane.leftAnchor="58.0" AnchorPane.topAnchor="240.0" />
+   <Button fx:id="buttonAddFile" layoutX="1050.0" layoutY="324.0" mnemonicParsing="false" onAction="#onAddUploads" text="Add" AnchorPane.rightAnchor="20.0" />
+   <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="200.0" prefWidth="149.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0" />
+   <TextField id="txt_common_title" fx:id="txt_common_title" layoutX="185.0" layoutY="40.0" prefHeight="25.0" prefWidth="200.0" promptText="common title" AnchorPane.leftAnchor="185.0" AnchorPane.topAnchor="40.0" />
+   <TextArea id="txt_common_description" fx:id="txt_common_description" layoutX="185.0" layoutY="85.0" prefHeight="200.0" prefWidth="200.0" promptText="common description" AnchorPane.leftAnchor="185.0" AnchorPane.topAnchor="85.0" />
+   <TextField fx:id="txtStartEpisode" layoutX="395.0" layoutY="40.0" prefHeight="25.0" prefWidth="85.0" promptText="start episode" />
+   <TextArea id="txtTags" fx:id="txtTags" layoutX="395.0" layoutY="85.0" prefHeight="200.0" prefWidth="200.0" promptText="Tags, separate with comma and space (&quot;, &quot;)" AnchorPane.leftAnchor="395.0" AnchorPane.topAnchor="85.0" />
+   <TextField id="txt_playlistURL" fx:id="txt_playlistURL" layoutX="607.0" layoutY="40.0" promptText="Playlist URL" AnchorPane.leftAnchor="607.0" AnchorPane.topAnchor="40.0" />
+   <Label layoutX="15.0" layoutY="307.0" text="Presets" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="307.0" />
+   <ChoiceBox id="choice_presets" fx:id="choice_presets" layoutX="59.0" layoutY="303.0" prefWidth="150.0" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="303.0" />
+</AnchorPane>

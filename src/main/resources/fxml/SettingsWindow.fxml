@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane id="SettingsWindow" fx:id="SettingsWindow" prefHeight="687.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.youtubeuploader.settings.SettingsController">
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+   <ListView layoutX="14.0" layoutY="389.0" prefHeight="375.0" prefWidth="876.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="230.0" />
+   <Button layoutX="801.0" layoutY="277.0" mnemonicParsing="false" text="Edit Selected" AnchorPane.rightAnchor="115.0" AnchorPane.topAnchor="200.0" />
+   <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="145.0" text="Create new preset" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />
+   <Label layoutX="10.0" layoutY="368.0" prefHeight="17.0" prefWidth="107.0" text="Saved Presets" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="200.0" />
+   <Button layoutX="686.0" layoutY="277.0" mnemonicParsing="false" text="Save Preset" AnchorPane.rightAnchor="205.0" AnchorPane.topAnchor="200.0" />
+   <Button layoutX="624.0" layoutY="200.0" mnemonicParsing="false" text="Delete Selected" AnchorPane.rightAnchor="10.0" />
+</AnchorPane>
