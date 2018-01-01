@@ -2,8 +2,6 @@ package io.github.stekeblad.youtubeuploader.main;
 
 import io.github.stekeblad.youtubeuploader.fxml.PaneFactory;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.youtube.Uploader;
-import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,16 +16,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import static io.github.stekeblad.youtubeuploader.utils.Constants.DATA_DIR;
 
 public class mainController implements Initializable {
     public Button buttDoThing;
@@ -78,38 +71,38 @@ public class mainController implements Initializable {
 
     public void onDoThingClicked(ActionEvent event) {
 
-
-        //videoPanes.add(videoGridPane);
-        videoPanes.add(PaneFactory.makeVideoDetailsPane("pane1"));
-        videoPanes.add(PaneFactory.makeUploadPane("pane2"));
+       /* videoPanes.add(PaneFactory.makeVideoDetailsPane("pane1"));
+        List<String> taggar = new ArrayList<>();
+        taggar.add("1");
+        taggar.add("2");
+        VideoUpload vidUp = new VideoUpload("A", "B", VisibilityStatus.UNLISTED.getStatusName(),
+                taggar, Categories.DJUR_OCH_HUSDJUR, false, null, null);
+        vidUp.setPaneProgressBarProgress(0.25F);
+        videoPanes.add(vidUp.getUploadPane());
+        vidUp.setPaneProgressBarProgress(0.75F); // This works!
         videoPanes.add(PaneFactory.makePresetPane("pane3"));
         listView.setItems(FXCollections.observableArrayList(videoPanes));
 
 
-
-
-        try {
-            List<String> tags = Collections.singletonList("example tag");
-            InputStream videoStream = new FileInputStream(DATA_DIR + "/myNewVideo.mkv");
-            Uploader newUpload = new Uploader.Builder()
-                    .setVideoName("My new Video")
-                    .setVideoDescription("This video was uploaded using Stekeblad Youtube Uploader!")
-                    .setVisibility("private")
-                    .setVideoTags(tags)
-                    .setVideoFile(videoStream)
-                    .setCategory(Categories.KOMEDI)
-                    .setTellSubs(false)
-                    .build();
-
-            //newUpload.uploadToTheTube();
-
-
-
+        List<String> tags = Collections.singletonList("example tag");
+        File videoFile = new File(DATA_DIR + "/myNewVideo.mkv");
+        VideoUpload newUpload = new VideoUpload.Builder()
+                .setVideoName("My new Video")
+                .setVideoDescription("This video was uploaded using Stekeblad Youtube Uploader!")
+                .setVisibility("private")
+                .setVideoTags(tags)
+                .setCategory(Categories.KOMEDI)
+                .setTellSubs(false)
+                .setVideoFile(videoFile)
+                .build();
+*/
+        /*try {
+            newUpload.uploadToTheTube();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
-       event.consume();
+        event.consume();
     }
 
 
