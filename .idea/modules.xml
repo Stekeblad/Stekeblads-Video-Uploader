@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/youtubeuploader.iml" filepath="$PROJECT_DIR$/.idea/modules/youtubeuploader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/youtubeuploader_main.iml" filepath="$PROJECT_DIR$/.idea/modules/youtubeuploader_main.iml" group="youtubeuploader" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/youtubeuploader_test.iml" filepath="$PROJECT_DIR$/.idea/modules/youtubeuploader_test.iml" group="youtubeuploader" />
+    </modules>
+  </component>
+</project>

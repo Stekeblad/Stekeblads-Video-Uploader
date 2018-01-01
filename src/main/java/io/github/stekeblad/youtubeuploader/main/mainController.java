@@ -2,6 +2,8 @@ package io.github.stekeblad.youtubeuploader.main;
 
 import io.github.stekeblad.youtubeuploader.fxml.PaneFactory;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
+import io.github.stekeblad.youtubeuploader.youtube.Uploader;
+import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,11 +18,16 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import static io.github.stekeblad.youtubeuploader.utils.Constants.DATA_DIR;
 
 public class mainController implements Initializable {
     public Button buttDoThing;
@@ -80,28 +87,28 @@ public class mainController implements Initializable {
 
 
 
-/*
+
         try {
             List<String> tags = Collections.singletonList("example tag");
             InputStream videoStream = new FileInputStream(DATA_DIR + "/myNewVideo.mkv");
-            Uploader newUpload = new UploaderBuilder()
+            Uploader newUpload = new Uploader.Builder()
                     .setVideoName("My new Video")
                     .setVideoDescription("This video was uploaded using Stekeblad Youtube Uploader!")
                     .setVisibility("private")
                     .setVideoTags(tags)
                     .setVideoFile(videoStream)
-                    .setCategory(Constants.CATEGORIES.KOMEDI)
+                    .setCategory(Categories.KOMEDI)
                     .setTellSubs(false)
-                    .createUploader();
+                    .build();
 
-            newUpload.uploadToTheTube();
+            //newUpload.uploadToTheTube();
 
 
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        */
+
        event.consume();
     }
 

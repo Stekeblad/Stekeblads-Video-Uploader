@@ -10,3 +10,4 @@ And suddenly all my ideas just vanished...
 - GSON to save settings to files as JSON
 - each pane in PaneFactory is its own class? extend-ing videoDetails for preset and upload
 - Get the users playlists and show dropdown instead of asking for playlist URL
+- Thumbnail in preset

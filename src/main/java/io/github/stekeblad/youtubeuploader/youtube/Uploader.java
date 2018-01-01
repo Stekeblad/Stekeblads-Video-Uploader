@@ -42,6 +42,55 @@ public class Uploader {
         this.tellSubs = tellSubs;
     }
 
+    public static class Builder {
+        private String videoName;
+        private String videoDescription;
+        private String visibility;
+        private List<String> videoTags;
+        private InputStream videoFile;
+        private Categories category;
+        private boolean tellSubs;
+
+        public Uploader.Builder setVideoName(String videoName) {
+            this.videoName = videoName;
+            return this;
+        }
+
+        public Uploader.Builder setVideoDescription(String videoDescription) {
+            this.videoDescription = videoDescription;
+            return this;
+        }
+
+        public Uploader.Builder setVisibility(String visibility) {
+            this.visibility = visibility;
+            return this;
+        }
+
+        public Uploader.Builder setVideoTags(List<String> videoTags) {
+            this.videoTags = videoTags;
+            return this;
+        }
+
+        public Uploader.Builder setVideoFile(InputStream videoFile) {
+            this.videoFile = videoFile;
+            return this;
+        }
+
+        public Uploader.Builder setCategory(Categories category) {
+            this.category = category;
+            return this;
+        }
+
+        public Uploader.Builder setTellSubs(boolean tellSubs) {
+            this.tellSubs = tellSubs;
+            return this;
+        }
+
+        public Uploader build() {
+            return new Uploader(videoName, videoDescription, visibility, videoTags, videoFile, category, tellSubs);
+        }
+    }
+
     public Video uploadToTheTube() throws IOException{
 
             Credential creds = Auth.authUser();
