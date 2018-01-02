@@ -1,6 +1,7 @@
 package io.github.stekeblad.youtubeuploader.youtube;
 
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
+import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
@@ -20,9 +21,36 @@ public class VideoPreset extends VideoInformationBase {
         return presetPane;
     }
 
-    public VideoPreset(String videoName, String videoDescription, String visibility, List<String> videoTags,
+    public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                        Categories category, boolean tellSubs, File thumbNail, String paneId, String presetName) {
         super(videoName, videoDescription, visibility, videoTags, category, tellSubs, thumbNail, paneId);
+        makePresetPane(presetName);
+    }
+
+    public VideoPreset(String fromString, String paneId) throws Exception {
+        super(fromString, paneId);
+
+        String presetName = null;
+
+        String[] lines = fromString.split("\n");
+        for (String line : lines) {
+            int colonIndex = line.indexOf(':');
+            if (colonIndex < 0) {
+                System.err.println(fromString);
+                throw new Exception("Malformed string representation of class");
+            } else {
+                switch (line.substring(0, colonIndex)) {
+                    case NODE_ID_PRESETNAME:
+                        presetName = line.substring(colonIndex + 1);
+                        break;
+                    default:
+                        // likely belong to parent
+                }
+                if (presetName == null) {
+                    throw new Exception("String representation of class does not have presetName");
+                }
+            }
+        }
         makePresetPane(presetName);
     }
 
@@ -34,7 +62,7 @@ public class VideoPreset extends VideoInformationBase {
     public static class Builder {
         private String videoName;
         private String videoDescription;
-        private String visibility;
+        private VisibilityStatus visibility;
         private List<String> videoTags;
         private Categories category;
         private boolean tellSubs;
@@ -52,7 +80,7 @@ public class VideoPreset extends VideoInformationBase {
             return this;
         }
 
-        public VideoPreset.Builder setVisibility(String visibility) {
+        public VideoPreset.Builder setVisibility(VisibilityStatus visibility) {
             this.visibility = visibility;
             return this;
         }
@@ -95,18 +123,25 @@ public class VideoPreset extends VideoInformationBase {
 
     protected void makePresetPane(String name) {
         presetPane = super.getPane();
-        presetPane.setPrefHeight(150);
+        presetPane.setPrefHeight(165);
 
         TextField presetName = new TextField();
         presetName.setId(getPaneId() + NODE_ID_PRESETNAME);
         presetName.setPromptText("Preset name");
         presetName.setText(name);
         presetName.setEditable(false);
-        presetPane.add(presetName, 0, 5);
+        presetPane.add(presetName, 0, 4);
     }
 
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
         ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setEditable(newEditStatus);
+    }
+
+    public String toString() {
+        StringBuilder classString = new StringBuilder()
+                .append(super.toString()).append("\n")
+                .append(NODE_ID_PRESETNAME).append(":").append(getPresetName());
+        return classString.toString();
     }
 }

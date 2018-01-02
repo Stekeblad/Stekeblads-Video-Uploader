@@ -7,6 +7,8 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
+import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 
@@ -20,6 +22,7 @@ public class VideoUpload extends VideoInformationBase{
 
     public static final String VIDEO_FILE_FORMAT = "video/*";
     public static final String NODE_ID_PROGRESS = "_progress";
+    public static final String NODE_ID_UPLOADSTATUS = "_status";
 
     private File videoFile;
     private GridPane uploadPane;
@@ -31,7 +34,7 @@ public class VideoUpload extends VideoInformationBase{
         return this.uploadPane;
     }
 
-    public VideoUpload(String videoName, String videoDescription, String visibility, List<String> videoTags,
+    public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                        Categories category, boolean tellSubs, File videoFile, File thumbNail, String paneName) {
 
         super(videoName, videoDescription, visibility, videoTags, category, tellSubs, thumbNail, paneName);
@@ -44,7 +47,7 @@ public class VideoUpload extends VideoInformationBase{
     public static class Builder {
         private String videoName;
         private String videoDescription;
-        private String visibility;
+        private VisibilityStatus visibility;
         private List<String> videoTags;
         private Categories category;
         private boolean tellSubs;
@@ -62,7 +65,7 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
-        public VideoUpload.Builder setVisibility(String visibility) {
+        public VideoUpload.Builder setVisibility(VisibilityStatus visibility) {
             this.visibility = visibility;
             return this;
         }
@@ -111,7 +114,11 @@ public class VideoUpload extends VideoInformationBase{
         progressBar.setId("#" + getPaneId() + NODE_ID_PROGRESS);
         progressBar.setPrefWidth(200);
 
-        uploadPane.add(progressBar, 0, 5);
+        Label uploadStatus = new Label("Waiting...");
+        uploadStatus.setId(getPaneId() + NODE_ID_UPLOADSTATUS);
+
+        uploadPane.add(progressBar, 0, 4);
+        uploadPane.add(uploadStatus, 1, 4);
     }
 
     public Video uploadToTheTube() throws IOException{
@@ -122,7 +129,7 @@ public class VideoUpload extends VideoInformationBase{
 
             Video videoObject = new Video();
 
-            videoObject.setStatus(new VideoStatus().setPrivacyStatus(getVisibility()));
+            videoObject.setStatus(new VideoStatus().setPrivacyStatus(getVisibility().getStatusName()));
 
             VideoSnippet videoMetaData = new VideoSnippet();
             videoMetaData.setTitle(getVideoName());
@@ -147,23 +154,22 @@ public class VideoUpload extends VideoInformationBase{
             MediaHttpUploaderProgressListener progressListener = uploader1 -> {
                 switch (uploader1.getUploadState()) {
                     case INITIATION_STARTED:
-                        System.out.println("Initiation Started");
+                        setStatusLabelText("Preparing to Upload...");
                         break;
                     case INITIATION_COMPLETE:
-                        System.out.println("Initiation Completed");
                         setPaneProgressBarProgress(0);
+                        setStatusLabelText("Starting...");
                         break;
                     case MEDIA_IN_PROGRESS:
-                        System.out.println("Upload in progress");
-                        System.out.println("Upload percentage: " + uploader1.getProgress());
                         setPaneProgressBarProgress(uploader1.getProgress());
+                        setStatusLabelText("Uploading: " + Math.round((uploader1.getProgress()) * 100) + "%");
                         break;
                     case MEDIA_COMPLETE:
-                        System.out.println("Upload Completed!");
                         setPaneProgressBarProgress(1);
+                        setStatusLabelText("Upload Completed!");
                         break;
                     case NOT_STARTED:
-                        System.out.println("Upload Not Started!");
+                        setStatusLabelText("Waiting...");
                         break;
                 }
             };
@@ -175,11 +181,17 @@ public class VideoUpload extends VideoInformationBase{
 
     private void setPaneProgressBarProgress(double progress) {
         if (progress >= 0 && progress <= 1) {
-            ((ProgressBar) this.uploadPane.lookup("#test" + NODE_ID_PROGRESS)).setProgress(progress);
+            ((ProgressBar) this.uploadPane.lookup(getPaneId() + NODE_ID_PROGRESS)).setProgress(progress);
         }
+    }
+
+    private void setStatusLabelText(String text) {
+        ((Label) this.uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)).setText(text);
     }
 
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
     }
+
+    public String toString() {return super.toString();}
 }
