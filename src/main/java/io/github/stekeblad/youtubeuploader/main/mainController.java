@@ -1,6 +1,7 @@
 package io.github.stekeblad.youtubeuploader.main;
 
 import io.github.lilahamstern.AlertBox;
+import io.github.lilahamstern.ConfirmBox;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -8,9 +9,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -26,15 +28,9 @@ import java.util.ResourceBundle;
 public class mainController implements Initializable {
     public Button buttDoThing;
     public ListView<Pane> listView;
-    public GridPane videoGridPane;
     public Button buttonPickFile;
     public Button buttonAddFile;
     public ListView<String> chosen_files;
-    public TextField txt_common_title;
-    public TextArea txt_common_description;
-    public TextField txtStartEpisode;
-    public TextArea txtTags;
-    public TextField txt_playlistURL;
     public Button btn_presets;
     public ChoiceBox choice_presets;
     public AnchorPane mainWindowPane;
@@ -43,28 +39,19 @@ public class mainController implements Initializable {
     private int videoPaneCounter;
     private List<Pane> videoPanes;
 
-    public mainController() {
-        configManager = new ConfigManager();
-    }
-
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
 
         videoPaneCounter = 0;
         videoPanes = new ArrayList<>();
-        configManager = new ConfigManager();
+        configManager = ConfigManager.INSTANCE;
+        configManager.configManager();
         if (configManager.getNoSettings()) {
             AlertBox.display("No settings found", "Go to settings and add some");
             onSettingsPressed(new ActionEvent());
             configManager.setNoSettings(false);
             configManager.saveSettings();
         }
-
-        txtStartEpisode.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                txtStartEpisode.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
 
 
 
@@ -97,17 +84,31 @@ public class mainController implements Initializable {
     }
 
     public void onAddUploads(ActionEvent actionEvent) {
-        /*if(chosen_files.getItems().size() == 0) {
+        //if (configManager.getNeverAuthed()) {
+            if (ConfirmBox.display("Authentication Required", "To upload videos you must grant this application permission to access your Youtube channel. " +
+                    "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
+                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
+                    "\n\"YOUTUBE\" for basic account access for adding videos to playlists and setting thumbnails" +
+                    "\n\nPress yes to open your browser for authentication or no to cancel")) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else {
+                actionEvent.consume();
+                return;
+            }
+       /* }
+        if(chosen_files.getItems().size() == 0) {
+          actionEvent.consume();
             return;
-        }
+        } /*
         GridPane newVideo = PaneFactory.makeUploadPane("vid" + videoPaneCounter);
         ((TextField) newVideo.lookup("#vid" + videoPaneCounter + "_title")).setText(nameOfFile.getText());
         videoPanes.add(newVideo);
         nameOfFile.setText("");
         listView.setItems(FXCollections.observableArrayList(videoPanes));
         videoPaneCounter++;
-        actionEvent.consume();
-*/
+*/        actionEvent.consume();
+
     }
 
     public void onSettingsPressed(ActionEvent actionEvent) {
@@ -116,6 +117,8 @@ public class mainController implements Initializable {
             fxmlLoader.setLocation(mainController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 725, 700);
             Stage stage = new Stage();
+            stage.setMinWidth(725);
+            stage.setMinHeight(550);
             stage.setTitle("Settings - Stekeblads Youtube Uploader");
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);

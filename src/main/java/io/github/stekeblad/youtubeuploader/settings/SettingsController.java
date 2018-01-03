@@ -2,6 +2,8 @@ package io.github.stekeblad.youtubeuploader.settings;
 
 import io.github.lilahamstern.AlertBox;
 import io.github.lilahamstern.ConfirmBox;
+import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
+import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
 import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
@@ -16,10 +18,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
 import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_THUMBNAIL;
 
 
@@ -33,12 +37,14 @@ public class SettingsController implements Initializable {
 
     private VideoPreset addNewPreset;
     private ArrayList<VideoPreset> videoPresets;
+    private ConfigManager configManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
         String newPresetId = "newPreset";
         addNewPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC,
-                new ArrayList<String>(), Categories.SPEL, false, null, newPresetId, "");
+                new ArrayList<>(), Categories.SPEL, false, null, newPresetId, "");
         addNewPreset.setEditable(true);
         GridPane newPreset = addNewPreset.getPresetPane();
         newPreset.setLayoutX(10);
@@ -58,8 +64,31 @@ public class SettingsController implements Initializable {
                 }
             }
         });
+        newPreset.lookup("#" + newPresetId + NODE_ID_PLAYLIST).setOnMouseClicked(event ->  {
+            try {
+                playlistUtils.getUserPlaylists();
+            } catch (IOException e) {
+                System.err.println("Failed getting playlists");
+                e.printStackTrace();
+            }
+        });
         SettingsWindow.getChildren().add(newPreset);
+
+        configManager = ConfigManager.INSTANCE;
         videoPresets = new ArrayList<>();
+        ArrayList<String> savedPresetNames = configManager.getSavedPresetNamesList();
+        for (String presetName : savedPresetNames) {
+            try {
+                VideoPreset videoPreset = new VideoPreset(configManager.loadPreset(presetName), presetName);
+                videoPresets.add(videoPreset);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Trying to load a preset that does not exist or missing read permission: " + presetName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Bad format of preset or is another type of preset then the one trying to be created: " + presetName);
+            }
+        }
         updatePresetList();
     }
 
@@ -71,9 +100,8 @@ public class SettingsController implements Initializable {
 
         boolean isPresetNameUnique = true;
         String nameNewPreset = addNewPreset.getPresetName();
-        for (int i = 0; i < videoPresets.size(); i++) {
-            VideoPreset preset = videoPresets.get(i);
-            if(preset.getPresetName().equals(nameNewPreset)) {
+        for (VideoPreset preset : videoPresets) {
+            if (preset.getPresetName().equals(nameNewPreset)) {
                 isPresetNameUnique = false;
                 break;
             }
@@ -82,7 +110,7 @@ public class SettingsController implements Initializable {
             VideoPreset newestPreset = addNewPreset.copy(addNewPreset.getPresetName());
             videoPresets.add(newestPreset);
             updatePresetList();
-            System.out.println(newestPreset.toString());
+            configManager.savePreset(newestPreset.getPresetName(), newestPreset.toString());
         } else {
             AlertBox.display("Invalid Preset name",
                     "There is already a preset with that name. Select another one or edit/delete the existing preset.");
@@ -101,8 +129,12 @@ public class SettingsController implements Initializable {
         }
         if (ConfirmBox.display("Confirm delete",
                 "Are you sure you want to delete preset " + videoPresets.get(selected).getPresetName() + "?")) {
-            videoPresets.remove(selected);
-            updatePresetList();
+            if (!configManager.deletePreset(videoPresets.get(selected).getPresetName())) {
+                AlertBox.display("Error", "Could not delete preset");
+            } else {
+                videoPresets.remove(selected);
+                updatePresetList();
+            }
         }
 
         actionEvent.consume();

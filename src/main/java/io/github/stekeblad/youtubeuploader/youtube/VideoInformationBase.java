@@ -124,7 +124,7 @@ public class VideoInformationBase {
                         visibility = VisibilityStatus.valueOf(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_TAGS:
-                        line = line.substring(1, line.length() - 1); // remove brackets
+                        line = line.substring(colonIndex + 2, line.length() - 1); // remove brackets
                         videoTags = new ArrayList<String>(Arrays.asList(line.split(",")));
                         break;
                     case NODE_ID_CATEGORY:
@@ -248,10 +248,13 @@ public class VideoInformationBase {
         tags.setText(tagsString.toString());
         tags.setEditable(false);
 
-        TextField playlist = new TextField();
+        ArrayList<String> playlistStrings = new ArrayList<>();
+        playlistStrings.add("select a playlist");
+        ChoiceBox<String> playlist = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
         playlist.setId(paneId + NODE_ID_PLAYLIST);
-        playlist.setPromptText("playlist url"); //todo playlist
-        playlist.setEditable(false);
+        playlist.getSelectionModel().select(0);
+        playlist.setTooltip(new Tooltip("Select a playlist to add this video to"));
+        playlist.setDisable(true);
 
         ArrayList<VisibilityStatus> statuses = new ArrayList<>(EnumSet.allOf(VisibilityStatus.class));
         ArrayList<String> visibilityStrings = new ArrayList<>();
@@ -289,6 +292,7 @@ public class VideoInformationBase {
          thumbNailFrame.setFitWidth(160);
          thumbNailFrame.setFitHeight(90);
          thumbNailFrame.setId(paneId + NODE_ID_THUMBNAIL);
+         thumbNailFrame.setPreserveRatio(true);
 
          videoBasePane.add(title, 0, 0);
          videoBasePane.add(categoryChoiceBox, 1, 0);
@@ -308,7 +312,7 @@ public class VideoInformationBase {
         ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_DESCRIPTION)).setEditable(newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY).setDisable(!newEditStatus);
         ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_TAGS)).setEditable(newEditStatus);
-        ((TextField) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).setEditable(newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
     }
@@ -318,7 +322,7 @@ public class VideoInformationBase {
         try {
             classString.append(NODE_ID_TITLE + ":").append(getVideoName()).append("\n")
                     .append(NODE_ID_DESCRIPTION).append(":").append(getVideoDescription()).append("\n")
-                    .append(NODE_ID_VISIBILITY).append(":").append(getVisibility().getStatusName()).append("\n")
+                    .append(NODE_ID_VISIBILITY).append(":").append(getVisibility().getStatusName().toUpperCase()).append("\n")
                     .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
                     .append(NODE_ID_CATEGORY).append(":").append(getCategory().getName()).append("\n")
                     .append(NODE_ID_TELLSUBS).append(":").append(Boolean.toString(isTellSubs())).append("\n")

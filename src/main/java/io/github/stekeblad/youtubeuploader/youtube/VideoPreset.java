@@ -46,12 +46,14 @@ public class VideoPreset extends VideoInformationBase {
                     default:
                         // likely belong to parent
                 }
-                if (presetName == null) {
-                    throw new Exception("String representation of class does not have presetName");
-                }
+
             }
         }
+        if (presetName == null) {
+            throw new Exception("String representation of class does not have presetName");
+        }
         makePresetPane(presetName);
+
     }
 
     public VideoPreset copy(String paneIdForCopy) {

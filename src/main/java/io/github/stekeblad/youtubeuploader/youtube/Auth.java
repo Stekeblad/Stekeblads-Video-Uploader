@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.AUTH_DIR;
@@ -30,9 +30,11 @@ public class Auth {
 
     public static Credential authUser() throws IOException {
         //List<String> scope = Arrays.asList(YouTubeScopes.YOUTUBE_UPLOAD);
-        List<String> scope = Collections.singletonList(YouTubeScopes.YOUTUBE_UPLOAD);
+        List<String> scope = new ArrayList<>();
+        scope.add(YouTubeScopes.YOUTUBE_UPLOAD);
+        scope.add(YouTubeScopes.YOUTUBE);
 
-        Reader clientSecretReader = new InputStreamReader(Auth.class.getResourceAsStream("/.auth/client_secrets.json"));
+        Reader clientSecretReader = new InputStreamReader(Auth.class.getClassLoader().getResourceAsStream(".auth/client_secrets.json"));
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader);
         FileDataStoreFactory fileFactory = new FileDataStoreFactory(new File(AUTH_DIR));
 

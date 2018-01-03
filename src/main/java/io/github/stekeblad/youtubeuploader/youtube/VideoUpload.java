@@ -123,60 +123,60 @@ public class VideoUpload extends VideoInformationBase{
 
     public Video uploadToTheTube() throws IOException{
 
-            Credential creds = Auth.authUser();
+        Credential creds = Auth.authUser();
         YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
                 "Stekeblads Youtube Uploader").build();
 
-            Video videoObject = new Video();
+        Video videoObject = new Video();
 
-            videoObject.setStatus(new VideoStatus().setPrivacyStatus(getVisibility().getStatusName()));
+        videoObject.setStatus(new VideoStatus().setPrivacyStatus(getVisibility().getStatusName()));
 
-            VideoSnippet videoMetaData = new VideoSnippet();
-            videoMetaData.setTitle(getVideoName());
-            videoMetaData.setDescription(getVideoDescription());
-            videoMetaData.setTags(getVideoTags());
-            videoMetaData.setCategoryId(Integer.toString(getCategory().getId()));
-            videoMetaData.setThumbnails(new ThumbnailDetails().setMaxres(new Thumbnail()
-                    .setUrl(getThumbNail().getCanonicalPath())));
+        VideoSnippet videoMetaData = new VideoSnippet();
+        videoMetaData.setTitle(getVideoName());
+        videoMetaData.setDescription(getVideoDescription());
+        videoMetaData.setTags(getVideoTags());
+        videoMetaData.setCategoryId(Integer.toString(getCategory().getId()));
+        videoMetaData.setThumbnails(new ThumbnailDetails().setMaxres(new Thumbnail()
+                .setUrl(getThumbNail().getCanonicalPath())));
 
-            videoObject.setSnippet(videoMetaData);
+        videoObject.setSnippet(videoMetaData);
 
-            InputStreamContent videoFileStream = new InputStreamContent(VIDEO_FILE_FORMAT,
-                    new BufferedInputStream(new FileInputStream(videoFile)));
+        InputStreamContent videoFileStream = new InputStreamContent(VIDEO_FILE_FORMAT,
+                new BufferedInputStream(new FileInputStream(videoFile)));
 
-            YouTube.Videos.Insert videoInsert = myTube.videos()
-                    .insert("snippet,statistics,status", videoObject, videoFileStream);
-            videoInsert.setNotifySubscribers(isTellSubs());
+        YouTube.Videos.Insert videoInsert = myTube.videos()
+                .insert("snippet,statistics,status", videoObject, videoFileStream);
+        videoInsert.setNotifySubscribers(isTellSubs());
 
-            MediaHttpUploader uploader = videoInsert.getMediaHttpUploader();
-            uploader.setDirectUploadEnabled(false); // makes the upload resumable!
+        MediaHttpUploader uploader = videoInsert.getMediaHttpUploader();
+        uploader.setDirectUploadEnabled(false); // makes the upload resumable!
 
-            MediaHttpUploaderProgressListener progressListener = uploader1 -> {
-                switch (uploader1.getUploadState()) {
-                    case INITIATION_STARTED:
-                        setStatusLabelText("Preparing to Upload...");
-                        break;
-                    case INITIATION_COMPLETE:
-                        setPaneProgressBarProgress(0);
-                        setStatusLabelText("Starting...");
-                        break;
-                    case MEDIA_IN_PROGRESS:
-                        setPaneProgressBarProgress(uploader1.getProgress());
-                        setStatusLabelText("Uploading: " + Math.round((uploader1.getProgress()) * 100) + "%");
-                        break;
-                    case MEDIA_COMPLETE:
-                        setPaneProgressBarProgress(1);
-                        setStatusLabelText("Upload Completed!");
-                        break;
-                    case NOT_STARTED:
-                        setStatusLabelText("Waiting...");
-                        break;
-                }
-            };
-            uploader.setProgressListener(progressListener);
+        MediaHttpUploaderProgressListener progressListener = uploader1 -> {
+            switch (uploader1.getUploadState()) {
+                case INITIATION_STARTED:
+                    setStatusLabelText("Preparing to Upload...");
+                    break;
+                case INITIATION_COMPLETE:
+                    setPaneProgressBarProgress(0);
+                    setStatusLabelText("Starting...");
+                    break;
+                case MEDIA_IN_PROGRESS:
+                    setPaneProgressBarProgress(uploader1.getProgress());
+                    setStatusLabelText("Uploading: " + Math.round((uploader1.getProgress()) * 100) + "%");
+                    break;
+                case MEDIA_COMPLETE:
+                    setPaneProgressBarProgress(1);
+                    setStatusLabelText("Upload Completed!");
+                    break;
+                case NOT_STARTED:
+                    setStatusLabelText("Waiting...");
+                    break;
+            }
+        };
+        uploader.setProgressListener(progressListener);
 
-            // finally ready for upload!
-            return videoInsert.execute();
+        // finally ready for upload!
+        return videoInsert.execute();
     }
 
     private void setPaneProgressBarProgress(double progress) {
