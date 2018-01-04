@@ -7,8 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import static io.github.stekeblad.youtubeuploader.utils.Constants.DATA_DIR;
-import static io.github.stekeblad.youtubeuploader.utils.Constants.PRESET_DIR;
+import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
 
 // Using enum to make class singleton, something about that just sounds weird
 public enum ConfigManager {
@@ -88,7 +87,6 @@ public enum ConfigManager {
                     e.printStackTrace();
                 }
             }
-
         }
     }
 
@@ -109,17 +107,22 @@ public enum ConfigManager {
     }
 
     public void savePreset(String presetName, String stringRepresentation) {
+        BufferedWriter writer = null;
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(
+            writer = new BufferedWriter(new FileWriter(
                     new File(PRESET_DIR + "/" + presetName)));
             writer.write(stringRepresentation);
-            writer.flush();
-            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-
-
     }
 
     public boolean deletePreset(String presetName) {
@@ -169,12 +172,45 @@ public enum ConfigManager {
         }
     }
 
-    public void savePlaylistCache(String playlistsStringData) {
+    public void savePlaylistCache(String playlistData) {
+        BufferedWriter writer = null;
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(
-                    new File("")));
+            writer = new BufferedWriter(new FileWriter(
+                    new File(PLAYLIST_FILE)));
+            writer.write(playlistData);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+    }
+
+    public ArrayList<String> loadPlaylistCache() {
+        BufferedReader reader = null;
+        ArrayList<String> playlistString = new ArrayList<>();
+        try {
+            if (!Files.exists(Paths.get(PLAYLIST_FILE))) {
+                Files.createFile(Paths.get(PLAYLIST_FILE));
+            } else {
+                reader = new BufferedReader(new FileReader(
+                        new File(PLAYLIST_FILE)));
+                String line = reader.readLine();
+                while (line != null) { // while not end of file
+                    playlistString.add(line);
+                    line = reader.readLine();
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not find playlist cache file");
+        } catch (IOException e) {
+            System.err.println("Could not create playlists cache file");
+        }
+        return playlistString;
     }
 }

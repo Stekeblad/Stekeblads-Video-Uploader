@@ -67,6 +67,7 @@ public class SettingsController implements Initializable {
         newPreset.lookup("#" + newPresetId + NODE_ID_PLAYLIST).setOnMouseClicked(event ->  {
             try {
                 playlistUtils.getUserPlaylists();
+                playlistUtils.printAll();
             } catch (IOException e) {
                 System.err.println("Failed getting playlists");
                 e.printStackTrace();
