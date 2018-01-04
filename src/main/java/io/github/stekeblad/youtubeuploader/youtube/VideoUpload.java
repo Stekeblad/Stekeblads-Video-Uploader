@@ -35,9 +35,9 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       Categories category, boolean tellSubs, File videoFile, File thumbNail, String paneName) {
+                       String playlist, Categories category, boolean tellSubs, File videoFile, File thumbNail, String paneName) {
 
-        super(videoName, videoDescription, visibility, videoTags, category, tellSubs, thumbNail, paneName);
+        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail, paneName);
         this.videoFile = videoFile;
         makeUploadPane();
     }
@@ -49,6 +49,7 @@ public class VideoUpload extends VideoInformationBase{
         private String videoDescription;
         private VisibilityStatus visibility;
         private List<String> videoTags;
+        private String playlist;
         private Categories category;
         private boolean tellSubs;
         private File videoFile;
@@ -72,6 +73,11 @@ public class VideoUpload extends VideoInformationBase{
 
         public VideoUpload.Builder setVideoTags(List<String> videoTags) {
             this.videoTags = videoTags;
+            return this;
+        }
+
+        public VideoUpload.Builder setPlaylist(String playlist) {
+            this.playlist = playlist;
             return this;
         }
 
@@ -101,7 +107,7 @@ public class VideoUpload extends VideoInformationBase{
         }
 
         public VideoUpload build() {
-            return new VideoUpload(videoName, videoDescription, visibility, videoTags, category, tellSubs,
+            return new VideoUpload(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
                     videoFile, thumbNail, paneName);
         }
     }

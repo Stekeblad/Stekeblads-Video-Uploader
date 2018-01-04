@@ -3,6 +3,8 @@ package io.github.stekeblad.youtubeuploader.main;
 import io.github.lilahamstern.AlertBox;
 import io.github.lilahamstern.ConfirmBox;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
+import io.github.stekeblad.youtubeuploader.utils.PresetManager;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,10 +34,11 @@ public class mainController implements Initializable {
     public Button buttonAddFile;
     public ListView<String> chosen_files;
     public Button btn_presets;
-    public ChoiceBox choice_presets;
+    public ChoiceBox<String> choice_presets;
     public AnchorPane mainWindowPane;
 
     private ConfigManager configManager;
+    private PresetManager presetManager;
     private int videoPaneCounter;
     private List<Pane> videoPanes;
 
@@ -52,11 +55,12 @@ public class mainController implements Initializable {
             configManager.setNoSettings(false);
             configManager.saveSettings();
         }
-
-
-
-
-        //testImageView.setImage(tesetImage);
+        presetManager = PresetManager.INSTANCE;
+        choice_presets.setItems(FXCollections.observableArrayList(presetManager.getPresetNames()));
+        choice_presets.getSelectionModel().selectedItemProperty()
+                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) ->
+                        System.out.println(newValue)
+                );
     }
 
     public void onDoThingClicked(ActionEvent event) {
@@ -84,11 +88,11 @@ public class mainController implements Initializable {
     }
 
     public void onAddUploads(ActionEvent actionEvent) {
-        //if (configManager.getNeverAuthed()) {
+        if (configManager.getNeverAuthed()) {
             if (ConfirmBox.display("Authentication Required", "To upload videos you must grant this application permission to access your Youtube channel. " +
                     "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
-                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                    "\n\"YOUTUBE\" for basic account access for adding videos to playlists and setting thumbnails" +
+                    "\n\nPermission overview: YOUTUBE_UPLOAD needed for uploading videos to your channel" +
+                    "\nYOUTUBE for basic account access, needed for adding videos to playlists and setting thumbnails" +
                     "\n\nPress yes to open your browser for authentication or no to cancel")) {
                 configManager.setNeverAuthed(false);
                 configManager.saveSettings();
@@ -96,8 +100,8 @@ public class mainController implements Initializable {
                 actionEvent.consume();
                 return;
             }
-       /* }
-        if(chosen_files.getItems().size() == 0) {
+        }
+        /*if(chosen_files.getItems().size() == 0) {
           actionEvent.consume();
             return;
         } /*

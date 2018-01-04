@@ -21,7 +21,7 @@ import java.util.List;
 public class VideoInformationBase {
 
     // Constants
-    public static final List<String> THUMBNAIL_FILE_FORMAT = Arrays.asList("*.jpg", "*.png"); //fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Video Files", THUMBNAIL_FILE_FORMAT));
+    public static final List<String> THUMBNAIL_FILE_FORMAT = Arrays.asList("*.jpg", "*.png");
     public static final String NODE_ID_TITLE = "_title";
     public static final String NODE_ID_DESCRIPTION = "_description";
     public static final String NODE_ID_CATEGORY = "_category";
@@ -52,6 +52,10 @@ public class VideoInformationBase {
         return new ArrayList<>(Arrays.asList(((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_TAGS)).getText().split(", ")));
     }
     @SuppressWarnings("unchecked")
+    public String getPlaylist() {
+        return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).getSelectionModel().getSelectedItem();
+    }
+    @SuppressWarnings("unchecked")
     public Categories getCategory() {
         return Categories.valueOf(((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).getSelectionModel().getSelectedItem());
     }
@@ -74,23 +78,41 @@ public class VideoInformationBase {
         if (!allowEdit) {
             throw new Exception("Edit not allowed");
         } else {
-            thumbNailFile = thumbnail;
-            ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
-                    new Image(new FileInputStream(thumbnail)));
+            boolean matchingExtension = false;
+            for (String fileFormat : THUMBNAIL_FILE_FORMAT) { // Extension filter in fileChooser not working, my own test
+                if(thumbnail.getName().contains(fileFormat.substring(1))) { //ignore "*", sadly accepts *.ext* instead of only *.ext
+                    matchingExtension = true;
+                    break;
+                }
+            }
+            if (matchingExtension) {
+                thumbNailFile = thumbnail;
+                ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
+                        new Image(new FileInputStream(thumbnail)));
+            } else {
+                throw new Exception("Invalid file format");
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void setPlaylists(ArrayList<String> playlistNames) {
+        if (playlistNames != null) {
+            ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).setItems(FXCollections.observableArrayList(playlistNames));
         }
     }
 
     // other methods
 
     public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                Categories category, boolean tellSubs, File thumbNail, String paneId) {
+                                String playlist, Categories category, boolean tellSubs, File thumbNail, String paneId) {
 
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
         }
         this.paneId = paneId;
         this.thumbNailFile = thumbNail;
-        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, category, tellSubs, thumbNail);
+        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail);
         allowEdit = false;
     }
 
@@ -102,12 +124,16 @@ public class VideoInformationBase {
         String videoDescription = null;
         VisibilityStatus visibility = null;
         ArrayList<String> videoTags = null;
+        String playlist = null;
         Categories category = null;
         boolean tellSubs = false;
         File thumbnail = null;
 
         String[] lines = fromString.split("\n");
-        for (String line : lines) {
+        String line;
+        //for (String line : lines) {
+        for(int i = 0; i < lines.length; i++) {
+            line = lines[i];
             int colonIndex = line.indexOf(':');
             if (colonIndex < 0) {
                 System.err.println(fromString);
@@ -118,14 +144,25 @@ public class VideoInformationBase {
                         videoName = line.substring(colonIndex + 1);
                         break;
                     case NODE_ID_DESCRIPTION:
-                        videoDescription = line.substring(colonIndex + 1);
+                        StringBuilder descBuilder = new StringBuilder();
+                        descBuilder.append(line.substring(colonIndex + 1));
+                        i++;
+                        while(!lines[i].startsWith("_")) {
+                            descBuilder.append("\n").append(lines[i]);
+                            i++;
+                        }
+                        i--;
+                        videoDescription = descBuilder.toString();
                         break;
                     case NODE_ID_VISIBILITY:
                         visibility = VisibilityStatus.valueOf(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_TAGS:
                         line = line.substring(colonIndex + 2, line.length() - 1); // remove brackets
-                        videoTags = new ArrayList<String>(Arrays.asList(line.split(",")));
+                        videoTags = new ArrayList<>(Arrays.asList(line.split(",")));
+                        break;
+                    case NODE_ID_PLAYLIST:
+                        playlist = line.substring(colonIndex + 1);
                         break;
                     case NODE_ID_CATEGORY:
                         category = Categories.valueOf(line.substring(colonIndex + 1));
@@ -134,18 +171,22 @@ public class VideoInformationBase {
                         tellSubs = Boolean.valueOf(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_THUMBNAIL:
-                        thumbnail = new File(line.substring(colonIndex + 1));
+                        if (line.equals("_")) {
+                            thumbnail = null; //use default
+                        } else {
+                            thumbnail = new File(line.substring(colonIndex + 1));
+                        }
                         break;
                     default:
                         //ignore, might be a child value
                 }
             }
         }
-        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, category, tellSubs, thumbnail);
+        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbnail);
     }
 
     public VideoInformationBase copy(String paneIdForCopy) {
-        return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getCategory(), isTellSubs(), getThumbNail(), paneIdForCopy);
+        return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(), getCategory(), isTellSubs(), getThumbNail(), paneIdForCopy);
     }
 
     public static class Builder {
@@ -153,6 +194,7 @@ public class VideoInformationBase {
         private String videoDescription;
         private VisibilityStatus visibility;
         private List<String> videoTags;
+        private String playlist;
         private Categories category;
         private boolean tellSubs;
         private File thumbNail;
@@ -178,6 +220,11 @@ public class VideoInformationBase {
             return this;
         }
 
+        public VideoInformationBase.Builder setPlaylist(String playlist) {
+            this.playlist = playlist;
+            return this;
+        }
+
         public VideoInformationBase.Builder setCategory(Categories category) {
             this.category = category;
             return this;
@@ -199,13 +246,13 @@ public class VideoInformationBase {
         }
 
         public VideoInformationBase build() {
-            return new VideoInformationBase(videoName, videoDescription, visibility, videoTags, category,
+            return new VideoInformationBase(videoName, videoDescription, visibility, videoTags, playlist, category,
                     tellSubs, thumbNail, paneName);
         }
     }
 
      protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                      Categories category, boolean tellSubs, File thumbNail) {
+                                      String playlist, Categories category, boolean tellSubs, File thumbNail) {
         videoBasePane = new GridPane();
         videoBasePane.setId(paneId);
         videoBasePane.setPrefSize(680, 100);
@@ -247,14 +294,25 @@ public class VideoInformationBase {
         }
         tags.setText(tagsString.toString());
         tags.setEditable(false);
+        tags.setWrapText(true);
+        tags.textProperty().addListener((observable, oldValue, newValue) -> { //Prevent newlines, allow text wrap
+                 tags.setText(newValue.replaceAll("\\R", ""));
+         });
+
+
+
 
         ArrayList<String> playlistStrings = new ArrayList<>();
-        playlistStrings.add("select a playlist");
-        ChoiceBox<String> playlist = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
-        playlist.setId(paneId + NODE_ID_PLAYLIST);
-        playlist.getSelectionModel().select(0);
-        playlist.setTooltip(new Tooltip("Select a playlist to add this video to"));
-        playlist.setDisable(true);
+        if (playlist != null && !playlist.equals("")) {
+            playlistStrings.add(playlist);
+        } else {
+            playlistStrings.add("select a playlist");
+        }
+        ChoiceBox<String> playlistChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
+        playlistChoiceBox.setId(paneId + NODE_ID_PLAYLIST);
+        playlistChoiceBox.getSelectionModel().select(0);
+        playlistChoiceBox.setTooltip(new Tooltip("Select a playlist to add this video to"));
+        playlistChoiceBox.setDisable(true);
 
         ArrayList<VisibilityStatus> statuses = new ArrayList<>(EnumSet.allOf(VisibilityStatus.class));
         ArrayList<String> visibilityStrings = new ArrayList<>();
@@ -296,7 +354,7 @@ public class VideoInformationBase {
 
          videoBasePane.add(title, 0, 0);
          videoBasePane.add(categoryChoiceBox, 1, 0);
-         videoBasePane.add(playlist, 2, 0);
+         videoBasePane.add(playlistChoiceBox, 2, 0);
 
          videoBasePane.add(description, 0, 1, 1, 3);
          videoBasePane.add(tags, 1, 1, 1, 2);
@@ -319,14 +377,21 @@ public class VideoInformationBase {
 
     public String toString() {
         StringBuilder classString = new StringBuilder();
-        try {
+        String thumbnailSave;
+    try {
+            if (thumbNailFile == null) {
+                thumbnailSave = "_"; //no thumbnail set, default is selected
+            } else {
+                thumbnailSave = thumbNailFile.getCanonicalPath();
+            }
             classString.append(NODE_ID_TITLE + ":").append(getVideoName()).append("\n")
                     .append(NODE_ID_DESCRIPTION).append(":").append(getVideoDescription()).append("\n")
                     .append(NODE_ID_VISIBILITY).append(":").append(getVisibility().getStatusName().toUpperCase()).append("\n")
                     .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
+                    .append(NODE_ID_PLAYLIST).append(":").append(getPlaylist()).append("\n")
                     .append(NODE_ID_CATEGORY).append(":").append(getCategory().getName()).append("\n")
                     .append(NODE_ID_TELLSUBS).append(":").append(Boolean.toString(isTellSubs())).append("\n")
-                    .append(NODE_ID_THUMBNAIL).append(":").append(thumbNailFile.getCanonicalPath());
+                    .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave);
             return classString.toString();
         } catch (IOException e) {
             e.printStackTrace();

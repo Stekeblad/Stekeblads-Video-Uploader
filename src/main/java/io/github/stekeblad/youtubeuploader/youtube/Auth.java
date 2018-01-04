@@ -42,7 +42,7 @@ public class Auth {
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scope).setDataStoreFactory(fileFactory)
                 .build();
 
-        LocalServerReceiver localReceiver = new LocalServerReceiver.Builder().setPort(8080).build();
+        LocalServerReceiver localReceiver = new LocalServerReceiver.Builder().setPort(7835).build();
         return new AuthorizationCodeInstalledApp(authFlow, localReceiver).authorize("user");
     }
 }

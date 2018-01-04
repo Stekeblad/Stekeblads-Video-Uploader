@@ -22,8 +22,8 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       Categories category, boolean tellSubs, File thumbNail, String paneId, String presetName) {
-        super(videoName, videoDescription, visibility, videoTags, category, tellSubs, thumbNail, paneId);
+                       String playlist, Categories category, boolean tellSubs, File thumbNail, String paneId, String presetName) {
+        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail, paneId);
         makePresetPane(presetName);
     }
 
@@ -35,10 +35,7 @@ public class VideoPreset extends VideoInformationBase {
         String[] lines = fromString.split("\n");
         for (String line : lines) {
             int colonIndex = line.indexOf(':');
-            if (colonIndex < 0) {
-                System.err.println(fromString);
-                throw new Exception("Malformed string representation of class");
-            } else {
+            if (colonIndex > 0) {
                 switch (line.substring(0, colonIndex)) {
                     case NODE_ID_PRESETNAME:
                         presetName = line.substring(colonIndex + 1);
@@ -47,7 +44,7 @@ public class VideoPreset extends VideoInformationBase {
                         // likely belong to parent
                 }
 
-            }
+            } //else continue, let the case handle multiline data
         }
         if (presetName == null) {
             throw new Exception("String representation of class does not have presetName");
@@ -57,8 +54,8 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     public VideoPreset copy(String paneIdForCopy) {
-        return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getCategory(),
-                isTellSubs(), getThumbNail(), paneIdForCopy, getPresetName());
+        return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
+                getCategory(), isTellSubs(), getThumbNail(), paneIdForCopy, getPresetName());
     }
 
     public static class Builder {
@@ -66,6 +63,7 @@ public class VideoPreset extends VideoInformationBase {
         private String videoDescription;
         private VisibilityStatus visibility;
         private List<String> videoTags;
+        private String playlist;
         private Categories category;
         private boolean tellSubs;
         private File thumbNail;
@@ -89,6 +87,11 @@ public class VideoPreset extends VideoInformationBase {
 
         public VideoPreset.Builder setVideoTags(List<String> videoTags) {
             this.videoTags = videoTags;
+            return this;
+        }
+
+        public VideoPreset.Builder setPlaylist(String playlist) {
+            this.playlist = playlist;
             return this;
         }
 
@@ -118,7 +121,7 @@ public class VideoPreset extends VideoInformationBase {
         }
 
         public VideoPreset build() {
-            return new VideoPreset(videoName, videoDescription, visibility, videoTags, category, tellSubs,
+            return new VideoPreset(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
                     thumbNail, paneName, presetName);
         }
     }

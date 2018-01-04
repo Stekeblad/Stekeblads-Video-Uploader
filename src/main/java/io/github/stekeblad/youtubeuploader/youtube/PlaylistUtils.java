@@ -18,29 +18,50 @@ public enum PlaylistUtils {
 
     private ArrayList<Pair<String, String>> playlistCache = null;
 
-    public ArrayList<Pair<String, String>> getUserPlaylists() throws IOException {
+    private void getUserPlaylists() {
+        loadCache();
         if (playlistCache == null) {
-            loadCache();
-        }
-        if (playlistCache == null) {
-            Credential creds = Auth.authUser();
-            YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Youtube Uploader").build();
+            try {
+                Credential creds = Auth.authUser();
+                YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
+                        "Stekeblads Youtube Uploader").build();
 
-            YouTube.Playlists.List userPlaylists = youtube.playlists().list("snippet,contentDetails");
-            userPlaylists.setMine(true);
-            userPlaylists.setMaxResults(25L);
+                YouTube.Playlists.List userPlaylists = youtube.playlists().list("snippet,contentDetails");
+                userPlaylists.setMine(true);
+                userPlaylists.setMaxResults(25L);
 
-            PlaylistListResponse response = userPlaylists.execute();
-            List<Playlist> playlists = response.getItems();
+                PlaylistListResponse response = userPlaylists.execute();
+                List<Playlist> playlists = response.getItems();
 
-            playlistCache = new ArrayList<>();
-            for(Playlist aPlaylist : playlists) {
-                playlistCache.add(new Pair<>(aPlaylist.getId(), aPlaylist.getSnippet().getTitle()));
+                playlistCache = new ArrayList<>();
+                for (Playlist aPlaylist : playlists) {
+                    playlistCache.add(new Pair<>(aPlaylist.getId(), aPlaylist.getSnippet().getTitle()));
+                }
+                saveCache();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            saveCache();
         }
-        return playlistCache;
+    }
+
+    public ArrayList<String> getUserPlaylistNames() {
+        if(playlistCache == null) {
+            getUserPlaylists();
+        }
+        ArrayList<String> playlistNames = new ArrayList<>();
+        for(Pair<String, String> playlist : playlistCache) {
+            playlistNames.add(playlist.getValue());
+        }
+        return playlistNames;
+    }
+
+    public String getPlaylistId(String playlistName) {
+        for(Pair<String, String> playlist : playlistCache) {
+            if (playlist.getValue().equals(playlistName)) {
+                return playlist.getKey();
+            }
+        }
+        return null;
     }
 
     private void saveCache() {
@@ -55,18 +76,13 @@ public enum PlaylistUtils {
     }
 
     private void loadCache() {
+        playlistCache = new ArrayList<>();
         ArrayList<String> loadedPlaylists = configManager.loadPlaylistCache();
 
         for(int i = 0; i < loadedPlaylists.size(); i++) {
             String id = loadedPlaylists.get(i).substring(0, loadedPlaylists.get(i).indexOf(':'));
             String name = loadedPlaylists.get(i).substring(loadedPlaylists.get(i).indexOf(':') + 1);
             playlistCache.add(new Pair<>(id, name));
-        }
-    }
-
-    public void printAll() {
-        for (Pair<String, String> pl : playlistCache) {
-            System.out.println(pl.getKey() + "\t" + pl.getValue());
         }
     }
 }

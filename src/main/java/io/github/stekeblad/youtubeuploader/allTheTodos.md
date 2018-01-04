@@ -4,10 +4,9 @@
 
 And suddenly all my ideas just vanished...
 
-- RxJava to async uploads (if needed) ((probably not needed))
-- Get the users playlists and show dropdown instead of asking for playlist URL, URL NOT SUPPORTED IN API!
-- Finish load and save of presets (only playlist left)
+- RxJava to async uploads (if needed) ((probably not needed)) and for getting playlists (needed)
+- Move stuff to PresetManager
+- Selecting files and a preset makes it possible to add files to upload list and after
+that make files uploadable
+- Add support for syncing playlists with youtube after first load
 
--- playlist to/from file for testing without network request, do not really understand response format yet
-
--- playlist choicebox

@@ -3,6 +3,7 @@ package io.github.stekeblad.youtubeuploader.settings;
 import io.github.lilahamstern.AlertBox;
 import io.github.lilahamstern.ConfirmBox;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
+import io.github.stekeblad.youtubeuploader.utils.PresetManager;
 import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
@@ -23,8 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_THUMBNAIL;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
 
 
 public class SettingsController implements Initializable {
@@ -38,13 +38,17 @@ public class SettingsController implements Initializable {
     private VideoPreset addNewPreset;
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
+    private PresetManager presetManager;
+    private PlaylistUtils playlistUtils;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
+        configManager = ConfigManager.INSTANCE;
+        presetManager = PresetManager.INSTANCE;
+        playlistUtils = PlaylistUtils.INSTANCE;
         String newPresetId = "newPreset";
         addNewPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC,
-                new ArrayList<>(), Categories.SPEL, false, null, newPresetId, "");
+                new ArrayList<>(), "", Categories.SPEL, false, null, newPresetId, "");
         addNewPreset.setEditable(true);
         GridPane newPreset = addNewPreset.getPresetPane();
         newPreset.setLayoutX(10);
@@ -53,31 +57,47 @@ public class SettingsController implements Initializable {
         newPreset.lookup("#" + newPresetId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose a thumbnail");
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Image Files", THUMBNAIL_FILE_FORMAT));
             Stage fileChooserStage = new Stage();
             File thumbnail = fileChooser.showOpenDialog(fileChooserStage);
             if (thumbnail != null) {
                 try {
                     addNewPreset.setThumbNailFile(thumbnail);
                 } catch (Exception e) {
-                    // If user managed to select a non-existing file (or editing is not allowed, it is allowed here)
-                    e.printStackTrace();
+                    // If user managed to select a non-existing file (or editing is not allowed, it is allowed here) or invalid file format
+                    if (e.getMessage().equals("Invalid file format")) {
+                        StringBuilder extensionsString = new StringBuilder();
+                        for(String ext : THUMBNAIL_FILE_FORMAT) {
+                            extensionsString.append(ext).append("\n");
+                        }
+                        AlertBox.display("Invalid file format", "Thumbnails need to have one of the following file formats:\n" + extensionsString.toString() +
+                        "\nChosen file is: " + thumbnail.getName());
+                    } else {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
         newPreset.lookup("#" + newPresetId + NODE_ID_PLAYLIST).setOnMouseClicked(event ->  {
-            try {
-                playlistUtils.getUserPlaylists();
-                playlistUtils.printAll();
-            } catch (IOException e) {
-                System.err.println("Failed getting playlists");
-                e.printStackTrace();
+            if (configManager.getNeverAuthed()) {
+                if (ConfirmBox.display("Authentication Required", "To select a playlist you must grant this application permission to access your Youtube channel. " +
+                        "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
+                        "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
+                        "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
+                        "\n\nPress yes to open your browser for authentication or no to cancel")) {
+                    configManager.setNeverAuthed(false);
+                    configManager.saveSettings();
+                } else {
+                    return;
+                }
             }
+            ArrayList<String> playlistNames = playlistUtils.getUserPlaylistNames();
+            addNewPreset.setPlaylists(playlistNames);
         });
         SettingsWindow.getChildren().add(newPreset);
 
-        configManager = ConfigManager.INSTANCE;
         videoPresets = new ArrayList<>();
-        ArrayList<String> savedPresetNames = configManager.getSavedPresetNamesList();
+        ArrayList<String> savedPresetNames = presetManager.getPresetNames();
         for (String presetName : savedPresetNames) {
             try {
                 VideoPreset videoPreset = new VideoPreset(configManager.loadPreset(presetName), presetName);
@@ -108,7 +128,7 @@ public class SettingsController implements Initializable {
             }
         }
         if (isPresetNameUnique) {
-            VideoPreset newestPreset = addNewPreset.copy(addNewPreset.getPresetName());
+            VideoPreset newestPreset = addNewPreset.copy(nameNewPreset);
             videoPresets.add(newestPreset);
             updatePresetList();
             configManager.savePreset(newestPreset.getPresetName(), newestPreset.toString());
