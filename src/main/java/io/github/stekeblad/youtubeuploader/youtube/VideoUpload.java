@@ -20,7 +20,7 @@ import java.util.List;
 
 public class VideoUpload extends VideoInformationBase{
 
-    public static final String VIDEO_FILE_FORMAT = "video/*";
+    public static final String VIDEO_FILE_FORMAT = "video/";
     public static final String NODE_ID_PROGRESS = "_progress";
     public static final String NODE_ID_UPLOADSTATUS = "_status";
 
@@ -35,7 +35,7 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, Categories category, boolean tellSubs, File videoFile, File thumbNail, String paneName) {
+                       String playlist, Categories category, boolean tellSubs, File thumbNail, String paneName, File videoFile) {
 
         super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail, paneName);
         this.videoFile = videoFile;
@@ -52,9 +52,9 @@ public class VideoUpload extends VideoInformationBase{
         private String playlist;
         private Categories category;
         private boolean tellSubs;
-        private File videoFile;
         private File thumbNail;
         private String paneName;
+        private File videoFile;
 
         public VideoUpload.Builder setVideoName(String videoName) {
             this.videoName = videoName;
@@ -91,11 +91,6 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
-        public VideoUpload.Builder setVideoFile(File videoFile) {
-            this.videoFile = videoFile;
-            return this;
-        }
-
         public VideoUpload.Builder setThumbNail(File thumbNail) {
             this.thumbNail = thumbNail;
             return this;
@@ -106,9 +101,14 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
+        public VideoUpload.Builder setVideoFile(File videoFile) {
+            this.videoFile = videoFile;
+            return this;
+        }
+
         public VideoUpload build() {
             return new VideoUpload(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
-                    videoFile, thumbNail, paneName);
+                    thumbNail, paneName, videoFile);
         }
     }
 
@@ -120,7 +120,7 @@ public class VideoUpload extends VideoInformationBase{
         progressBar.setId("#" + getPaneId() + NODE_ID_PROGRESS);
         progressBar.setPrefWidth(200);
 
-        Label uploadStatus = new Label("Waiting...");
+        Label uploadStatus = new Label("Upload not started");
         uploadStatus.setId(getPaneId() + NODE_ID_UPLOADSTATUS);
 
         uploadPane.add(progressBar, 0, 4);
@@ -175,7 +175,7 @@ public class VideoUpload extends VideoInformationBase{
                     setStatusLabelText("Upload Completed!");
                     break;
                 case NOT_STARTED:
-                    setStatusLabelText("Waiting...");
+                    setStatusLabelText("Upload not started");
                     break;
             }
         };

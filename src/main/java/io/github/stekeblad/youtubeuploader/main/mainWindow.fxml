@@ -1,16 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.youtubeuploader.main.mainController">
+<AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.youtubeuploader.main.mainWindowController">
     <ToolBar prefHeight="40.0" prefWidth="1088.0">
         <Button id="aButt" fx:id="buttDoThing" mnemonicParsing="false" onAction="#onDoThingClicked" text="Button" />
       <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsPressed" text="Settings" />
     </ToolBar>
     <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" prefHeight="464.0" prefWidth="1070.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="350.0" />
-    <Button fx:id="buttonPickFile" layoutX="58.0" layoutY="240.0" mnemonicParsing="false" onAction="#onPickFile" text="Pick files" AnchorPane.leftAnchor="58.0" AnchorPane.topAnchor="240.0" />
    <Button fx:id="buttonAddFile" layoutX="1050.0" layoutY="324.0" mnemonicParsing="false" onAction="#onAddUploads" text="Add" AnchorPane.rightAnchor="20.0" />
    <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="200.0" prefWidth="149.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0" />
    <Label layoutX="15.0" layoutY="307.0" text="Presets" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="307.0" />
-   <ChoiceBox id="choice_presets" fx:id="choice_presets" layoutX="59.0" layoutY="303.0" prefWidth="150.0" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="303.0" />
+   <VBox layoutX="196.0" layoutY="149.0" prefHeight="200.0" prefWidth="149.0" spacing="2.0" />
+    <HBox layoutX="164.0" layoutY="40.0" prefHeight="32.0" prefWidth="717.0" spacing="5.0">
+        <Button fx:id="buttonPickFile" mnemonicParsing="false" onAction="#onPickFile" prefHeight="25.0"
+                prefWidth="148.0" text="Pick files to upload"/>
+        <Label text="Select a preset">
+           <HBox.margin>
+               <Insets top="3.0"/>
+           </HBox.margin>
+        </Label>
+        <ChoiceBox id="choice_presets" fx:id="choice_presets" disable="true" prefWidth="150.0"/>
+        <Label text="Auto numbers">
+           <HBox.margin>
+               <Insets top="3.0"/>
+           </HBox.margin>
+        </Label>
+        <TextField fx:id="text_autoNum" disable="true" prefHeight="25.0" prefWidth="72.0"/>
+        <Button fx:id="btn_applyPreset" disable="true" mnemonicParsing="false" onAction="#onApplyPresetClicked"
+                text="Apply preset"/>
+    </HBox>
 </AnchorPane>

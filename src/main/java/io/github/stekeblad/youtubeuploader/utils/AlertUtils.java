@@ -24,13 +24,16 @@ public class AlertUtils {
     /**
      * Convenient method for creating a @code{Alert} dialog with a YES and a NO button.
      * To set what to do on the buttons you can do like this:
-     * <pre>{@code alert.showAndWait().ifPresent(response -> {
-     *     if (response == ButtonType.YES) {
+     * <pre>{@code
+     * Optional<ButtonType> buttonChoice = alert.showAndWait();
+     * if (buttonChoice.isPresent()) {
+     *     if (buttonChoice.get() == ButtonType.YES) {
      *         doOnYes();
-     *     } else if(response == ButtonType.NO) {
+     *     } else { // ButtonType.NO or Closed with [X] button
      *         doOnNo();
      *     }
-     * });}</pre>
+     * }
+     * </pre>
      *
      * @param header Header to display in window title
      * @param content The message to display to the user

@@ -1,7 +1,5 @@
 package io.github.stekeblad.youtubeuploader.settings;
 
-import io.github.lilahamstern.AlertBox;
-import io.github.lilahamstern.ConfirmBox;
 import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
 import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
@@ -12,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -22,12 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
 
 
-public class SettingsController implements Initializable {
+public class PresetsWindowController implements Initializable {
 
     public AnchorPane SettingsWindow;
     public Button editPreset;
@@ -56,6 +56,7 @@ public class SettingsController implements Initializable {
         newPreset.lookup("#" + newPresetId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose a thumbnail");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", THUMBNAIL_FILE_FORMAT));
             fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Image Files", THUMBNAIL_FILE_FORMAT));
             Stage fileChooserStage = new Stage();
             File thumbnail = fileChooser.showOpenDialog(fileChooserStage);
@@ -63,36 +64,31 @@ public class SettingsController implements Initializable {
                 try {
                     addNewPreset.setThumbNailFile(thumbnail);
                 } catch (Exception e) {
-                    // If user managed to select a non-existing file (or editing is not allowed, it is allowed here) or invalid file format
-                    if (e.getMessage().equals("Invalid file format")) {
-                        StringBuilder extensionsString = new StringBuilder();
-                        for(String ext : THUMBNAIL_FILE_FORMAT) {
-                            extensionsString.append(ext).append("\n");
-                        }
-                        AlertBox.display("Invalid file format", "Thumbnails need to have one of the following file formats:\n" + extensionsString.toString() +
-                        "\nChosen file is: " + thumbnail.getName());
-                    } else {
                         e.printStackTrace();
-                    }
                 }
             }
         });
-        newPreset.lookup("#" + newPresetId + NODE_ID_PLAYLIST).setOnMouseClicked(event ->  {
+        newPreset.lookup("#" + newPresetId + NODE_ID_PLAYLIST).setOnMouseClicked(event -> {
             if (configManager.getNeverAuthed()) {
-                if (ConfirmBox.display("Authentication Required", "To select a playlist you must grant this application permission to access your Youtube channel. " +
-                        "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
-                        "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                        "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                        "\n\nPress yes to open your browser for authentication or no to cancel")) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required", "To select a playlist you must grant this application permission to access your Youtube channel. " +
+                    "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
+                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
+                    "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
+                    "\n\nPress yes to open your browser for authentication or no to cancel")
+                    .showAndWait();
+            if (buttonChoice.isPresent()) {
+                if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
                     configManager.saveSettings();
-                } else {
+                } else { // ButtonType.NO
                     return;
                 }
             }
-            ArrayList<String> playlistNames = playlistUtils.getUserPlaylistNames();
-            addNewPreset.setPlaylists(playlistNames);
-        });
+        }
+        ArrayList<String> playlistNames = playlistUtils.getUserPlaylistNames();
+        addNewPreset.setPlaylists(playlistNames);
+    });
+
         SettingsWindow.getChildren().add(newPreset);
 
         videoPresets = new ArrayList<>();
@@ -111,6 +107,7 @@ public class SettingsController implements Initializable {
         }
         updatePresetList();
     }
+
 
     public void onPresetEdit(ActionEvent actionEvent) {
 
@@ -133,8 +130,9 @@ public class SettingsController implements Initializable {
             updatePresetList();
             configManager.savePreset(newestPreset.getPresetName(), newestPreset.toString());
         } else {
-            AlertBox.display("Invalid Preset name",
-                    "There is already a preset with that name. Select another one or edit/delete the existing preset.");
+            AlertUtils.simpleClose("Invalid Preset name",
+                    "There is already a preset with that name. Select another one or edit/delete the existing preset.")
+            .show();
         }
 
 
@@ -144,20 +142,35 @@ public class SettingsController implements Initializable {
     public void onPresetDelete(ActionEvent actionEvent) {
         int selected = listPresets.getSelectionModel().getSelectedIndex();
         if (selected < 0) { //no preset selected
-            AlertBox.display("No preset selected", "No preset selected");
+            AlertUtils.simpleClose("No preset selected", "No preset selected").show();
             actionEvent.consume();
             return;
         }
-        if (ConfirmBox.display("Confirm delete",
-                "Are you sure you want to delete preset " + videoPresets.get(selected).getPresetName() + "?")) {
-            if (!configManager.deletePreset(videoPresets.get(selected).getPresetName())) {
-                AlertBox.display("Error", "Could not delete preset");
-            } else {
-                videoPresets.remove(selected);
-                updatePresetList();
-            }
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Confirm delete",
+                "Are you sure you want to delete preset " + videoPresets.get(selected).getPresetName() + "?").showAndWait();
+        if(buttonChoice.isPresent()) {
+            if(buttonChoice.get() == ButtonType.YES) {
+                if (!configManager.deletePreset(videoPresets.get(selected).getPresetName())) {
+                    AlertUtils.simpleClose("Error", "Could not delete preset").show();
+                } else {
+                    videoPresets.remove(selected);
+                    updatePresetList();
+                }
+            } //else if ButtonType.NO or closed [X] do nothing
         }
+        actionEvent.consume();
+    }
 
+    public void onTipsClicked(ActionEvent actionEvent) {
+        String messageContent = "First warnings: \n- Do not start a line in the description box with a underscore (\"_\") as " +
+                "that preset will not be loadable again!" +
+                "\n- Tags must be separated with a comma followed by a space, forgetting the space will make the " +
+                "comma a part of the tag.\nOk, tips!" +
+                "\n- In the video title field you can write \"$(ep)\" to tell the program where to insert the episode " +
+                "number/name defined  when adding videos for upload." +
+                "\n- In the description field you can add \"$(playlist)\" to insert a link to the playlist the " +
+                "video will be added to then uploaded.";
+        AlertUtils.simpleClose("Tips", messageContent).showAndWait();
         actionEvent.consume();
     }
 
@@ -167,11 +180,5 @@ public class SettingsController implements Initializable {
             presetPanes.add(videoPreset.getPresetPane());
         }
         listPresets.setItems(FXCollections.observableArrayList(presetPanes));
-    }
-
-    public void onTipsClicked(ActionEvent actionEvent) {
-        AlertUtils.simpleClose("Tips", "Here will tips be added about $(playlist) and interesting stuff").show();
-
-        actionEvent.consume();
     }
 }

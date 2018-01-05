@@ -78,20 +78,9 @@ public class VideoInformationBase {
         if (!allowEdit) {
             throw new Exception("Edit not allowed");
         } else {
-            boolean matchingExtension = false;
-            for (String fileFormat : THUMBNAIL_FILE_FORMAT) { // Extension filter in fileChooser not working, my own test
-                if(thumbnail.getName().contains(fileFormat.substring(1))) { //ignore "*", sadly accepts *.ext* instead of only *.ext
-                    matchingExtension = true;
-                    break;
-                }
-            }
-            if (matchingExtension) {
-                thumbNailFile = thumbnail;
-                ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
-                        new Image(new FileInputStream(thumbnail)));
-            } else {
-                throw new Exception("Invalid file format");
-            }
+            thumbNailFile = thumbnail;
+            ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
+                    new Image(new FileInputStream(thumbnail)));
         }
     }
 
