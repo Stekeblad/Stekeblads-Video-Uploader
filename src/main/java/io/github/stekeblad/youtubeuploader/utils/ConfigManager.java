@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
@@ -15,6 +16,7 @@ public enum ConfigManager {
 
     private Path filesPath;
     private Properties mainProp;
+    private HashMap<String, String> presetStringsMap;
 
     public void configManager() {
         filesPath = Paths.get(DATA_DIR).toAbsolutePath();
@@ -36,8 +38,11 @@ public enum ConfigManager {
                 System.err.println("Could not find or create directory for presets!");
                 e.printStackTrace();
             }
-        }
+        } else { // do not attempt to load presets if presets directory did not exist
 
+            ArrayList<String> presetNames = loadSavedPresetNamesList();
+            loadSavedPresets(presetNames);
+        }
         loadSettings();
     }
 
@@ -67,6 +72,51 @@ public enum ConfigManager {
                 mainProp.setProperty("noSettings", "true");
                 mainProp.setProperty("neverAuthed", "true");
             }
+        }
+    }
+
+    private ArrayList<String> loadSavedPresetNamesList() {
+        ArrayList<String> presetNames = new ArrayList<>();
+        File dir = new File(PRESET_DIR);
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File preset : directoryListing) {
+                presetNames.add(preset.getName());
+            }
+        }
+        return presetNames;
+    }
+
+    private void loadSavedPresets(ArrayList<String> presetNames) {
+        presetStringsMap = new HashMap<>();
+        for(String presetName : presetNames) {
+            try {
+                presetStringsMap.put(presetName, loadPreset(presetName));
+            } catch (IOException e) {
+                System.err.println("Error reading preset file: \"" + presetName + "\"");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String loadPreset(String presetName) throws IOException {
+        if (Files.exists(Paths.get(PRESET_DIR + "/" + presetName))) {
+            BufferedReader reader = new BufferedReader(new FileReader(
+                    new File(PRESET_DIR + "/" + presetName)));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = reader.readLine();
+            while (line != null) { // while not end of file
+                stringBuilder.append(line);
+                line = reader.readLine();
+                if (line != null) {
+                    stringBuilder.append("\n"); // do not end the last line with '\n'
+                }
+            }
+            reader.close();
+            return stringBuilder.toString();
+
+        } else {
+            throw new IOException("Preset " + presetName + " does not exist or cant be accessed");
         }
     }
 
@@ -139,37 +189,12 @@ public enum ConfigManager {
         return true;
     }
 
-    public ArrayList<String> getSavedPresetNamesList() {
-        ArrayList<String> presetNames = new ArrayList<>();
-        File dir = new File(PRESET_DIR);
-        File[] directoryListing = dir.listFiles();
-        if (directoryListing != null) {
-            for (File preset : directoryListing) {
-                presetNames.add(preset.getName());
-            }
-        }
-        return presetNames;
+    public ArrayList<String> getPresetNames() {
+        return new ArrayList<>(presetStringsMap.keySet());
     }
 
-    public String loadPreset(String presetName) throws IOException {
-        if (Files.exists(Paths.get(PRESET_DIR + "/" + presetName))) {
-            BufferedReader reader = new BufferedReader(new FileReader(
-                    new File(PRESET_DIR + "/" + presetName)));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line = reader.readLine();
-            while (line != null) { // while not end of file
-                stringBuilder.append(line);
-                line = reader.readLine();
-                if (line != null) {
-                    stringBuilder.append("\n"); // do not end the last line with '\n'
-                }
-            }
-            reader.close();
-            return stringBuilder.toString();
-
-        } else {
-            throw new IOException("Preset " + presetName + " does not exist or cant be accessed");
-        }
+    public String getPresetString(String presetName) {
+        return presetStringsMap.getOrDefault(presetName, null);
     }
 
     public void savePlaylistCache(String playlistData) {
@@ -192,7 +217,7 @@ public enum ConfigManager {
     }
 
     public ArrayList<String> loadPlaylistCache() {
-        BufferedReader reader = null;
+        BufferedReader reader;
         ArrayList<String> playlistString = new ArrayList<>();
         try {
             if (!Files.exists(Paths.get(PLAYLIST_FILE))) {

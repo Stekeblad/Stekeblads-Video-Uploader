@@ -2,8 +2,8 @@ package io.github.stekeblad.youtubeuploader.settings;
 
 import io.github.lilahamstern.AlertBox;
 import io.github.lilahamstern.ConfirmBox;
+import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.utils.PresetManager;
 import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
@@ -34,17 +34,16 @@ public class SettingsController implements Initializable {
     public Button savePreset;
     public Button deletePreset;
     public ListView<GridPane> listPresets;
+    public Button btn_tips;
 
     private VideoPreset addNewPreset;
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
-    private PresetManager presetManager;
     private PlaylistUtils playlistUtils;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         configManager = ConfigManager.INSTANCE;
-        presetManager = PresetManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
         String newPresetId = "newPreset";
         addNewPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC,
@@ -97,10 +96,10 @@ public class SettingsController implements Initializable {
         SettingsWindow.getChildren().add(newPreset);
 
         videoPresets = new ArrayList<>();
-        ArrayList<String> savedPresetNames = presetManager.getPresetNames();
+        ArrayList<String> savedPresetNames = configManager.getPresetNames();
         for (String presetName : savedPresetNames) {
             try {
-                VideoPreset videoPreset = new VideoPreset(configManager.loadPreset(presetName), presetName);
+                VideoPreset videoPreset = new VideoPreset(configManager.getPresetString(presetName), presetName);
                 videoPresets.add(videoPreset);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -115,6 +114,7 @@ public class SettingsController implements Initializable {
 
     public void onPresetEdit(ActionEvent actionEvent) {
 
+        actionEvent.consume();
     }
 
     public void onPresetSave(ActionEvent actionEvent) {
@@ -163,9 +163,15 @@ public class SettingsController implements Initializable {
 
     private void updatePresetList() {
         ArrayList<GridPane> presetPanes = new ArrayList<>();
-        for (int i = 0; i < videoPresets.size(); i++) {
-            presetPanes.add(videoPresets.get(i).getPresetPane());
+        for (VideoPreset videoPreset : videoPresets) {
+            presetPanes.add(videoPreset.getPresetPane());
         }
         listPresets.setItems(FXCollections.observableArrayList(presetPanes));
+    }
+
+    public void onTipsClicked(ActionEvent actionEvent) {
+        AlertUtils.simpleClose("Tips", "Here will tips be added about $(playlist) and interesting stuff").show();
+
+        actionEvent.consume();
     }
 }

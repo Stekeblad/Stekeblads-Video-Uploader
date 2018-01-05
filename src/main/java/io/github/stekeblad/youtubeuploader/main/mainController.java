@@ -3,7 +3,6 @@ package io.github.stekeblad.youtubeuploader.main;
 import io.github.lilahamstern.AlertBox;
 import io.github.lilahamstern.ConfirmBox;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.utils.PresetManager;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -38,7 +37,6 @@ public class mainController implements Initializable {
     public AnchorPane mainWindowPane;
 
     private ConfigManager configManager;
-    private PresetManager presetManager;
     private int videoPaneCounter;
     private List<Pane> videoPanes;
 
@@ -55,8 +53,7 @@ public class mainController implements Initializable {
             configManager.setNoSettings(false);
             configManager.saveSettings();
         }
-        presetManager = PresetManager.INSTANCE;
-        choice_presets.setItems(FXCollections.observableArrayList(presetManager.getPresetNames()));
+        choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
         choice_presets.getSelectionModel().selectedItemProperty()
                 .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) ->
                         System.out.println(newValue)
@@ -77,8 +74,8 @@ public class mainController implements Initializable {
         if (filesToUpload != null) {
 
             List<String> filenames = new ArrayList<>();
-            for (int i = 0; i < filesToUpload.size(); i++) {
-                String fileNameString = filesToUpload.get(i).getName();
+            for (File aFilesToUpload : filesToUpload) {
+                String fileNameString = aFilesToUpload.getName();
                 filenames.add(fileNameString);
             }
             chosen_files.setItems(FXCollections.observableArrayList(filenames));
