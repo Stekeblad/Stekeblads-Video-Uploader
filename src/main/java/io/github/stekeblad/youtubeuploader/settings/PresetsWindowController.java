@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -40,12 +41,12 @@ public class PresetsWindowController implements Initializable {
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
+    private String newPresetId = "newPreset";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         configManager = ConfigManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
-        String newPresetId = "newPreset";
         addNewPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC,
                 new ArrayList<>(), "", Categories.SPEL, false, null, newPresetId, "");
         addNewPreset.setEditable(true);
@@ -61,6 +62,12 @@ public class PresetsWindowController implements Initializable {
             Stage fileChooserStage = new Stage();
             File thumbnail = fileChooser.showOpenDialog(fileChooserStage);
             if (thumbnail != null) {
+                if(thumbnail.length() > 2 *1024 * 1024) { // max allowed size is 2MB
+                    AlertUtils.simpleClose("Warning", "Image to large, YouTube do not allow thumbnails larger then 2 MB." +
+                            "\n the chosen file is " + BigDecimal.valueOf((double) thumbnail.length() /(1024 * 1024)).setScale(3, BigDecimal.ROUND_HALF_UP) + "MB").show();
+                    //
+                    return;
+                }
                 try {
                     addNewPreset.setThumbNailFile(thumbnail);
                 } catch (Exception e) {
@@ -105,11 +112,20 @@ public class PresetsWindowController implements Initializable {
                 System.err.println("Bad format of preset or is another type of preset then the one trying to be created: " + presetName);
             }
         }
+
         updatePresetList();
     }
 
 
     public void onPresetEdit(ActionEvent actionEvent) {
+        int selected = listPresets.getSelectionModel().getSelectedIndex();
+        if (selected == -1) {
+            AlertUtils.simpleClose("No preset selected", "No preset selected, cant edit.").show();
+            return;
+        }
+        SettingsWindow.getChildren().set(
+                SettingsWindow.getChildren().indexOf(SettingsWindow.lookup("#" + newPresetId)),
+                listPresets.getSelectionModel().getSelectedItem());
 
         actionEvent.consume();
     }
@@ -134,7 +150,6 @@ public class PresetsWindowController implements Initializable {
                     "There is already a preset with that name. Select another one or edit/delete the existing preset.")
             .show();
         }
-
 
         actionEvent.consume();
     }

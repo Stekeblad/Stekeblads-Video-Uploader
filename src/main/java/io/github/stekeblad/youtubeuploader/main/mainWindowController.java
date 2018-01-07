@@ -97,7 +97,7 @@ public class mainWindowController implements Initializable {
 
     public void onPickFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a video file to upload");
+        fileChooser.setTitle("Choose video files to upload");
         Stage fileChooserStage = new Stage();
         List<File> filesToUpload = fileChooser.showOpenMultipleDialog(fileChooserStage);
         if (filesToUpload != null) {
@@ -111,8 +111,8 @@ public class mainWindowController implements Initializable {
                     } else {
                         fileWasSkipped = true; // at leased one selected file is not a video file
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    fileWasSkipped = true;
                 }
             }
             if(fileWasSkipped) {
@@ -131,6 +131,7 @@ public class mainWindowController implements Initializable {
     private void onPresetChanged(String newValue) {
         text_autoNum.setDisable(false);
         btn_applyPreset.setDisable(false);
+
     }
 
     public void onApplyPresetClicked(ActionEvent actionEvent) {
