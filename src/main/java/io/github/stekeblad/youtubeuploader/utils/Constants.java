@@ -6,5 +6,10 @@ public class Constants {
     public static final String PRESET_DIR = DATA_DIR + "/presets";
     public static final String PLAYLIST_FILE = DATA_DIR + "/playlist";
 
+    public static final String BUTTON_EDIT = "_buttonEdit";
+    public static final String BUTTON_SAVE = "_buttonSave";
+    public static final String BUTTON_CANCEL = "_buttonCancel";
+    public static final String BUTTON_DELETE = "_buttonDelete";
+
 
 }

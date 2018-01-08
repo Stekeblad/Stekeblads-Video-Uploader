@@ -60,7 +60,12 @@ public enum PlaylistUtils {
     }
 
     public String getPlaylistUrl(String playlistName) {
-        return "https://www.youtube.com/playlist?list=" + getPlaylistId(playlistName);
+        String id = getPlaylistId(playlistName);
+        if(id != null) {
+            return "https://www.youtube.com/playlist?list=" + id;
+        } else {
+            return null;
+        }
     }
 
     private void saveCache() {

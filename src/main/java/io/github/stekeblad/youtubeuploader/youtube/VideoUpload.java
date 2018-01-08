@@ -114,7 +114,7 @@ public class VideoUpload extends VideoInformationBase{
 
     protected void makeUploadPane() {
         uploadPane = super.getPane();
-        uploadPane.setPrefHeight(150);
+        uploadPane.setPrefHeight(170);
 
         ProgressBar progressBar = new ProgressBar();
         progressBar.setId("#" + getPaneId() + NODE_ID_PROGRESS);

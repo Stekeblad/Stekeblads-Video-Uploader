@@ -46,7 +46,7 @@ public class mainWindowController implements Initializable {
 
     private ConfigManager configManager;
     private int uploadPaneCounter;
-    private List<GridPane> uploadQueuePanes;
+    //private List<GridPane> uploadQueuePanes;
     private List<VideoUpload> uploadQueueVideos;
     private List<VideoUpload> inEditingVideos;
     private VideoInformationBase videoEdit;
@@ -55,7 +55,7 @@ public class mainWindowController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
 
         uploadPaneCounter = 0;
-        uploadQueuePanes = new ArrayList<>();
+        //uploadQueuePanes = new ArrayList<>();
         uploadQueueVideos = new ArrayList<>();
         inEditingVideos = new ArrayList<>();
         configManager = ConfigManager.INSTANCE;
@@ -90,7 +90,15 @@ public class mainWindowController implements Initializable {
     }
 
     public void onDoThingClicked(ActionEvent event) {
-
+        VideoUpload vidUp = new VideoUpload.Builder().setPaneName("testPane")
+                .setVideoName("a test for non-upload purpose")
+                .setVideoDescription("DO NOT WATCH, NOT UPLOADED!")
+                .setCategory(Categories.NYHETER_OCH_POLITIK)
+                .setTellSubs(false)
+                .setVisibility(VisibilityStatus.PRIVATE)
+                .build();
+        //uploadQueuePanes.add(vidUp.getUploadPane());
+        //listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
         event.consume();
     }
 

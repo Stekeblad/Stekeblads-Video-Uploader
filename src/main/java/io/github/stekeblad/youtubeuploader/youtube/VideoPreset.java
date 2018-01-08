@@ -128,13 +128,14 @@ public class VideoPreset extends VideoInformationBase {
 
     protected void makePresetPane(String name) {
         presetPane = super.getPane();
-        presetPane.setPrefHeight(165);
+        presetPane.setPrefHeight(170);
 
         TextField presetName = new TextField();
         presetName.setId(getPaneId() + NODE_ID_PRESETNAME);
         presetName.setPromptText("Preset name");
         presetName.setText(name);
         presetName.setEditable(false);
+
         presetPane.add(presetName, 0, 4);
     }
 
@@ -144,9 +145,7 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     public String toString() {
-        StringBuilder classString = new StringBuilder()
-                .append(super.toString()).append("\n")
-                .append(NODE_ID_PRESETNAME).append(":").append(getPresetName());
-        return classString.toString();
+        return super.toString() + "\n" +
+                NODE_ID_PRESETNAME + ":" + getPresetName();
     }
 }

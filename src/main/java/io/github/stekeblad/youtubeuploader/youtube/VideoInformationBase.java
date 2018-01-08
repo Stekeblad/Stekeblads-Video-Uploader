@@ -73,7 +73,7 @@ public class VideoInformationBase {
         return videoBasePane;
     }
 
-    //Setters
+    //Setters (mostly done directly on the GridPane)
     public void setThumbNailFile(File thumbnail) throws Exception {
         if (!allowEdit) {
             throw new Exception("Edit not allowed");
@@ -275,11 +275,13 @@ public class VideoInformationBase {
         tags.setId(paneId + NODE_ID_TAGS);
         tags.setPromptText("list, of, tags, separated, with, comma, and, space");
         StringBuilder tagsString = new StringBuilder();
-        for (int i = 0; i < videoTags.size() - 1; i++) {
-            tagsString.append(videoTags.get(i)).append(", ");
-        }
-        if (videoTags.size() > 0) {
-            tagsString.append(videoTags.get(videoTags.size() - 1));
+        if(videoTags != null && videoTags.size() > 0) {
+            for (int i = 0; i < videoTags.size() - 1; i++) {
+                tagsString.append(videoTags.get(i)).append(", ");
+            }
+            if (videoTags.size() > 0) {
+                tagsString.append(videoTags.get(videoTags.size() - 1));
+            }
         }
         tags.setText(tagsString.toString());
         tags.setEditable(false);
