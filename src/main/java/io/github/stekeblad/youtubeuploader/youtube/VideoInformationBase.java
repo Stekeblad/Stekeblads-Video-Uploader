@@ -247,6 +247,10 @@ public class VideoInformationBase {
         videoBasePane.setPrefSize(680, 100);
         videoBasePane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
+        if(videoName == null) videoName = "";
+        if(videoDescription == null) videoDescription = "";
+
+
         TextField title = new TextField();
         title.setId(paneId + NODE_ID_TITLE);
         title.setPromptText("Video title");

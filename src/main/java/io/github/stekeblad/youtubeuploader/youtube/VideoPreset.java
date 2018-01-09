@@ -2,8 +2,10 @@ package io.github.stekeblad.youtubeuploader.youtube;
 
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
 import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 
 import java.io.File;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 public class VideoPreset extends VideoInformationBase {
 
     public static final String NODE_ID_PRESETNAME = "_presetName";
+    public static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     private GridPane presetPane;
 
@@ -19,6 +22,14 @@ public class VideoPreset extends VideoInformationBase {
     }
     public GridPane getPresetPane() {
         return presetPane;
+    }
+
+    public void setButton1(Button btn1) {
+        ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(0, btn1);
+    }
+
+    public void setButton2(Button btn2) {
+        ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
     }
 
     public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
@@ -136,7 +147,15 @@ public class VideoPreset extends VideoInformationBase {
         presetName.setText(name);
         presetName.setEditable(false);
 
+        Button ghostBtn1 = new Button("");
+        ghostBtn1.setVisible(false);
+        Button ghostBtn2 = new Button("");
+        ghostBtn2.setVisible(false);
+        HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2);
+        buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
+
         presetPane.add(presetName, 0, 4);
+        presetPane.add(buttonsBox, 1, 4);
     }
 
     public void setEditable(boolean newEditStatus) {

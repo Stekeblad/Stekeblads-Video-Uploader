@@ -10,14 +10,15 @@ edited and deleted from their lists
 
 #### More important things to do
 
-- RxJava to async uploads and for getting playlists
+- (RxJava to) async uploads and getting playlists
 - Selecting files and a preset makes it possible to add files to upload list and after
 that make files uploadable
-- Add support for syncing playlists with youtube after first load
-(just button missing to call method)
 
 
 #### Less important things to do
 - Creating localization support and moving all strings visible for the users there
 - Then getting playlists, get ALL, not just the 25 first. Make playlists searchable
+
+#### Thinking
+- is presetName needed in VideoPreset? is it not equal to paneId?
 
