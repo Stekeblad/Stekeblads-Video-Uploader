@@ -10,6 +10,8 @@ public class Constants {
     public static final String BUTTON_SAVE = "_buttonSave";
     public static final String BUTTON_CANCEL = "_buttonCancel";
     public static final String BUTTON_DELETE = "_buttonDelete";
+    public static final String BUTTON_START_UPLOAD = "_buttonStartUpload";
+    public static final String BUTTON_ABORT_UPLOAD = "_buttonUploadAbort";
 
 
 }

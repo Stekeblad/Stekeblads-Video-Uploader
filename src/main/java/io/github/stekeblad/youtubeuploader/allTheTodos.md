@@ -7,16 +7,16 @@ And suddenly all my ideas just vanished...
 #### Right now
 - Working on how both presets and videos to be uploaded should be
 edited and deleted from their lists
+- javafx based concurrency
 
 #### More important things to do
 
-- (RxJava to) async uploads and getting playlists
 - Selecting files and a preset makes it possible to add files to upload list and after
 that make files uploadable
 
 
 #### Less important things to do
-- Creating localization support and moving all strings visible for the users there
+- Creating localization support and moving all strings visible for the users there (resourceBundle)
 - Then getting playlists, get ALL, not just the 25 first. Make playlists searchable
 
 #### Thinking

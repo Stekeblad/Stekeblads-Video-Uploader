@@ -2,54 +2,53 @@ package io.github.stekeblad.youtubeuploader.main;
 
 import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase;
+import io.github.stekeblad.youtubeuploader.utils.PickFile;
+import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoUpload;
-import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
-import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
-import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
+import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_THUMBNAIL;
 
 public class mainWindowController implements Initializable {
-    public Button buttDoThing;
     public ListView<GridPane> listView;
     public Button buttonPickFile;
-    public Button buttonAddFile;
     public ListView<String> chosen_files;
     public Button btn_presets;
     public ChoiceBox<String> choice_presets;
     public AnchorPane mainWindowPane;
     public TextField text_autoNum;
     public Button btn_applyPreset;
+    public Button buttonStartAll;
 
     private ConfigManager configManager;
-    private int uploadPaneCounter;
-    //private List<GridPane> uploadQueuePanes;
+    private PlaylistUtils playlistUtils;
+    private int uploadPaneCounter = 0;
     private List<VideoUpload> uploadQueueVideos;
-    private List<VideoUpload> inEditingVideos;
-    private VideoInformationBase videoEdit;
+    private List<File> videosToAdd;
+
+    private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
 
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
@@ -57,7 +56,6 @@ public class mainWindowController implements Initializable {
         uploadPaneCounter = 0;
         //uploadQueuePanes = new ArrayList<>();
         uploadQueueVideos = new ArrayList<>();
-        inEditingVideos = new ArrayList<>();
         configManager = ConfigManager.INSTANCE;
         configManager.configManager();
         if (configManager.getNoSettings()) {
@@ -66,117 +64,53 @@ public class mainWindowController implements Initializable {
             configManager.setNoSettings(false);
             configManager.saveSettings();
         }
+        playlistUtils = PlaylistUtils.INSTANCE;
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
-        choice_presets.getSelectionModel().selectedItemProperty()
-                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) ->
-                        onPresetChanged(newValue)
-                );
 
         text_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 text_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
-        String editorId = "editor";
-        videoEdit = new VideoInformationBase("", "", VisibilityStatus.PUBLIC,
-                new ArrayList<>(), "", Categories.SPEL, false, null, editorId);
-        videoEdit.setEditable(true);
-        GridPane videoEditPane = videoEdit.getPane();
-        videoEditPane.setLayoutX(180);
-        videoEditPane.setLayoutY(80);
-        videoEditPane.setPrefSize(680, 130);
-        mainWindowPane.getChildren().add(videoEditPane);
-
-    }
-
-    public void onDoThingClicked(ActionEvent event) {
-        VideoUpload vidUp = new VideoUpload.Builder().setPaneName("testPane")
-                .setVideoName("a test for non-upload purpose")
-                .setVideoDescription("DO NOT WATCH, NOT UPLOADED!")
-                .setCategory(Categories.NYHETER_OCH_POLITIK)
-                .setTellSubs(false)
-                .setVisibility(VisibilityStatus.PRIVATE)
-                .build();
-        //uploadQueuePanes.add(vidUp.getUploadPane());
-        //listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
-        event.consume();
     }
 
 
     public void onPickFile(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose video files to upload");
-        Stage fileChooserStage = new Stage();
-        List<File> filesToUpload = fileChooser.showOpenMultipleDialog(fileChooserStage);
-        if (filesToUpload != null) {
-            List<String> filenames = new ArrayList<>();
-            boolean fileWasSkipped = false;
-            for (File aFilesToUpload : filesToUpload) {
-                try { // Check file MIME to see if it is a video file
-                    if(Files.probeContentType(Paths.get(aFilesToUpload.toURI())).startsWith(VIDEO_FILE_FORMAT)) {
-                        String fileNameString = aFilesToUpload.getName();
-                        filenames.add(fileNameString);
-                    } else {
-                        fileWasSkipped = true; // at leased one selected file is not a video file
-                    }
-                } catch (Exception e) {
-                    fileWasSkipped = true;
-                }
-            }
-            if(fileWasSkipped) {
-                AlertUtils.simpleClose("Invalid files",
-                        "One or more of the selected files was not added because they are not video files").show();
-            }
-            chosen_files.setItems(FXCollections.observableArrayList(filenames));
-            if(chosen_files.getItems().size() > 0) {
-                choice_presets.setDisable(false);
+        videosToAdd = PickFile.pickVideos();
+        ArrayList<String> filenames = new ArrayList<>();
+        if(videosToAdd != null) {
+            for (File file : videosToAdd) {
+                filenames.add(file.getName());
             }
         }
-
+        chosen_files.setItems(FXCollections.observableArrayList(filenames));
         actionEvent.consume();
     }
 
-    private void onPresetChanged(String newValue) {
-        text_autoNum.setDisable(false);
-        btn_applyPreset.setDisable(false);
-
-    }
-
     public void onApplyPresetClicked(ActionEvent actionEvent) {
-
+        if(videosToAdd == null || videosToAdd.size() == 0 ) {
+            AlertUtils.simpleClose("No files selected", "Please select files to upload").show();
+            return;
+        }
+        if(choice_presets.getSelectionModel().getSelectedIndex() == -1) {
+            // add videos to upload list with file name as title and blank/default values on the rest
+            for(File videoFile : videosToAdd) {
+                VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
+                        null, null, null, false, null,
+                        UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
+                onEdit(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + "_fakeButton");
+                uploadQueueVideos.add(newUpload);
+                uploadPaneCounter++;
+            }
+        }
+        videosToAdd = null;
+        chosen_files.setItems(FXCollections.observableArrayList(new ArrayList<>()));
+        updateUploadList();
+        actionEvent.consume();
     }
 
-    public void onAddUploads(ActionEvent actionEvent) {
-        if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required", "To upload videos you must grant this application permission to access your Youtube channel. " +
-                    "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
-                    "\n\nPermission overview: YOUTUBE_UPLOAD needed for uploading videos to your channel" +
-                    "\nYOUTUBE for basic account access, needed for adding videos to playlists and setting thumbnails" +
-                    "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or Closed [X]
-                    return;
-                }
-            }
-
-
-        }
-        /*if(chosen_files.getItems().size() == 0) {
-          actionEvent.consume();
-            return;
-        } /*
-        GridPane newVideo = PaneFactory.makeUploadPane("vid" + uploadPaneCounter);
-        ((TextField) newVideo.lookup("#vid" + uploadPaneCounter + "_title")).setText(nameOfFile.getText());
-        uploadQueuePanes.add(newVideo);
-        nameOfFile.setText("");
-        listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
-        uploadPaneCounter++;
-*/        actionEvent.consume();
-
+    public void onStartAll(ActionEvent actionEvent) {
+        actionEvent.consume();
     }
 
     public void onSettingsPressed(ActionEvent actionEvent) {
@@ -190,10 +124,123 @@ public class mainWindowController implements Initializable {
             stage.setTitle("Settings - Stekeblads Youtube Uploader");
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.show();
+            stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
         }
         actionEvent.consume();
+        // Update presets choice box in case presets was added or remove
+        choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
+    }
+
+    private void updateUploadList() {
+        List<GridPane> uploadQueuePanes = new ArrayList<>();
+        for(VideoUpload vid : uploadQueueVideos) {
+            uploadQueuePanes.add(vid.getUploadPane());
+        }
+        listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
+    }
+
+    private int getUploadIndexByname(String nameToTest, int skipIndex) {
+        int videoIndex = -1;
+        for(int i = 0; i < uploadQueueVideos.size(); i++) {
+            if (i == skipIndex) {
+                continue;
+            }
+            if(uploadQueueVideos.get(i).getPaneId().equals(nameToTest)) {
+                videoIndex = i;
+                break;
+            }
+        }
+        return videoIndex;
+    }
+
+    private void onEdit(String calledId) {
+        String parentId = calledId.substring(0, calledId.indexOf('_'));
+        int selected = getUploadIndexByname(parentId, -1);
+        if (selected == -1) {
+            System.err.println("Non-existing button was pressed!");
+            return;
+        }
+        uploadQueueVideos.get(selected).setEditable(true);
+        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
+            File pickedThumbnail = PickFile.pickThumbnail();
+            if(pickedThumbnail != null) {
+                try {
+                    uploadQueueVideos.get(selected).setThumbNailFile(pickedThumbnail);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event ->
+                ((ChoiceBox<String>) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST)).setItems(
+                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames())));
+        // Set buttons
+        Button saveButton = new Button("Save");
+        saveButton.setId(parentId + BUTTON_SAVE);
+        saveButton.setOnMouseClicked(event -> onSave(saveButton.getId()));
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setId(parentId + BUTTON_CANCEL);
+        cancelButton.setOnMouseClicked(event -> onCancel(cancelButton.getId()));
+        //Button three is not used but I do not want it to be invisible
+        Button ghostButton = new Button("");
+        ghostButton.setVisible(false);
+
+        uploadQueueVideos.get(selected).setButton1(cancelButton);
+        uploadQueueVideos.get(selected).setButton2(saveButton);
+        uploadQueueVideos.get(selected).setButton3(ghostButton);
+
+        // Make sure visual change get to the UI
+        updateUploadList();
+    }
+
+    private void onSave(String calledId) {
+        String parentId = calledId.substring(0, calledId.indexOf('_'));
+        int selected = getUploadIndexByname(parentId, -1);
+        if (selected == -1) {
+            System.err.println("Non-existing button was pressed!");
+            return;
+        }
+        // Check fields
+        if(uploadQueueVideos.get(selected).getVideoName().equals("")) {
+            AlertUtils.simpleClose("Title Required", "Video does not have a title").show();
+            return;
+        }
+        // Everything else is not required or given a default value that can not be set to a invalid value
+
+        // Change buttons
+        Button editButton = new Button("Edit");
+        editButton.setId(parentId + BUTTON_EDIT);
+        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
+        Button deleteButton = new Button("Delete");
+        deleteButton.setId(parentId + BUTTON_DELETE);
+        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
+        Button startUploadButton = new Button("Start Upload");
+        startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
+        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
+
+        uploadQueueVideos.get(selected).setButton1(editButton);
+        uploadQueueVideos.get(selected).setButton2(deleteButton);
+        uploadQueueVideos.get(selected).setButton3(startUploadButton);
+
+        // Make sure visual change get to the UI
+        updateUploadList();
+    }
+
+    private void onCancel(String calledId) {
+
+    }
+
+    private void onDelete(String calledId) {
+
+    }
+
+    private void onStartUpload(String calledId) {
+
+    }
+
+    private void onAbort(String calledId) {
+
     }
 }

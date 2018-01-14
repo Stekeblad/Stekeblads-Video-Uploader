@@ -173,11 +173,13 @@ public enum ConfigManager {
                 }
             }
         }
+        presetStringsMap.put(presetName, stringRepresentation);
     }
 
     public boolean deletePreset(String presetName) {
         Path path = Paths.get(PRESET_DIR + "/" + presetName);
         if (!Files.exists(path)) {
+            presetStringsMap.remove(presetName);
             return true; //does not exist, job already done
         }
         try {
@@ -186,6 +188,7 @@ public enum ConfigManager {
             e.printStackTrace();
             return false;
         }
+        presetStringsMap.remove(presetName);
         return true;
     }
 

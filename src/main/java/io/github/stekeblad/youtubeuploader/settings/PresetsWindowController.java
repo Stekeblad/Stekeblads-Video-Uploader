@@ -2,6 +2,7 @@ package io.github.stekeblad.youtubeuploader.settings;
 
 import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
+import io.github.stekeblad.youtubeuploader.utils.PickFile;
 import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
 import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
@@ -12,19 +13,17 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_THUMBNAIL;
 
 
 public class PresetsWindowController implements Initializable {
@@ -44,38 +43,6 @@ public class PresetsWindowController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         configManager = ConfigManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
-        //addNewPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC,
-        //        new ArrayList<>(), "", Categories.SPEL, false, null, newPresetId, "");
-        //addNewPreset.setEditable(true);
-        //GridPane newPreset = addNewPreset.getPresetPane();
-        //newPreset.setLayoutX(10);
-        //newPreset.setLayoutY(30);
-        //newPreset.setPrefSize(680, 150);
-        //newPreset.lookup("#" + newPresetId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
-
-        //});
-       /* newPreset.lookup("#" + newPresetId + NODE_ID_PLAYLIST).setOnMouseClicked(event -> {
-            if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required", "To select a playlist you must grant this application permission to access your Youtube channel. " +
-                    "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
-                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                    "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                    "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO
-                    return;
-                }
-            }
-        }
-        ArrayList<String> playlistNames = playlistUtils.getUserPlaylistNames();
-        addNewPreset.setPlaylists(playlistNames);
-    });*/
-
-        //SettingsWindow.getChildren().add(newPreset);
 
         videoPresets = new ArrayList<>();
         ArrayList<String> savedPresetNames = configManager.getPresetNames();
@@ -103,6 +70,88 @@ public class PresetsWindowController implements Initializable {
         updatePresetList();
     }
 
+    public void onPresetAddNew(ActionEvent actionEvent) {
+        if (txt_nameNewPreset.getText().equals("")) {
+            AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
+            return;
+        }
+        if (getPresetIndexByName(txt_nameNewPreset.getText(), -1) > -1) {
+            AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
+            return;
+        }
+        VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
+                null, Categories.SPEL, false, null, txt_nameNewPreset.getText(), txt_nameNewPreset.getText());
+        videoPresets.add(newPreset);
+        onPresetEdit(txt_nameNewPreset.getText() + "_fakeButton");
+        updatePresetList();
+        listPresets.scrollTo(listPresets.getItems().size() -1);
+        txt_nameNewPreset.setText("");
+        actionEvent.consume();
+    }
+
+    public void onTipsClicked(ActionEvent actionEvent) {
+        String messageContent = "First warnings: \n- Do not start a line in the description box with a underscore (\"_\") as " +
+                "that preset will not be loadable again!" +
+                "\n- Tags must be separated with a comma followed by a space, forgetting the space will make the " +
+                "comma a part of the tag.\nOk, tips!" +
+                "\n- In the video title field you can write \"$(ep)\" to tell the program where to insert the episode " +
+                "number/name defined  when adding videos for upload." +
+                "\n- In the description field you can add \"$(playlist)\" to insert a link to the playlist the " +
+                "video will be added to then uploaded.";
+        AlertUtils.simpleClose("Tips", messageContent).showAndWait();
+        actionEvent.consume();
+    }
+
+    public void onRefreshPlaylists(ActionEvent actionEvent) {
+        if (configManager.getNeverAuthed()) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required", "To download your playlists you must grant this application permission to access your Youtube channel. " +
+                    "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
+                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
+                    "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
+                    "\n\nPress yes to open your browser for authentication or no to cancel")
+                    .showAndWait();
+            if (buttonChoice.isPresent()) {
+                if (buttonChoice.get() == ButtonType.YES) {
+                    configManager.setNeverAuthed(false);
+                    configManager.saveSettings();
+                    playlistUtils.refreshPlaylist();
+                } else { // ButtonType.NO oc closed [X]
+                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
+                }
+            }
+        }
+        actionEvent.consume();
+    }
+
+    private void updatePresetList() {
+        ArrayList<GridPane> presetPanes = new ArrayList<>();
+        for (VideoPreset videoPreset : videoPresets) {
+            presetPanes.add(videoPreset.getPresetPane());
+        }
+        listPresets.setItems(FXCollections.observableArrayList(presetPanes));
+    }
+
+    /**
+     * Returns the index in videoPresets that has a preset named nameToTest or -1 if no preset has that name
+     * @param nameToTest preset name to test for
+     * @param skipIndex specify a index in videoPresets to skip or set to -1 to test all
+     *                  (any number <0 or >videoPresets.size() works, but -1 is easy do
+     *                  understand and then it is same number every time for skipping)
+     * @return the index of where the preset named nameToTest inside videoPresets or -1 if it does not exist a preset with that name
+     */
+    private int getPresetIndexByName(String nameToTest, int skipIndex) {
+        int presetIndex = -1;
+        for (int i = 0; i < videoPresets.size(); i++) {
+            if (i == skipIndex) {
+                continue;
+            }
+            if (videoPresets.get(i).getPresetName().equals(nameToTest)) {
+                presetIndex = i;
+                break;
+            }
+        }
+        return presetIndex;
+    }
 
     private void onPresetEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
@@ -112,7 +161,16 @@ public class PresetsWindowController implements Initializable {
             return;
         }
         videoPresets.get(selected).setEditable(true);
-        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> doFileChooser(parentId));
+        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
+            File pickedThumbnail = PickFile.pickThumbnail();
+            if(pickedThumbnail != null) {
+                try {
+                    videoPresets.get(selected).setThumbNailFile(pickedThumbnail);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event->
                 ((ChoiceBox<String>) videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST)).setItems(
                         FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames())));
@@ -132,18 +190,11 @@ public class PresetsWindowController implements Initializable {
     private void onPresetSave(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         // locate this preset
-        int thisPreset = -1;
-        for(int i = 0; i < videoPresets.size(); i++) {
-            if(videoPresets.get(i).getPaneId().equals(parentId)) {
-                thisPreset = i;
-                break;
-            }
-        }
+        int thisPreset = getPresetIndexByName(parentId, -1);
         if(thisPreset == -1) {
             System.err.println("Can't find witch preset to save");
             return;
         }
-        // found it
         // check if preset name changed
         if (! parentId.equals(videoPresets.get(thisPreset).getPresetName())) {
             // changed, check if preset name is valid
@@ -236,113 +287,5 @@ public class PresetsWindowController implements Initializable {
                 }
             } //else if ButtonType.NO or closed [X] do nothing
         }
-    }
-
-    public void onPresetAddNew(ActionEvent actionEvent) {
-        if (txt_nameNewPreset.getText().equals("")) {
-            AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
-            return;
-        }
-        if (getPresetIndexByName(txt_nameNewPreset.getText(), -1) > -1) {
-            AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
-            return;
-        }
-        VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
-                null, Categories.SPEL, false, null, txt_nameNewPreset.getText(), txt_nameNewPreset.getText());
-        videoPresets.add(newPreset);
-        onPresetEdit(txt_nameNewPreset.getText() + "_fakeButton");
-        updatePresetList();
-        listPresets.scrollTo(listPresets.getItems().size() -1);
-        txt_nameNewPreset.setText("");
-        actionEvent.consume();
-    }
-
-    public void onTipsClicked(ActionEvent actionEvent) {
-        String messageContent = "First warnings: \n- Do not start a line in the description box with a underscore (\"_\") as " +
-                "that preset will not be loadable again!" +
-                "\n- Tags must be separated with a comma followed by a space, forgetting the space will make the " +
-                "comma a part of the tag.\nOk, tips!" +
-                "\n- In the video title field you can write \"$(ep)\" to tell the program where to insert the episode " +
-                "number/name defined  when adding videos for upload." +
-                "\n- In the description field you can add \"$(playlist)\" to insert a link to the playlist the " +
-                "video will be added to then uploaded.";
-        AlertUtils.simpleClose("Tips", messageContent).showAndWait();
-        actionEvent.consume();
-    }
-
-    public void onRefreshPlaylists(ActionEvent actionEvent) {
-        if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required", "To download your playlists you must grant this application permission to access your Youtube channel. " +
-                    "Do you want to allow \"Stekeblads Youtube Uploader\" permission to access Your channel?" +
-                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                    "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                    "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                    playlistUtils.refreshPlaylist();
-                } else { // ButtonType.NO oc closed [X]
-                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
-                }
-            }
-        }
-    }
-
-    private void updatePresetList() {
-        ArrayList<GridPane> presetPanes = new ArrayList<>();
-        for (VideoPreset videoPreset : videoPresets) {
-            presetPanes.add(videoPreset.getPresetPane());
-        }
-        listPresets.setItems(FXCollections.observableArrayList(presetPanes));
-    }
-
-    private void doFileChooser(String parentId) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a thumbnail");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", THUMBNAIL_FILE_FORMAT));
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Image Files", THUMBNAIL_FILE_FORMAT));
-        Stage fileChooserStage = new Stage();
-        File thumbnail = fileChooser.showOpenDialog(fileChooserStage);
-        if (thumbnail != null) {
-            if(thumbnail.length() > 2 *1024 * 1024) { // max allowed size is 2MB
-                AlertUtils.simpleClose("Warning", "Image to large, YouTube do not allow thumbnails larger then 2 MB." +
-                        "\n the chosen file is " + BigDecimal.valueOf((double) thumbnail.length() /(1024 * 1024)).setScale(3, BigDecimal.ROUND_HALF_UP) + "MB").show();
-                return;
-            }
-            try {
-                for (VideoPreset videoPreset : videoPresets) {
-                    if (videoPreset.getPaneId().equals(parentId)) {
-                        videoPreset.setThumbNailFile(thumbnail);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Returns the index in videoPresets that has a preset named nameToTest or -1 if no preset has that name
-     * @param nameToTest preset name to test for
-     * @param skipIndex specify a index in videoPresets to skip or set to -1 to test all
-     *                  (any number <0 or >videoPresets.size() works, but -1 is easy do
-     *                  understand and then it is same number every time for skipping)
-     * @return the index of where the preset named nameToTest inside videoPresets or -1 if it does not exist a preset with that name
-     */
-    private int getPresetIndexByName(String nameToTest, int skipIndex) {
-        int presetIndex = -1;
-        for (int i = 0; i < videoPresets.size(); i++) {
-            if (i == skipIndex) {
-                continue;
-            }
-            if (videoPresets.get(i).getPresetName().equals(nameToTest)) {
-                presetIndex = i;
-                break;
-            }
-        }
-        return presetIndex;
     }
 }

@@ -99,6 +99,9 @@ public class VideoInformationBase {
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
         }
+        if(category == null) {
+            category = Categories.SPEL;
+        }
         this.paneId = paneId;
         this.thumbNailFile = thumbNail;
         makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail);
