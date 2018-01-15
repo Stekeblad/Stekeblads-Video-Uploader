@@ -56,6 +56,9 @@ public enum PlaylistUtils {
     }
 
     public String getPlaylistId(String playlistName) {
+        if (playlistName == null) {
+            return null;
+        }
         return playlistCache.getOrDefault(playlistName, null);
     }
 
@@ -75,7 +78,7 @@ public enum PlaylistUtils {
         configManager.savePlaylistCache(saveString.toString());
     }
 
-    private void loadCache() {
+    public void loadCache() {
         playlistCache = new HashMap<>();
         ArrayList<String> loadedPlaylists = configManager.loadPlaylistCache();
         for (String loadedPlaylist : loadedPlaylists) {

@@ -5,9 +5,12 @@
 And suddenly all my ideas just vanished...
 
 #### Right now
-- Working on how both presets and videos to be uploaded should be
-edited and deleted from their lists
 - javafx based concurrency
+- Close program and continue upload later
+- Remove abort button then finished uploading
+- is progressbar moving?
+- can Uploader tell me in some way if it is uploading something at a specific moment
+or if it is not?
 
 #### More important things to do
 
@@ -18,7 +21,4 @@ that make files uploadable
 #### Less important things to do
 - Creating localization support and moving all strings visible for the users there (resourceBundle)
 - Then getting playlists, get ALL, not just the 25 first. Make playlists searchable
-
-#### Thinking
-- is presetName needed in VideoPreset? is it not equal to paneId?
-
+- Categories should be downloaded for the usser's location instead of the categories for my location being hardcoded

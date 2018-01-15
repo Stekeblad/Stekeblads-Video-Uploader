@@ -21,6 +21,7 @@ public enum ConfigManager {
     public void configManager() {
         filesPath = Paths.get(DATA_DIR).toAbsolutePath();
         Path presetsPath = Paths.get(PRESET_DIR).toAbsolutePath();
+        Path waitingUploadsPath = Paths.get(UPLOAD_DIR).toAbsolutePath();
         mainProp = new Properties();
 
         if (!Files.exists(filesPath)) {
@@ -31,6 +32,7 @@ public enum ConfigManager {
                 e.printStackTrace();
             }
         }
+
         if (!Files.exists(presetsPath)) {
             try {
                 Files.createDirectory(presetsPath);
@@ -42,6 +44,15 @@ public enum ConfigManager {
 
             ArrayList<String> presetNames = loadSavedPresetNamesList();
             loadSavedPresets(presetNames);
+        }
+
+        if (!Files.exists(waitingUploadsPath)) {
+            try {
+                Files.createDirectory(waitingUploadsPath);
+            } catch (IOException e) {
+                System.err.println("Could not find or create directory for waiting uploads!");
+                e.printStackTrace();
+            }
         }
         loadSettings();
     }
@@ -73,6 +84,42 @@ public enum ConfigManager {
                 mainProp.setProperty("neverAuthed", "true");
             }
         }
+    }
+
+    public void saveSettings() {
+        OutputStream output = null;
+        try {
+            output = new FileOutputStream(filesPath + "/settings.properties");
+                    mainProp.store(output, "main settings file for Stekeblads Youtube Uploader");
+        } catch (FileNotFoundException e) {
+            System.err.println("File is not a file or do not have permission to create settings file");
+        } catch (IOException e) {
+            System.err.println("Error writing settings to file");
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public boolean getNoSettings() {
+        return "true".equals(mainProp.getProperty("noSettings"));
+    }
+
+    public void setNoSettings(boolean noSettings) {
+        mainProp.setProperty("noSettings", noSettings ? "true" : "false");
+    }
+
+    public boolean getNeverAuthed() {
+        return "true".equals(mainProp.getProperty("neverAuthed"));
+    }
+
+    public void setNeverAuthed(boolean neverAuthed) {
+        mainProp.setProperty("neverAuthed", neverAuthed ? "true" : "false");
     }
 
     private ArrayList<String> loadSavedPresetNamesList() {
@@ -118,42 +165,6 @@ public enum ConfigManager {
         } else {
             throw new IOException("Preset " + presetName + " does not exist or cant be accessed");
         }
-    }
-
-    public void saveSettings() {
-        OutputStream output = null;
-        try {
-            output = new FileOutputStream(filesPath + "/settings.properties");
-                    mainProp.store(output, "main settings file for Stekeblads Youtube Uploader");
-        } catch (FileNotFoundException e) {
-            System.err.println("File is not a file or do not have permission to create settings file");
-        } catch (IOException e) {
-            System.err.println("Error writing settings to file");
-        } finally {
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public boolean getNoSettings() {
-        return "true".equals(mainProp.getProperty("noSettings"));
-    }
-
-    public void setNoSettings(boolean noSettings) {
-        mainProp.setProperty("noSettings", noSettings ? "true" : "false");
-    }
-
-    public boolean getNeverAuthed() {
-        return "true".equals(mainProp.getProperty("neverAuthed"));
-    }
-
-    public void setNeverAuthed(boolean neverAuthed) {
-        mainProp.setProperty("neverAuthed", neverAuthed ? "true" : "false");
     }
 
     public void savePreset(String presetName, String stringRepresentation) {
@@ -240,5 +251,11 @@ public enum ConfigManager {
             System.err.println("Could not create playlists cache file");
         }
         return playlistString;
+    }
+
+    public boolean hasWaitingUploads() {
+        File dir = new File(UPLOAD_DIR);
+        File[] directoryListing = dir.listFiles();
+        return directoryListing != null;
     }
 }

@@ -4,6 +4,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 
+import java.util.Optional;
+
 public class AlertUtils {
 
     /**
@@ -46,5 +48,19 @@ public class AlertUtils {
         alert.setContentText(content);
         alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
         return alert;
+    }
+
+    public static String threeButtons(String header, String content, String btn1Text, String btn2Text, String btn3Text) {
+        Alert alert = new Alert(Alert.AlertType.NONE);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setTitle(header);
+        alert.setContentText(content);
+        alert.getButtonTypes().addAll(new ButtonType(btn1Text), new ButtonType(btn2Text), new ButtonType(btn3Text));
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent()) {
+            return result.get().getText();
+        } else {
+            return null;
+        }
     }
 }
