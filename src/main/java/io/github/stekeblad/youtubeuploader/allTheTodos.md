@@ -5,11 +5,7 @@
 And suddenly all my ideas just vanished...
 
 #### Right now
-- Close program and continue upload later
-- Remove abort button then finished uploading
-- is progressbar moving?
-- can Uploader tell me in some way if it is uploading something at a specific moment
-or if it is not?
+- Bugs and small things?
 
 #### More important things to do
 

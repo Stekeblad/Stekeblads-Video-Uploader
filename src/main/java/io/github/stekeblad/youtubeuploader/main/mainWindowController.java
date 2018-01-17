@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
 import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
@@ -40,6 +39,8 @@ public class mainWindowController implements Initializable {
     public AnchorPane mainWindowPane;
     public TextField text_autoNum;
     public Button btn_applyPreset;
+    public Button btn_removeFinished;
+    public Button btn_startAll;
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
@@ -60,13 +61,14 @@ public class mainWindowController implements Initializable {
         configManager.configManager();
         if (configManager.getNoSettings()) {
             AlertUtils.simpleClose("No settings found", "Go to settings and add some").show();
-            onSettingsPressed(new ActionEvent());
+            onSettingsClicked(new ActionEvent());
             configManager.setNoSettings(false);
             configManager.saveSettings();
         }
         playlistUtils = PlaylistUtils.INSTANCE;
         playlistUtils.loadCache();
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
+        btn_startAll.setTooltip(new Tooltip("Starts all uploads that have the \"Start Upload\" button visible"));
 
         text_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
@@ -74,15 +76,32 @@ public class mainWindowController implements Initializable {
             }
         });
         uploader = new Uploader();
+        uploader.setUploadFinishedCallback(this::onUploadFinished);
+
+        if(configManager.hasWaitingUploads()) {
+            ArrayList<String> waitingUploads = configManager.getWaitingUploads();
+            if (waitingUploads != null) {
+                for(String waitingUpload : waitingUploads) {
+                    try {
+                        uploadQueueVideos.add(new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     // returns true if window is allowed to be closed
     public boolean onWindowClose() {
         // Check if uploads is in progress, if not then directly return true
+        if (! uploader.getIsActive()) {
+            return true;
+        }
         String choice = AlertUtils.threeButtons("Close Program?",
                 "Do you want to close, now? There is currently one or more uploads in progress and they will " +
                         "be stopped if you close the program. What do you want to do?",
-                "Do not close", "Stop all uploads", "auto-restart unfinished uploads next time");
+                "Do not close", "Stop all uploads", "auto-restart unfinished but started uploads next time");
         if (choice == null) {
             return false;
         }
@@ -94,16 +113,12 @@ public class mainWindowController implements Initializable {
                 return true;
             case "auto-restart unfinished uploads next time":
                 Set<String> tasks = uploader.kill();
-                AtomicBoolean someFailed = new AtomicBoolean(false);
                 tasks.forEach(s -> {
-                    int index = getUploadIndexByname(s);
-                    if (index == -1) {
-                        someFailed.set(true);
+                    int index = getUploadIndexByName(s);
+                    if (index != -1) { // If a task does not have a index it has been removed and is not interesting, or bugged with a bad id, skip them
+                        configManager.saveWaitingUpload(uploadQueueVideos.get(index).toString(), String.valueOf(index));
                     }
-                    // save upload information for later continuing
                 });
-
-                AlertUtils.simpleClose("Not implemented", "This feature is not yet implemented, that button is just there to show it is currently planned").showAndWait();
                 return true;
         }
         return false;
@@ -139,7 +154,12 @@ public class mainWindowController implements Initializable {
         } else { // preset selected
             VideoPreset chosenPreset;
             // Get the auto numbering and preset
-            int autoNum = Integer.valueOf(text_autoNum.getText());
+            int autoNum;
+            try {
+                autoNum = Integer.valueOf(text_autoNum.getText());
+            } catch (NumberFormatException e) {
+                autoNum = 1;
+            }
             try {
                 chosenPreset = new VideoPreset(configManager.getPresetString(
                         choice_presets.getSelectionModel().getSelectedItem()), "preset");
@@ -164,7 +184,7 @@ public class mainWindowController implements Initializable {
                         .setPlaylist(chosenPreset.getPlaylist())
                         .setCategory(chosenPreset.getCategory())
                         .setTellSubs(chosenPreset.isTellSubs())
-                        .setThumbNail(chosenPreset.getThumbNail())
+                        .setThumbNailPath(chosenPreset.getThumbNail().getAbsolutePath())
                         .setPaneName(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter)
                         .setVideoFile(videoFile)
                         .build();
@@ -186,7 +206,7 @@ public class mainWindowController implements Initializable {
                 uploadQueueVideos.add(newUpload);
                 uploadPaneCounter++;
             }
-            // update autoNum textfield
+            // update autoNum textField
             text_autoNum.setText(String.valueOf(autoNum));
         }
         videosToAdd = null;
@@ -195,7 +215,7 @@ public class mainWindowController implements Initializable {
         actionEvent.consume();
     }
 
-    public void onSettingsPressed(ActionEvent actionEvent) {
+    public void onSettingsClicked(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/PresetsWindow.fxml"));
@@ -215,6 +235,24 @@ public class mainWindowController implements Initializable {
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
     }
 
+    public void onStartAllUploads(ActionEvent actionEvent) {
+        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
+            if (uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
+                onStartUpload(uploadQueueVideo.getButton3Id());
+            }
+        }
+        actionEvent.consume();
+    }
+
+    public void onRemoveFinishedUploads(ActionEvent actionEvent) {
+        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
+            if (uploadQueueVideo.getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
+                onRemoveFinishedUpload(uploadQueueVideo.getButton2Id());
+            }
+        }
+        actionEvent.consume();
+    }
+
     private void updateUploadList() {
         List<GridPane> uploadQueuePanes = new ArrayList<>();
         for(VideoUpload vid : uploadQueueVideos) {
@@ -223,7 +261,7 @@ public class mainWindowController implements Initializable {
         listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
     }
 
-    private int getUploadIndexByname(String nameToTest) {
+    private int getUploadIndexByName(String nameToTest) {
         int videoIndex = -1;
         for(int i = 0; i < uploadQueueVideos.size(); i++) {
             if(uploadQueueVideos.get(i).getPaneId().equals(nameToTest)) {
@@ -236,7 +274,7 @@ public class mainWindowController implements Initializable {
 
     private void onEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByname(parentId);
+        int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
             System.err.println("edit button belongs to a invalid or non-existing parent");
             return;
@@ -277,7 +315,7 @@ public class mainWindowController implements Initializable {
 
     private void onSave(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByname(parentId);
+        int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
             System.err.println("save button belongs to a invalid or non-existing parent");
             return;
@@ -316,7 +354,7 @@ public class mainWindowController implements Initializable {
 
     private void onCancel(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByname(parentId);
+        int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
             System.err.println("cancel button belongs to a invalid or non-existing parent");
             return;
@@ -351,7 +389,7 @@ public class mainWindowController implements Initializable {
 
     private void onDelete(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByname(parentId);
+        int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
             System.err.println("delete button belongs to a invalid or non-existing parent");
             return;
@@ -371,7 +409,7 @@ public class mainWindowController implements Initializable {
 
     private void onStartUpload(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByname(parentId);
+        int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
             System.err.println("start upload button belongs to a invalid or non-existing parent");
             return;
@@ -400,7 +438,7 @@ public class mainWindowController implements Initializable {
 
     private void onAbort(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByname(parentId);
+        int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
             System.err.println("abort upload button belongs to a invalid or non-existing parent");
             return;
@@ -409,7 +447,9 @@ public class mainWindowController implements Initializable {
         // Set label text and reset progress bar
         uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(false);
         ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Aborted");
-        uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId());
+        if (! uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId())) {
+            AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
+        }
 
         // Change buttons
         Button editButton = new Button("Edit");
@@ -427,6 +467,29 @@ public class mainWindowController implements Initializable {
         uploadQueueVideos.get(selected).setButton3(startUploadButton);
 
         // Make sure visual change get to the UI
+        updateUploadList();
+    }
+
+    private void onUploadFinished(String paneId) {
+        int index = getUploadIndexByName(paneId);
+        if (index == -1) {
+            System.err.println("Unknown upload just finished: " + paneId);
+            return;
+        }
+        Button finishedUploadButton = new Button("Remove Finished Upload");
+        finishedUploadButton.setId(paneId + BUTTON_FINISHED_UPLOAD);
+        finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
+        uploadQueueVideos.get(index).setButton2(finishedUploadButton);
+    }
+
+    private void onRemoveFinishedUpload(String callerId) {
+        String parentId = callerId.substring(0, callerId.indexOf('_'));
+        int selected = getUploadIndexByName(parentId);
+        if (selected == -1) {
+            System.err.println("remove finished upload button belongs to a invalid or non-existing parent");
+            return;
+        }
+        uploadQueueVideos.remove(selected);
         updateUploadList();
     }
 }

@@ -40,10 +40,22 @@ public class VideoUpload extends VideoInformationBase{
         ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(2, btn3);
     }
 
-    public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, Categories category, boolean tellSubs, File thumbNail, String paneName, File videoFile) {
+    public String getButton1Id() {
+        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+    }
 
-        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail, paneName);
+    public String getButton2Id() {
+        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+    }
+
+    public String getButton3Id() {
+        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
+    }
+
+    public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
+                       String playlist, Categories category, boolean tellSubs, String thumbNailPath, String paneName, File videoFile) {
+
+        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath, paneName);
         this.videoFile = videoFile;
         makeUploadPane();
     }
@@ -51,6 +63,19 @@ public class VideoUpload extends VideoInformationBase{
     public VideoUpload(String fromString, String paneId) throws Exception{
         super(fromString, paneId);
         String[] lines = fromString.split("\n");
+        for (String line : lines) {
+            int colonIndex = line.indexOf(':');
+            if (colonIndex > 0) {
+                switch (line.substring(0, colonIndex)) {
+                    case "_videofile":
+                        videoFile = new File(line.substring((colonIndex + 1)));
+                        break;
+                    default:
+                        // likely belongs to parent
+                }
+            }
+        }
+        makeUploadPane();
     }
 
     public VideoUpload copy(String paneIdCopy) {
@@ -58,7 +83,7 @@ public class VideoUpload extends VideoInformationBase{
             paneIdCopy = getPaneId();
         }
         return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
-                getCategory(), isTellSubs(), getThumbNail(), paneIdCopy, getVideoFile());
+                getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdCopy, getVideoFile());
     }
 
     public static class Builder {
@@ -69,7 +94,7 @@ public class VideoUpload extends VideoInformationBase{
         private String playlist;
         private Categories category;
         private boolean tellSubs;
-        private File thumbNail;
+        private String thumbNailPath;
         private String paneName;
         private File videoFile;
 
@@ -108,8 +133,8 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
-        public VideoUpload.Builder setThumbNail(File thumbNail) {
-            this.thumbNail = thumbNail;
+        public VideoUpload.Builder setThumbNailPath(String thumbNailPath) {
+            this.thumbNailPath = thumbNailPath;
             return this;
         }
 
@@ -125,7 +150,7 @@ public class VideoUpload extends VideoInformationBase{
 
         public VideoUpload build() {
             return new VideoUpload(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
-                    thumbNail, paneName, videoFile);
+                    thumbNailPath, paneName, videoFile);
         }
     }
 

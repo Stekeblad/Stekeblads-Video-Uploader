@@ -116,11 +116,19 @@ public class PresetsWindowController implements Initializable {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
                     configManager.saveSettings();
+                    btn_refreshPlaylists.setDisable(true);
                     playlistUtils.refreshPlaylist();
+                    AlertUtils.simpleClose("Playlists updated", "For the updated playlist list to show up " +
+                            "you may need to save any preset you are currently editing and press 'edit' again").showAndWait();
                 } else { // ButtonType.NO oc closed [X]
                     AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
                 }
             }
+        } else { // has authenticated
+            btn_refreshPlaylists.setDisable(true);
+            playlistUtils.refreshPlaylist();
+            AlertUtils.simpleClose("Playlists updated", "For the updated playlist list to show up you " +
+                    "may need to save any preset you are currently editing and press 'edit' again").showAndWait();
         }
         actionEvent.consume();
     }
@@ -147,7 +155,7 @@ public class PresetsWindowController implements Initializable {
             if (i == skipIndex) {
                 continue;
             }
-            if (videoPresets.get(i).getPresetName().equals(nameToTest)) {
+            if (videoPresets.get(i).getPresetPane().getId().equals(nameToTest)) {
                 presetIndex = i;
                 break;
             }
@@ -198,9 +206,10 @@ public class PresetsWindowController implements Initializable {
             return;
         }
         // check if preset name changed
+        String newPresetName;
         if (! parentId.equals(videoPresets.get(thisPreset).getPresetName())) {
             // changed, check if preset name is valid
-            String newPresetName = videoPresets.get(thisPreset).getPresetName();
+            newPresetName = videoPresets.get(thisPreset).getPresetName();
             if (!newPresetName.equals("")) {
                 int indexIfExisting = getPresetIndexByName(parentId, thisPreset);
                 if (indexIfExisting >= 0) {
@@ -217,7 +226,9 @@ public class PresetsWindowController implements Initializable {
                 AlertUtils.simpleClose("Invalid preset name", "Preset names can not be empty").show();
                 return;
             }
-        } // end if preset name changed
+        } else { // end if preset name changed
+            newPresetName = videoPresets.get(thisPreset).getPresetName(); // use old name
+        }
         // save the preset, disable editing and update UI
         configManager.savePreset(videoPresets.get(thisPreset).getPresetName(), videoPresets.get(thisPreset).toString());
         videoPresets.get(thisPreset).setEditable(false);
@@ -225,10 +236,10 @@ public class PresetsWindowController implements Initializable {
 
         //change back buttons
         Button editButton = new Button("Edit");
-        editButton.setId(parentId + BUTTON_EDIT);
+        editButton.setId(newPresetName + BUTTON_EDIT);
         editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
         Button deleteButton = new Button("Delete");
-        deleteButton.setId(parentId + BUTTON_DELETE);
+        deleteButton.setId(newPresetName + BUTTON_DELETE);
         deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
 
         videoPresets.get(thisPreset).setButton1(editButton);

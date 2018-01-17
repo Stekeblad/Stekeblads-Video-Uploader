@@ -94,7 +94,7 @@ public class VideoInformationBase {
     // other methods
 
     public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                String playlist, Categories category, boolean tellSubs, File thumbNail, String paneId) {
+                                String playlist, Categories category, boolean tellSubs, String thumbNailPath, String paneId) {
 
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
@@ -103,8 +103,8 @@ public class VideoInformationBase {
             category = Categories.SPEL;
         }
         this.paneId = paneId;
-        this.thumbNailFile = thumbNail;
-        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail);
+        this.thumbNailFile = new File(thumbNailPath);
+        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath);
         allowEdit = false;
     }
 
@@ -119,11 +119,10 @@ public class VideoInformationBase {
         String playlist = null;
         Categories category = null;
         boolean tellSubs = false;
-        File thumbnail = null;
+        String thumbnailPath = null;
 
         String[] lines = fromString.split("\n");
         String line;
-        //for (String line : lines) {
         for(int i = 0; i < lines.length; i++) {
             line = lines[i];
             int colonIndex = line.indexOf(':');
@@ -164,9 +163,10 @@ public class VideoInformationBase {
                         break;
                     case NODE_ID_THUMBNAIL:
                         if (line.equals("_")) {
-                            thumbnail = null; //use default
+                            thumbnailPath = null; //use default
                         } else {
-                            thumbnail = new File(line.substring(colonIndex + 1));
+                            thumbnailPath = line.substring(colonIndex + 1);
+                            this.thumbNailFile = new File(thumbnailPath);
                         }
                         break;
                     default:
@@ -174,11 +174,12 @@ public class VideoInformationBase {
                 }
             }
         }
-        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbnail);
+        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbnailPath);
     }
 
     public VideoInformationBase copy(String paneIdForCopy) {
-        return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(), getCategory(), isTellSubs(), getThumbNail(), paneIdForCopy);
+        return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
+                getPlaylist(), getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy);
     }
 
     public static class Builder {
@@ -189,7 +190,7 @@ public class VideoInformationBase {
         private String playlist;
         private Categories category;
         private boolean tellSubs;
-        private File thumbNail;
+        private String thumbNailPath;
         private String paneName;
 
         public VideoInformationBase.Builder setVideoName(String videoName) {
@@ -227,8 +228,8 @@ public class VideoInformationBase {
             return this;
         }
 
-        public VideoInformationBase.Builder setThumbNail(File thumbNail) {
-            this.thumbNail = thumbNail;
+        public VideoInformationBase.Builder setThumbNailPath(String thumbNailPath) {
+            this.thumbNailPath = thumbNailPath;
             return this;
         }
 
@@ -239,12 +240,12 @@ public class VideoInformationBase {
 
         public VideoInformationBase build() {
             return new VideoInformationBase(videoName, videoDescription, visibility, videoTags, playlist, category,
-                    tellSubs, thumbNail, paneName);
+                    tellSubs, thumbNailPath, paneName);
         }
     }
 
      protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                      String playlist, Categories category, boolean tellSubs, File thumbNail) {
+                                      String playlist, Categories category, boolean tellSubs, String thumbNailPath) {
         videoBasePane = new GridPane();
         videoBasePane.setId(paneId);
         videoBasePane.setPrefSize(680, 100);
@@ -339,7 +340,7 @@ public class VideoInformationBase {
 
          Image thumbNailImage;
          try {
-             thumbNailImage = new Image(new BufferedInputStream(new FileInputStream(thumbNail)));
+             thumbNailImage = new Image(new BufferedInputStream(new FileInputStream(new File(thumbNailPath))));
          } catch (FileNotFoundException | NullPointerException e) {
              InputStream thumbStream = this.getClass().getResourceAsStream("/images/no_image.png");
              thumbNailImage = new Image(thumbStream);

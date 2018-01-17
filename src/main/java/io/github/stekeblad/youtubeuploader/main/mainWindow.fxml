@@ -4,18 +4,24 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.youtubeuploader.main.mainWindowController">
     <ToolBar prefHeight="40.0" prefWidth="1088.0">
-      <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsPressed" text="Settings" />
+      <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsClicked" text="Settings" />
     </ToolBar>
     <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" prefHeight="464.0" prefWidth="1070.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="225.0" />
    <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="154.0" prefWidth="309.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0" />
-   <VBox layoutX="324.0" layoutY="40.0" prefHeight="145.0" prefWidth="177.0" spacing="4.0">
-      <children>
-           <Button fx:id="buttonPickFile" mnemonicParsing="false" onAction="#onPickFile" prefHeight="25.0" prefWidth="148.0" text="Pick files to upload" />
-           <Label text="Select a preset" />
-           <ChoiceBox id="choice_presets" fx:id="choice_presets" prefWidth="150.0" />
-           <Label text="Auto numbers" />
-           <TextField fx:id="text_autoNum" maxWidth="-Infinity" prefHeight="25.0" prefWidth="72.0" />
-           <Button fx:id="btn_applyPreset" mnemonicParsing="false" onAction="#onApplyPresetClicked" text="Apply preset" />
-      </children>
-   </VBox>
+    <VBox layoutX="324.0" layoutY="40.0" prefHeight="145.0" prefWidth="177.0" spacing="4.0">
+        <Button fx:id="buttonPickFile" mnemonicParsing="false" onAction="#onPickFile" prefHeight="25.0"
+                prefWidth="148.0" text="Pick files to upload"/>
+        <Label text="Select a preset"/>
+        <ChoiceBox id="choice_presets" fx:id="choice_presets" prefWidth="150.0"/>
+        <Label text="Auto numbers"/>
+        <TextField fx:id="text_autoNum" maxWidth="-Infinity" prefHeight="25.0" prefWidth="72.0"/>
+        <Button fx:id="btn_applyPreset" mnemonicParsing="false" onAction="#onApplyPresetClicked" text="Apply preset"/>
+    </VBox>
+    <HBox layoutX="877.0" layoutY="194.0" prefHeight="25.0" prefWidth="326.0" spacing="10.0"
+          AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="195.0">
+        <Button fx:id="btn_removeFinished" mnemonicParsing="false" onAction="#onRemoveFinishedUploads"
+                text="Remove All Finished Uploads"/>
+        <Button fx:id="btn_startAll" mnemonicParsing="false" onAction="#onStartAllUploads"
+                text="Start All Ready Uploads"/>
+    </HBox>
 </AnchorPane>

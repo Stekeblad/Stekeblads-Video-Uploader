@@ -7,7 +7,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
-import java.io.File;
 import java.util.List;
 
 public class VideoPreset extends VideoInformationBase {
@@ -32,9 +31,17 @@ public class VideoPreset extends VideoInformationBase {
         ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
     }
 
+    public String getButton1Id() {
+        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+    }
+
+    public String getButton2Id() {
+        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+    }
+
     public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, Categories category, boolean tellSubs, File thumbNail, String paneId, String presetName) {
-        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNail, paneId);
+                       String playlist, Categories category, boolean tellSubs, String thumbNailPath, String paneId, String presetName) {
+        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath, paneId);
         makePresetPane(presetName);
     }
 
@@ -66,7 +73,7 @@ public class VideoPreset extends VideoInformationBase {
 
     public VideoPreset copy(String paneIdForCopy) {
         return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
-                getCategory(), isTellSubs(), getThumbNail(), paneIdForCopy, getPresetName());
+                getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy, getPresetName());
     }
 
     public static class Builder {
@@ -77,7 +84,7 @@ public class VideoPreset extends VideoInformationBase {
         private String playlist;
         private Categories category;
         private boolean tellSubs;
-        private File thumbNail;
+        private String thumbNailPath;
         private String presetName;
         private String paneName;
 
@@ -116,8 +123,8 @@ public class VideoPreset extends VideoInformationBase {
             return this;
         }
 
-        public VideoPreset.Builder setThumbNail(File thumbNail) {
-            this.thumbNail = thumbNail;
+        public VideoPreset.Builder setThumbNailPath(String thumbNailPath) {
+            this.thumbNailPath = thumbNailPath;
             return this;
         }
 
@@ -133,7 +140,7 @@ public class VideoPreset extends VideoInformationBase {
 
         public VideoPreset build() {
             return new VideoPreset(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
-                    thumbNail, paneName, presetName);
+                    thumbNailPath, paneName, presetName);
         }
     }
 

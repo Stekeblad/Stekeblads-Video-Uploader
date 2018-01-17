@@ -24,19 +24,31 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.*;
 
 public class Uploader {
     private HashMap<String, Future> tasks = new HashMap<>();
 
+    private Consumer<String> uploadFinishedCallback = null;
+
     private ExecutorService exec = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r);
         return t ;
     });
 
+    // the callback will be called with the cancelName of the task that finished
+    public void setUploadFinishedCallback(Consumer<String> callback) {
+        this.uploadFinishedCallback = callback;
+    }
+
     public boolean abortUpload(String cancelName) {
         return tasks.get(cancelName).cancel(true);
+    }
+
+    public boolean getIsActive() {
+        return !tasks.keySet().isEmpty();
     }
 
     // returns the cancelName of all unfinished uploads
@@ -57,6 +69,9 @@ public class Uploader {
                     } else {
                         e.printStackTrace();
                     }
+                }
+                if(uploadFinishedCallback != null) {
+                    uploadFinishedCallback.accept(cancelName);
                 }
                 tasks.remove(cancelName);
                 return null ;
@@ -104,9 +119,9 @@ public class Uploader {
                     break;
                 case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
                     // the upload is slightly larger than the video file, but for longer videos it will be close enough
-                    setPaneProgressBarProgress(uploader1.getNumBytesUploaded() / video.getVideoFile().length(), video);
+                    setPaneProgressBarProgress((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length(), video);
                     setStatusLabelText("Uploading: " + Math.floor(
-                            (uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%", video);
+                            ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%", video);
                     break;
                 case MEDIA_COMPLETE:
                     setPaneProgressBarProgress(1, video);

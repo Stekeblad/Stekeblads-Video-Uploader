@@ -261,4 +261,70 @@ public enum ConfigManager {
         File[] directoryListing = dir.listFiles();
         return directoryListing != null;
     }
+
+    public ArrayList<String> getWaitingUploads() {
+        File dir = new File(UPLOAD_DIR);
+        File[] directoryListing = dir.listFiles();
+        if(directoryListing == null) {
+            return null;
+        }
+        ArrayList<String> uploads = new ArrayList<>();
+        for (File waitingUpload : directoryListing) {
+            String loaded = loadWaitingUploadsFile(waitingUpload);
+            if (loaded != null) {
+                uploads.add(loaded);
+            }
+            if(! waitingUpload.delete()) {
+                System.err.println("Failed to delete: " + waitingUpload.getAbsolutePath());
+            }
+        }
+        return uploads;
+    }
+
+    public void saveWaitingUpload(String waitingUpload, String fileName) { // filename does not really matter as long as it is valid
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(
+                    new File(UPLOAD_DIR + "/" + fileName)));
+            writer.write(waitingUpload);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private String loadWaitingUploadsFile(File waitingUpload) {
+        BufferedReader reader = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            reader = new BufferedReader(new FileReader(waitingUpload));
+            String line = reader.readLine();
+            while (line != null) { // while not end of file
+                stringBuilder.append(line);
+                line = reader.readLine();
+                if (line != null) {
+                    stringBuilder.append("\n"); // do not end the last line with '\n'
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading a waiting upload!");
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
 }
