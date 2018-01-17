@@ -5,7 +5,6 @@
 And suddenly all my ideas just vanished...
 
 #### Right now
-- javafx based concurrency
 - Close program and continue upload later
 - Remove abort button then finished uploading
 - is progressbar moving?

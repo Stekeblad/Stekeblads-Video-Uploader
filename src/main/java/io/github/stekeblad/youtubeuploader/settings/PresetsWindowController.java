@@ -46,24 +46,26 @@ public class PresetsWindowController implements Initializable {
 
         videoPresets = new ArrayList<>();
         ArrayList<String> savedPresetNames = configManager.getPresetNames();
-        for (String presetName : savedPresetNames) {
-            try {
-                VideoPreset videoPreset = new VideoPreset(configManager.getPresetString(presetName), presetName);
-                Button editButton = new Button("Edit");
-                editButton.setId(presetName + BUTTON_EDIT);
-                editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-                Button deleteButton = new Button("Delete");
-                deleteButton.setId(presetName + BUTTON_DELETE);
-                deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
-                videoPreset.setButton1(editButton);
-                videoPreset.setButton2(deleteButton);
-                videoPresets.add(videoPreset);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.err.println("Trying to load a preset that does not exist or missing read permission: " + presetName);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Bad format of preset or is another type of preset then the one trying to be created: " + presetName);
+        if (savedPresetNames != null) {
+            for (String presetName : savedPresetNames) {
+                try {
+                    VideoPreset videoPreset = new VideoPreset(configManager.getPresetString(presetName), presetName);
+                    Button editButton = new Button("Edit");
+                    editButton.setId(presetName + BUTTON_EDIT);
+                    editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
+                    Button deleteButton = new Button("Delete");
+                    deleteButton.setId(presetName + BUTTON_DELETE);
+                    deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
+                    videoPreset.setButton1(editButton);
+                    videoPreset.setButton2(deleteButton);
+                    videoPresets.add(videoPreset);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.err.println("Trying to load a preset that does not exist or missing read permission: " + presetName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Bad format of preset or is another type of preset then the one trying to be created: " + presetName);
+                }
             }
         }
 

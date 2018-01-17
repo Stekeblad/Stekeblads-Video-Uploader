@@ -91,7 +91,7 @@ public class Uploader {
         videoInsert.setNotifySubscribers(video.isTellSubs());
 
         MediaHttpUploader uploader = videoInsert.getMediaHttpUploader();
-        uploader.setDirectUploadEnabled(false); // makes the upload resumable!
+        uploader.setDirectUploadEnabled(false); // makes the upload resumable?
 
         MediaHttpUploaderProgressListener progressListener = uploader1 -> {
             switch (uploader1.getUploadState()) {
@@ -102,7 +102,8 @@ public class Uploader {
                     setPaneProgressBarProgress(0, video);
                     setStatusLabelText("Starting...", video);
                     break;
-                case MEDIA_IN_PROGRESS:
+                case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
+                    // the upload is slightly larger than the video file, but for longer videos it will be close enough
                     setPaneProgressBarProgress(uploader1.getNumBytesUploaded() / video.getVideoFile().length(), video);
                     setStatusLabelText("Uploading: " + Math.floor(
                             (uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%", video);

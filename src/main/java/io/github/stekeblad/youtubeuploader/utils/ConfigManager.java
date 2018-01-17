@@ -204,7 +204,10 @@ public enum ConfigManager {
     }
 
     public ArrayList<String> getPresetNames() {
-        return new ArrayList<>(presetStringsMap.keySet());
+        if(presetStringsMap != null) {
+            return new ArrayList<>(presetStringsMap.keySet());
+        }
+        return null;
     }
 
     public String getPresetString(String presetName) {
