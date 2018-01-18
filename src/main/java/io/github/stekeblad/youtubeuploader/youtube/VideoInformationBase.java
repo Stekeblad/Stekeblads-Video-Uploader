@@ -103,7 +103,11 @@ public class VideoInformationBase {
             category = Categories.SPEL;
         }
         this.paneId = paneId;
-        this.thumbNailFile = new File(thumbNailPath);
+        if(thumbNailPath != null) {
+            this.thumbNailFile = new File(thumbNailPath);
+        } else {
+            this.thumbNailFile = null;
+        }
         makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath);
         allowEdit = false;
     }

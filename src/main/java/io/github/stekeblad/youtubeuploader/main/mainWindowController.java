@@ -60,7 +60,6 @@ public class mainWindowController implements Initializable {
         configManager = ConfigManager.INSTANCE;
         configManager.configManager();
         if (configManager.getNoSettings()) {
-            AlertUtils.simpleClose("No settings found", "Go to settings and add some").show();
             onSettingsClicked(new ActionEvent());
             configManager.setNoSettings(false);
             configManager.saveSettings();

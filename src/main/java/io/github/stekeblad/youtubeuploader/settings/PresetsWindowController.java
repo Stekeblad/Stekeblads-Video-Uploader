@@ -88,6 +88,7 @@ public class PresetsWindowController implements Initializable {
         updatePresetList();
         listPresets.scrollTo(listPresets.getItems().size() -1);
         txt_nameNewPreset.setText("");
+        updatePresetList();
         actionEvent.consume();
     }
 
