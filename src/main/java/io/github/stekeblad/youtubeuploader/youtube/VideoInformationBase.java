@@ -170,7 +170,11 @@ public class VideoInformationBase {
                             thumbnailPath = null; //use default
                         } else {
                             thumbnailPath = line.substring(colonIndex + 1);
-                            this.thumbNailFile = new File(thumbnailPath);
+                            if(thumbnailPath != null) {
+                                this.thumbNailFile = new File(thumbnailPath);
+                            } else {
+                                this.thumbNailFile = null;
+                            }
                         }
                         break;
                     default:

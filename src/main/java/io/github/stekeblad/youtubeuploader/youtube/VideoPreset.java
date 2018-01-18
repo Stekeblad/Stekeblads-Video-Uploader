@@ -72,8 +72,17 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     public VideoPreset copy(String paneIdForCopy) {
+        if(paneIdForCopy == null) {
+            paneIdForCopy = this.getPaneId();
+        }
+        String thumbnailPath;
+        if(getThumbNail() == null) {
+            thumbnailPath = null;
+        } else {
+            thumbnailPath = getThumbNail().getAbsolutePath();
+        }
         return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
-                getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy, getPresetName());
+                getCategory(), isTellSubs(), thumbnailPath, paneIdForCopy, getPresetName());
     }
 
     public static class Builder {

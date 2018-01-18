@@ -82,8 +82,14 @@ public class VideoUpload extends VideoInformationBase{
         if(paneIdCopy == null) {
             paneIdCopy = getPaneId();
         }
+        String thumbnailPath;
+        if(getThumbNail() == null) {
+            thumbnailPath = null;
+        } else {
+            thumbnailPath = getThumbNail().getAbsolutePath();
+        }
         return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
-                getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdCopy, getVideoFile());
+                getCategory(), isTellSubs(), thumbnailPath, paneIdCopy, getVideoFile());
     }
 
     public static class Builder {

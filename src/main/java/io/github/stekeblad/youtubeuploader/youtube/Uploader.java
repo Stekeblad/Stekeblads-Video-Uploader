@@ -33,10 +33,7 @@ public class Uploader {
 
     private Consumer<String> uploadFinishedCallback = null;
 
-    private ExecutorService exec = Executors.newSingleThreadExecutor(r -> {
-        Thread t = new Thread(r);
-        return t ;
-    });
+    private ExecutorService exec = Executors.newSingleThreadExecutor(Thread::new);
 
     // the callback will be called with the cancelName of the task that finished
     public void setUploadFinishedCallback(Consumer<String> callback) {

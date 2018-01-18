@@ -7,6 +7,7 @@ import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.Uploader;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
 import io.github.stekeblad.youtubeuploader.youtube.VideoUpload;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -75,7 +76,7 @@ public class mainWindowController implements Initializable {
             }
         });
         uploader = new Uploader();
-        uploader.setUploadFinishedCallback(this::onUploadFinished);
+        uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
 
         if(configManager.hasWaitingUploads()) {
             ArrayList<String> waitingUploads = configManager.getWaitingUploads();
@@ -95,6 +96,7 @@ public class mainWindowController implements Initializable {
     public boolean onWindowClose() {
         // Check if uploads is in progress, if not then directly return true
         if (! uploader.getIsActive()) {
+            uploader.kill(); // just because it does not do anything it started and must be stopped
             return true;
         }
         String choice = AlertUtils.threeButtons("Close Program?",
@@ -479,6 +481,7 @@ public class mainWindowController implements Initializable {
         finishedUploadButton.setId(paneId + BUTTON_FINISHED_UPLOAD);
         finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
         uploadQueueVideos.get(index).setButton2(finishedUploadButton);
+        updateUploadList();
     }
 
     private void onRemoveFinishedUpload(String callerId) {
