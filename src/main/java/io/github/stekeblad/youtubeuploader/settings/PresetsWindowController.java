@@ -5,7 +5,6 @@ import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
 import io.github.stekeblad.youtubeuploader.utils.PickFile;
 import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
-import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
 import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -89,7 +88,7 @@ public class PresetsWindowController implements Initializable {
         //    return;
         //}
         VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
-                null, Categories.SPEL, false, null, PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
+                null, null, false, null, PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         videoPresets.add(newPreset);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
         updatePresetList();
@@ -115,7 +114,8 @@ public class PresetsWindowController implements Initializable {
 
     public void onRefreshPlaylists(ActionEvent actionEvent) {
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required", "To download your playlists you must grant this application permission to access your Youtube channel. " +
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
+                    "To download your playlists you must grant this application permission to access your Youtube channel. " +
                     "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
                     "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
                     "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
@@ -129,7 +129,7 @@ public class PresetsWindowController implements Initializable {
                     playlistUtils.refreshPlaylist();
                     AlertUtils.simpleClose("Playlists updated", "For the updated playlist list to show up " +
                             "you may need to save any preset you are currently editing and press 'edit' again").showAndWait();
-                } else { // ButtonType.NO oc closed [X]
+                } else { // ButtonType.NO or closed [X]
                     AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
                 }
             }
@@ -185,9 +185,15 @@ public class PresetsWindowController implements Initializable {
                 }
             }
         });
-        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event->
+        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event-> {
+            if(configManager.getNeverAuthed()) {
+                onRefreshPlaylists(new ActionEvent());
+            }
+            if (! configManager.getNeverAuthed()) {
                 ((ChoiceBox<String>) videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST)).setItems(
-                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames())));
+                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames()));
+            }
+        });
 
         // Change buttons from "edit" and "delete" to "save" and "cancel"
         Button saveButton = new Button("Save");
@@ -223,6 +229,7 @@ public class PresetsWindowController implements Initializable {
             }
             presetBackups.remove(videoPresets.get(selected).getPaneId());
         }
+        videoPresets.get(selected).setEditable(false);
         configManager.savePreset(videoPresets.get(selected).getPresetName(), videoPresets.get(selected).toString());
 
         //change back buttons
@@ -246,6 +253,7 @@ public class PresetsWindowController implements Initializable {
             return;
         }
 
+        videoPresets.get(selected).setEditable(false);
         if (! presetBackups.containsKey(videoPresets.get(selected).getPaneId())) {
             // assume preset is a newly added not saved preset, delete it directly
             videoPresets.remove(selected);

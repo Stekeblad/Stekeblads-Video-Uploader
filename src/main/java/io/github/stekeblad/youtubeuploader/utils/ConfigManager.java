@@ -107,7 +107,7 @@ public enum ConfigManager {
     }
 
     public boolean getNoSettings() {
-        return "true".equals(mainProp.getProperty("noSettings"));
+        return mainProp.getProperty("noSettings").equals("true");
     }
 
     public void setNoSettings(boolean noSettings) {
@@ -115,7 +115,7 @@ public enum ConfigManager {
     }
 
     public boolean getNeverAuthed() {
-        return "true".equals(mainProp.getProperty("neverAuthed"));
+        return mainProp.getProperty("neverAuthed").equals("true");
     }
 
     public void setNeverAuthed(boolean neverAuthed) {

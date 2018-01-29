@@ -64,7 +64,11 @@ public class VideoInformationBase {
         return (((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS)).getSelectionModel().isSelected(1));
     }
     public File getThumbNail() {
-        return thumbNailFile;
+        if(thumbNailFile == null || thumbNailFile.toURI().toString().endsWith("_")) {
+            return null;
+        } else {
+            return thumbNailFile;
+        }
     }
     public String getPaneId() {
         return paneId;
@@ -78,9 +82,9 @@ public class VideoInformationBase {
         if (!allowEdit) {
             throw new Exception("Edit not allowed");
         } else {
-            thumbNailFile = thumbnail;
             ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
                     new Image(new FileInputStream(thumbnail)));
+            thumbNailFile = thumbnail;
         }
     }
 

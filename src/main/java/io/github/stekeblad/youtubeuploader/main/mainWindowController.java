@@ -89,6 +89,7 @@ public class mainWindowController implements Initializable {
                     }
                 }
             }
+            updateUploadList();
         }
     }
 
@@ -102,7 +103,7 @@ public class mainWindowController implements Initializable {
         String choice = AlertUtils.threeButtons("Close Program?",
                 "Do you want to close, now? There is currently one or more uploads in progress and they will " +
                         "be stopped if you close the program. What do you want to do?",
-                "Do not close", "Stop all uploads", "auto-restart unfinished but started uploads next time");
+                "Do not close", "Stop all uploads", "auto-restart started but unfinished uploads next time");
         if (choice == null) {
             return false;
         }
@@ -112,7 +113,7 @@ public class mainWindowController implements Initializable {
             case "Stop all uploads":
                 uploader.kill();
                 return true;
-            case "auto-restart unfinished uploads next time":
+            case "auto-restart started but unfinished uploads next time":
                 Set<String> tasks = uploader.kill();
                 tasks.forEach(s -> {
                     int index = getUploadIndexByName(s);
@@ -177,7 +178,7 @@ public class mainWindowController implements Initializable {
                         .replace("$(playlist)", playlistUrl);
                         //.replaceAll(Matcher.quoteReplacement("$(playlist)"), playlistUrl);
 
-                VideoUpload newUpload = new VideoUpload.Builder()
+                VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()
                         .setVideoName(name)
                         .setVideoDescription(description)
                         .setVisibility(chosenPreset.getVisibility())
@@ -185,10 +186,13 @@ public class mainWindowController implements Initializable {
                         .setPlaylist(chosenPreset.getPlaylist())
                         .setCategory(chosenPreset.getCategory())
                         .setTellSubs(chosenPreset.isTellSubs())
-                        .setThumbNailPath(chosenPreset.getThumbNail().getAbsolutePath())
                         .setPaneName(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter)
-                        .setVideoFile(videoFile)
-                        .build();
+                        .setVideoFile(videoFile);
+                if (chosenPreset.getThumbNail() != null) {
+                    newUploadBuilder.setThumbNailPath(chosenPreset.getThumbNail().getAbsolutePath());
+                }
+                 VideoUpload newUpload = newUploadBuilder.build();
+
                 // Create the buttons
                 Button editButton = new Button("Edit");
                 editButton.setId(newUpload.getPaneId() + BUTTON_EDIT);
@@ -292,9 +296,14 @@ public class mainWindowController implements Initializable {
                 }
             }
         });
-        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event ->
+        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event -> {
+            if(configManager.getNeverAuthed()) {
+                AlertUtils.simpleClose("No playlists", "No playlists synced yet, go to the settings window to sync with Youtube").show();
+            } else {
                 ((ChoiceBox<String>) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST)).setItems(
-                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames())));
+                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames()));
+            }
+        });
         // Set buttons
         Button saveButton = new Button("Save");
         saveButton.setId(parentId + BUTTON_SAVE);
@@ -445,11 +454,14 @@ public class mainWindowController implements Initializable {
             return;
         }
         // Abort upload
+        boolean abortSuccess = uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId());
         // Set label text and reset progress bar
-        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(false);
-        ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Aborted");
-        if (! uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId())) {
-            AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
+
+        if (abortSuccess) {
+            uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(false);
+            ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Aborted");
+        } else {
+        AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
         }
 
         // Change buttons
@@ -477,7 +489,7 @@ public class mainWindowController implements Initializable {
             System.err.println("Unknown upload just finished: " + paneId);
             return;
         }
-        Button finishedUploadButton = new Button("Remove Finished Upload");
+        Button finishedUploadButton = new Button("hide");
         finishedUploadButton.setId(paneId + BUTTON_FINISHED_UPLOAD);
         finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
         uploadQueueVideos.get(index).setButton2(finishedUploadButton);

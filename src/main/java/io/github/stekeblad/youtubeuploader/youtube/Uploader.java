@@ -3,7 +3,9 @@ package io.github.stekeblad.youtubeuploader.youtube;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener;
+import com.google.api.client.http.HttpBackOffIOExceptionHandler;
 import com.google.api.client.http.InputStreamContent;
+import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import javafx.application.Platform;
@@ -61,11 +63,12 @@ public class Uploader {
                 try {
                     upload(video);
                 } catch (Exception e) {
-                    if(e.getClass().getName().equals("InterruptedException")) {
+                    if(e.getMessage().equals("INTERRUPTED")) {
                         System.out.println("Interrupted upload of: " + video.getVideoName());
                     } else {
                         e.printStackTrace();
                     }
+                    return null; // do not use callback on upload that throws exception
                 }
                 if(uploadFinishedCallback != null) {
                     uploadFinishedCallback.accept(cancelName);
@@ -80,8 +83,12 @@ public class Uploader {
     private void upload(VideoUpload video) throws IOException {
 
         Credential creds = Auth.authUser();
-        YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                "Stekeblads Youtube Uploader").build();
+        //YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
+        //        "Stekeblads Youtube Uploader").build();
+        YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, request -> {
+            creds.initialize(request);
+            request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(new ExponentialBackOff()));
+        }).setApplicationName("Stekeblads Youtube Uploader").build();
 
         Video videoObject = new Video();
 
@@ -106,6 +113,9 @@ public class Uploader {
         uploader.setDirectUploadEnabled(false); // makes the upload resumable?
 
         MediaHttpUploaderProgressListener progressListener = uploader1 -> {
+            if(Thread.interrupted()) {
+                throw new IOException("INTERRUPTED");
+            }
             switch (uploader1.getUploadState()) {
                 case INITIATION_STARTED:
                     setStatusLabelText("Preparing to Upload...", video);
@@ -117,7 +127,7 @@ public class Uploader {
                 case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
                     // the upload is slightly larger than the video file, but for longer videos it will be close enough
                     setPaneProgressBarProgress((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length(), video);
-                    setStatusLabelText("Uploading: " + Math.floor(
+                    setStatusLabelText("Uploading: " + (int) Math.floor(
                             ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%", video);
                     break;
                 case MEDIA_COMPLETE:
@@ -147,7 +157,9 @@ public class Uploader {
             thumbnailSet.execute();
         }
         // Add to playlist if selected
-        if (!video.getPlaylist().equals("select a playlist") && !video.getPlaylist().equals("")) {
+        String playlistString = video.getPlaylist();
+        if (playlistString != null && !playlistString.equals("null") &&
+                !playlistString.equals("select a playlist") && !playlistString.equals("")) {
             setStatusLabelText("Adding to playlist \"" + video.getPlaylist() + "\"", video);
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
@@ -166,7 +178,6 @@ public class Uploader {
         setStatusLabelText("Done! Video is here: https://youtu.be/" + uploadedVideo.getId(), video);
         makeLabelClickable("https://youtu.be/" + uploadedVideo.getId(), video);
     }
-
 
     private void setPaneProgressBarProgress(double progress, VideoUpload video) {
         if (progress >= 0 && progress <= 1) {
