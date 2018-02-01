@@ -3,9 +3,9 @@ package io.github.stekeblad.youtubeuploader.settings;
 import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
 import io.github.stekeblad.youtubeuploader.utils.PickFile;
-import io.github.stekeblad.youtubeuploader.youtube.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
-import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
+import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
+import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -34,6 +34,7 @@ public class PresetsWindowController implements Initializable {
     public Button addNewPreset;
     public Button btn_refreshPlaylists;
     public TextField txt_nameNewPreset;
+    public Button localizeCategories;
 
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
@@ -109,6 +110,12 @@ public class PresetsWindowController implements Initializable {
                 "\n- In the description field you can add \"$(playlist)\" to insert a link to the playlist the " +
                 "video will be added to then uploaded.";
         AlertUtils.simpleClose("Tips", messageContent).showAndWait();
+        actionEvent.consume();
+    }
+
+    public void onLocalizeCategories(ActionEvent actionEvent) {
+
+
         actionEvent.consume();
     }
 

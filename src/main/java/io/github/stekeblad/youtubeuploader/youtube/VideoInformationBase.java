@@ -1,7 +1,7 @@
 package io.github.stekeblad.youtubeuploader.youtube;
 
-import io.github.stekeblad.youtubeuploader.youtube.constants.Categories;
-import io.github.stekeblad.youtubeuploader.youtube.constants.VisibilityStatus;
+import io.github.stekeblad.youtubeuploader.youtube.utils.Categories;
+import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;

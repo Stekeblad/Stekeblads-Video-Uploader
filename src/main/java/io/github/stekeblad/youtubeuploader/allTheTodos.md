@@ -5,15 +5,13 @@
 And suddenly all my ideas just vanished...
 
 #### Right now
-- Categories should be downloaded for the user's location instead of the
+- Categories should be download ed for the user's location instead of the
 categories for my location being hardcoded
 https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
 - Bugs and small things
 
 #### More important things to do
-
-- handle network errors (wait a short time and try to continue the upload
-without restarting from the beginning)
+- none now
 
 
 #### Less important things to do

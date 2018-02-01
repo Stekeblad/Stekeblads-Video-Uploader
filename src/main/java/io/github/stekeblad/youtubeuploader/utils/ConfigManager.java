@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.zip.DataFormatException;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
 
@@ -54,6 +55,11 @@ public enum ConfigManager {
                 e.printStackTrace();
             }
         }
+
+        if(Files.exists(Paths.get(CATEGORIES_FILE))) {
+
+        }
+
         loadSettings();
     }
 
@@ -82,6 +88,8 @@ public enum ConfigManager {
             if ( mainProp.size() == 0) {
                 mainProp.setProperty("noSettings", "true");
                 mainProp.setProperty("neverAuthed", "true");
+                mainProp.setProperty("category_country", "");
+                mainProp.setProperty("category_language", "");
             }
         }
     }
@@ -106,6 +114,8 @@ public enum ConfigManager {
         }
     }
 
+    // Properties (Set/Get)
+
     public boolean getNoSettings() {
         return mainProp.getProperty("noSettings").equals("true");
     }
@@ -121,6 +131,30 @@ public enum ConfigManager {
     public void setNeverAuthed(boolean neverAuthed) {
         mainProp.setProperty("neverAuthed", neverAuthed ? "true" : "false");
     }
+
+    public String getCategoryCountry() {
+        return mainProp.getProperty("category_country");
+    }
+
+    public void setCategoryCountry(String twoCharCode) throws DataFormatException {
+        if(twoCharCode.length() != 2) {
+            throw new DataFormatException("Invalid country code format");
+        }
+        mainProp.setProperty("category_country", twoCharCode);
+    }
+
+    public String getCategoryLanguage() {
+        return mainProp.getProperty("category_language");
+    }
+
+    public void setCategoryLanguage(String twoCharCode) throws DataFormatException {
+        if(twoCharCode.length() != 2) {
+            throw new DataFormatException("Invalid country code format");
+        }
+        mainProp.setProperty("category_language", twoCharCode);
+    }
+
+    // Presets
 
     private ArrayList<String> loadSavedPresetNamesList() {
         ArrayList<String> presetNames = new ArrayList<>();
@@ -211,8 +245,13 @@ public enum ConfigManager {
     }
 
     public String getPresetString(String presetName) {
-        return presetStringsMap.getOrDefault(presetName, null);
+        if (presetStringsMap != null) {
+            return presetStringsMap.getOrDefault(presetName, null);
+        }
+        return null;
     }
+
+    // Playlists
 
     public void savePlaylistCache(String playlistData) {
         BufferedWriter writer = null;
@@ -255,6 +294,8 @@ public enum ConfigManager {
         }
         return playlistString;
     }
+
+    // Waiting Uploads
 
     public boolean hasWaitingUploads() {
         File dir = new File(UPLOAD_DIR);
@@ -326,5 +367,49 @@ public enum ConfigManager {
             }
         }
         return stringBuilder.toString();
+    }
+
+    // Categories
+
+    public void saveLocalizedCategories(String categoryData) {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(
+                    new File(CATEGORIES_FILE)));
+            writer.write(categoryData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public ArrayList<String> loadLocalizedCategories() {
+        BufferedReader reader;
+        ArrayList<String> playlistString = new ArrayList<>();
+        try {
+            if (!Files.exists(Paths.get(CATEGORIES_FILE))) {
+                Files.createFile(Paths.get(CATEGORIES_FILE));
+            } else {
+                reader = new BufferedReader(new FileReader(
+                        new File(CATEGORIES_FILE)));
+                String line = reader.readLine();
+                while (line != null) { // while not end of file
+                    playlistString.add(line);
+                    line = reader.readLine();
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not find categories file");
+        } catch (IOException e) {
+            System.err.println("Could not create categories file");
+        }
+        return playlistString;
     }
 }

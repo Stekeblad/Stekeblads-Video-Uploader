@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.youtube.constants;
+package io.github.stekeblad.youtubeuploader.youtube.utils;
 
 // I am in Sweden so this categories are localized for sweden
 // may be fetched for users locale in the future

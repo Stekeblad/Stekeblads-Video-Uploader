@@ -1,10 +1,11 @@
-package io.github.stekeblad.youtubeuploader.youtube;
+package io.github.stekeblad.youtubeuploader.youtube.utils;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistListResponse;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
+import io.github.stekeblad.youtubeuploader.youtube.Auth;
 
 import java.io.IOException;
 import java.util.ArrayList;
