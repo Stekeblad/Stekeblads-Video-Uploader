@@ -40,15 +40,19 @@ public enum CategoryUtils {
 
             List<VideoCategory> vidCat = response.getItems();
             categories = new HashMap<>();
-            categories.put("Select a category", "-1");
             for(VideoCategory cat : vidCat) {
-                categories.put(cat.getSnippet().getTitle(), cat.getId());
+                if(cat.getSnippet().getAssignable()) { // Check if category is allowed to be used
+                    categories.put(cat.getSnippet().getTitle(), cat.getId());
+                }
+            }
+            if (categories.isEmpty()) {
+                categories.put("Categories not localized", "-1");
             }
             saveCategories();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println(e.getMessage());
+        } catch (IOException e) { // invalid country or language
+            categories = new HashMap<>();
+            categories.put("Categories not localized", "-1");
         }
     }
 
@@ -60,7 +64,10 @@ public enum CategoryUtils {
     }
 
     public String getCategoryId(String categoryName) {
-        return categories.get(categoryName);
+        if (categories == null) {
+            loadCategories();
+        }
+        return categories.getOrDefault(categoryName, "-1");
     }
 
     private void saveCategories() {
@@ -77,6 +84,9 @@ public enum CategoryUtils {
             String id = category.substring(0, category.indexOf(':'));
             String name = category.substring(category.indexOf(':') + 1);
             categories.put(name, id);
+        }
+        if(categories.isEmpty()) {
+            categories.put("Categories not localized", "-1");
         }
     }
 }

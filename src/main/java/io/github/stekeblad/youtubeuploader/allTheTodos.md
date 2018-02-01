@@ -5,9 +5,6 @@
 And suddenly all my ideas just vanished...
 
 #### Right now
-- Categories should be download ed for the user's location instead of the
-categories for my location being hardcoded
-https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements
 - Bugs and small things
 
 #### More important things to do

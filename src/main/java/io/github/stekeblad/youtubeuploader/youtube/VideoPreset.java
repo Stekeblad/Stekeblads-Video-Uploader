@@ -1,6 +1,5 @@
 package io.github.stekeblad.youtubeuploader.youtube;
 
-import io.github.stekeblad.youtubeuploader.youtube.utils.Categories;
 import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -40,7 +39,7 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, Categories category, boolean tellSubs, String thumbNailPath, String paneId, String presetName) {
+                       String playlist, String category, boolean tellSubs, String thumbNailPath, String paneId, String presetName) {
         super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath, paneId);
         makePresetPane(presetName);
     }
@@ -91,7 +90,7 @@ public class VideoPreset extends VideoInformationBase {
         private VisibilityStatus visibility;
         private List<String> videoTags;
         private String playlist;
-        private Categories category;
+        private String category;
         private boolean tellSubs;
         private String thumbNailPath;
         private String presetName;
@@ -122,7 +121,7 @@ public class VideoPreset extends VideoInformationBase {
             return this;
         }
 
-        public VideoPreset.Builder setCategory(Categories category) {
+        public VideoPreset.Builder setCategory(String category) {
             this.category = category;
             return this;
         }

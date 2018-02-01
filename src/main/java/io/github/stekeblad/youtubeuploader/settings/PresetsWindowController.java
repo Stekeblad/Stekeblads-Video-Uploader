@@ -4,14 +4,19 @@ import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
 import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
 import io.github.stekeblad.youtubeuploader.utils.PickFile;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
+import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +27,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_THUMBNAIL;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
 
 
 public class PresetsWindowController implements Initializable {
@@ -34,11 +38,12 @@ public class PresetsWindowController implements Initializable {
     public Button addNewPreset;
     public Button btn_refreshPlaylists;
     public TextField txt_nameNewPreset;
-    public Button localizeCategories;
+    public Button btn_localizeCategories;
 
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
+    private CategoryUtils categoryUtils;
     private int presetCounter = 0;
     private HashMap<String, VideoPreset> presetBackups;
     
@@ -48,6 +53,7 @@ public class PresetsWindowController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         configManager = ConfigManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
+        categoryUtils = CategoryUtils.INSTANCE;
         presetBackups = new HashMap<>();
 
         videoPresets = new ArrayList<>();
@@ -114,8 +120,22 @@ public class PresetsWindowController implements Initializable {
     }
 
     public void onLocalizeCategories(ActionEvent actionEvent) {
-
-
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/LocalizeCategoriesWindow.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 400, 450);
+            Stage stage = new Stage();
+            stage.setMinWidth(400);
+            stage.setMinHeight(450);
+            stage.setMaxWidth(400);
+            stage.setMaxHeight(450);
+            stage.setTitle("Get Categories");
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         actionEvent.consume();
     }
 
@@ -201,6 +221,10 @@ public class PresetsWindowController implements Initializable {
                         FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames()));
             }
         });
+        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
+            ((ChoiceBox<String>) videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY)).setItems(
+                    FXCollections.observableArrayList(categoryUtils.getCategoryNames()))
+        );
 
         // Change buttons from "edit" and "delete" to "save" and "cancel"
         Button saveButton = new Button("Save");

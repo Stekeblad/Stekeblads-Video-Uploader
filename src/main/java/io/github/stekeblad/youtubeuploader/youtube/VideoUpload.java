@@ -1,6 +1,5 @@
 package io.github.stekeblad.youtubeuploader.youtube;
 
-import io.github.stekeblad.youtubeuploader.youtube.utils.Categories;
 import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -53,7 +52,7 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, Categories category, boolean tellSubs, String thumbNailPath, String paneName, File videoFile) {
+                       String playlist, String category, boolean tellSubs, String thumbNailPath, String paneName, File videoFile) {
 
         super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath, paneName);
         this.videoFile = videoFile;
@@ -98,7 +97,7 @@ public class VideoUpload extends VideoInformationBase{
         private VisibilityStatus visibility;
         private List<String> videoTags;
         private String playlist;
-        private Categories category;
+        private String category;
         private boolean tellSubs;
         private String thumbNailPath;
         private String paneName;
@@ -129,7 +128,7 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
-        public VideoUpload.Builder setCategory(Categories category) {
+        public VideoUpload.Builder setCategory(String category) {
             this.category = category;
             return this;
         }

@@ -6,6 +6,7 @@ import io.github.stekeblad.youtubeuploader.utils.PickFile;
 import io.github.stekeblad.youtubeuploader.youtube.Uploader;
 import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
 import io.github.stekeblad.youtubeuploader.youtube.VideoUpload;
+import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -26,8 +27,7 @@ import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_PLAYLIST;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.NODE_ID_THUMBNAIL;
+import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
 import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.NODE_ID_PROGRESS;
 import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.NODE_ID_UPLOADSTATUS;
 
@@ -45,6 +45,7 @@ public class mainWindowController implements Initializable {
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
+    private CategoryUtils categoryUtils;
     private int uploadPaneCounter = 0;
     private List<VideoUpload> uploadQueueVideos;
     private List<File> videosToAdd;
@@ -67,6 +68,8 @@ public class mainWindowController implements Initializable {
         }
         playlistUtils = PlaylistUtils.INSTANCE;
         playlistUtils.loadCache();
+        categoryUtils = CategoryUtils.INSTANCE;
+        categoryUtils.loadCategories();
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
         btn_startAll.setTooltip(new Tooltip("Starts all uploads that have the \"Start Upload\" button visible"));
 
@@ -304,6 +307,10 @@ public class mainWindowController implements Initializable {
                         FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames()));
             }
         });
+        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
+                ((ChoiceBox<String>) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY)).setItems(
+                        FXCollections.observableArrayList(categoryUtils.getCategoryNames()))
+        );
         // Set buttons
         Button saveButton = new Button("Save");
         saveButton.setId(parentId + BUTTON_SAVE);
@@ -375,7 +382,7 @@ public class mainWindowController implements Initializable {
             uploadQueueVideos.set(selected, editBackups.get(uploadQueueVideos.get(selected).getPaneId()));
             editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         } else {
-            AlertUtils.simpleClose("Can not change back", "Could not revert this upload to the state it was in before edit");
+            AlertUtils.simpleClose("Can not change back", "Could not revert this upload to the state it was in before edit").show();
         }
 
         // Change buttons
@@ -423,6 +430,13 @@ public class mainWindowController implements Initializable {
         if (selected == -1) {
             System.err.println("start upload button belongs to a invalid or non-existing parent");
             return;
+        }
+        // a few small checks first
+        if (uploadQueueVideos.get(selected).getVideoName().length() < 1) {
+            AlertUtils.simpleClose("Can not start", "Cant start the upload, the video does not have a name").show();
+        }
+        if (categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
+            AlertUtils.simpleClose("Can not start", "Category is not selected or invalid").show();
         }
         // Queue upload
         uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());

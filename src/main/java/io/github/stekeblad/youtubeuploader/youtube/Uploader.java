@@ -8,6 +8,7 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
+import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -33,6 +34,7 @@ import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.*;
 
 public class Uploader {
     private HashMap<String, Future> tasks = new HashMap<>();
+    private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
 
     private Consumer<String> uploadFinishedCallback = null;
 
@@ -99,7 +101,7 @@ public class Uploader {
         videoMetaData.setTitle(video.getVideoName());
         videoMetaData.setDescription(video.getVideoDescription());
         videoMetaData.setTags(video.getVideoTags());
-        videoMetaData.setCategoryId(Integer.toString(video.getCategory().getId()));
+        videoMetaData.setCategoryId(categoryUtils.getCategoryId(video.getCategory()));
 
         videoObject.setSnippet(videoMetaData);
 

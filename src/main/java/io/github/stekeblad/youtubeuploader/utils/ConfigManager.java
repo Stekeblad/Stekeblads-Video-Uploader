@@ -56,10 +56,6 @@ public enum ConfigManager {
             }
         }
 
-        if(Files.exists(Paths.get(CATEGORIES_FILE))) {
-
-        }
-
         loadSettings();
     }
 
@@ -140,7 +136,7 @@ public enum ConfigManager {
         if(twoCharCode.length() != 2) {
             throw new DataFormatException("Invalid country code format");
         }
-        mainProp.setProperty("category_country", twoCharCode);
+        mainProp.setProperty("category_country", twoCharCode.toUpperCase());
     }
 
     public String getCategoryLanguage() {
@@ -151,7 +147,7 @@ public enum ConfigManager {
         if(twoCharCode.length() != 2) {
             throw new DataFormatException("Invalid country code format");
         }
-        mainProp.setProperty("category_language", twoCharCode);
+        mainProp.setProperty("category_language", twoCharCode.toLowerCase());
     }
 
     // Presets
