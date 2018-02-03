@@ -96,6 +96,13 @@ public class VideoInformationBase {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void setCategories(ArrayList<String> categories) {
+        if(categories != null) {
+            ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).setItems(FXCollections.observableArrayList(categories));
+        }
+    }
+
     // other methods
 
     public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,

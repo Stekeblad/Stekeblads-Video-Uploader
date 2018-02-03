@@ -7,6 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../artifacts" />
       <excludeFolder url="file://$MODULE_DIR$/../libraries" />
       <excludeFolder url="file://$MODULE_DIR$/../markdown-navigator" />
+      <excludeFolder url="file://$MODULE_DIR$/../../YoutubeUploader data" />
       <excludeFolder url="file://$MODULE_DIR$/../../__artifacts_temp" />
       <excludeFolder url="file://$MODULE_DIR$/../../build" />
       <excludeFolder url="file://$MODULE_DIR$/../../out" />

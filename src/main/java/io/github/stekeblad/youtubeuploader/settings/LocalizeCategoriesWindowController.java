@@ -121,7 +121,7 @@ public class LocalizeCategoriesWindowController implements Initializable{
         } else {
             System.err.println("Desktop not supported, cant open Wikipedia country code list");
         }
-        AlertUtils.simpleClose("Sorry!", "For some reason we cant open the webpage in your default browser, but this is the url:\n " +
+        AlertUtils.simpleClose("Sorry!", "For some reason we cant open the web page in your default browser, but this is the url:\n " +
                 "https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements").showAndWait();
         actionEvent.consume();
     }
@@ -138,7 +138,7 @@ public class LocalizeCategoriesWindowController implements Initializable{
         } else {
             System.err.println("Desktop not supported, cant open Wikipedia language code list");
         }
-        AlertUtils.simpleClose("Sorry!", "For some reason we cant open the webpage in your default browser, but this is the url:\n " +
+        AlertUtils.simpleClose("Sorry!", "For some reason we cant open the web page in your default browser, but this is the url:\n " +
                 "https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes").showAndWait();
         actionEvent.consume();
     }

@@ -12,7 +12,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -90,10 +93,10 @@ public class PresetsWindowController implements Initializable {
             AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
             return;
         }
-        //if (getPresetIndexByName(txt_nameNewPreset.getText(), -1) > -1) {
-        //    AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
-        //    return;
-        //}
+        if (getPresetIndexByName(txt_nameNewPreset.getText()) > -1) {
+            AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
+            return;
+        }
         VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
                 null, null, false, null, PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         videoPresets.add(newPreset);
@@ -217,14 +220,11 @@ public class PresetsWindowController implements Initializable {
                 onRefreshPlaylists(new ActionEvent());
             }
             if (! configManager.getNeverAuthed()) {
-                ((ChoiceBox<String>) videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST)).setItems(
-                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames()));
+                videoPresets.get(selected).setPlaylists(playlistUtils.getUserPlaylistNames());
             }
         });
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
-            ((ChoiceBox<String>) videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY)).setItems(
-                    FXCollections.observableArrayList(categoryUtils.getCategoryNames()))
-        );
+                videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames()));
 
         // Change buttons from "edit" and "delete" to "save" and "cancel"
         Button saveButton = new Button("Save");

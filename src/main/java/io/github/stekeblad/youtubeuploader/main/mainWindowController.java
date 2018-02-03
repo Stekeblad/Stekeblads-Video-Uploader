@@ -78,6 +78,7 @@ public class mainWindowController implements Initializable {
                 text_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
+        text_autoNum.setTooltip(new Tooltip("Requires the $(ep) tag in preset video title"));
         uploader = new Uploader();
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
 
@@ -244,6 +245,24 @@ public class mainWindowController implements Initializable {
     }
 
     public void onStartAllUploads(ActionEvent actionEvent) {
+        if(configManager.getNeverAuthed()) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
+                    "To upload videos you must grant this application permission to access your Youtube channel. " +
+                            "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
+                            "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
+                            "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
+                            "\n\nPress yes to open your browser for authentication or no to cancel")
+                    .showAndWait();
+            if (buttonChoice.isPresent()) {
+                if (buttonChoice.get() == ButtonType.YES) {
+                    configManager.setNeverAuthed(false);
+                    configManager.saveSettings();
+                } else { // ButtonType.NO or closed [X]
+                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
+                    return;
+                }
+            }
+        }
         for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
             if (uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
                 onStartUpload(uploadQueueVideo.getButton3Id());
@@ -303,14 +322,12 @@ public class mainWindowController implements Initializable {
             if(configManager.getNeverAuthed()) {
                 AlertUtils.simpleClose("No playlists", "No playlists synced yet, go to the settings window to sync with Youtube").show();
             } else {
-                ((ChoiceBox<String>) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST)).setItems(
-                        FXCollections.observableArrayList(playlistUtils.getUserPlaylistNames()));
+                uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getUserPlaylistNames());
             }
         });
         uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
-                ((ChoiceBox<String>) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY)).setItems(
-                        FXCollections.observableArrayList(categoryUtils.getCategoryNames()))
-        );
+                uploadQueueVideos.get(selected).setCategories(categoryUtils.getCategoryNames()));
+
         // Set buttons
         Button saveButton = new Button("Save");
         saveButton.setId(parentId + BUTTON_SAVE);
@@ -438,6 +455,27 @@ public class mainWindowController implements Initializable {
         if (categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose("Can not start", "Category is not selected or invalid").show();
         }
+
+        if(configManager.getNeverAuthed()) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
+                    "To upload videos you must grant this application permission to access your Youtube channel. " +
+                            "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
+                            "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
+                            "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
+                            "\n\nPress yes to open your browser for authentication or no to cancel")
+                    .showAndWait();
+            if (buttonChoice.isPresent()) {
+                if (buttonChoice.get() == ButtonType.YES) {
+                    configManager.setNeverAuthed(false);
+                    configManager.saveSettings();
+                } else { // ButtonType.NO or closed [X]
+                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
+                    return;
+                }
+            }
+        }
+        // User is authenticated or warned about the upcoming prompt to do so.
+
         // Queue upload
         uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());
         // Change Buttons and text
