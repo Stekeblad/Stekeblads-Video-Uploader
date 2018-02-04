@@ -1,6 +1,10 @@
-# A list to remember things that can be done but i cant do because I am working on another part of the program at the moment
+# What I am working on and planning on maybe doing in the future
 
 #### Right now
+- Recording videos on how to get and use the program.
+    - Add it to readme
+    - Add it to wiki home page
+    - pick images from the videos and add to readme + wiki
 - Bugs and small things
 
 #### More important things to do
