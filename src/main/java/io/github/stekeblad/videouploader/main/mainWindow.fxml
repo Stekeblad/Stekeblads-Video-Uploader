@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.youtubeuploader.main.mainWindowController">
+<AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.videouploader.main.mainWindowController">
     <ToolBar prefHeight="40.0" prefWidth="1088.0">
       <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsClicked" text="Settings" />
     </ToolBar>

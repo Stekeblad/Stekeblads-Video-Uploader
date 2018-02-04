@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.utils;
+package io.github.stekeblad.videouploader.utils;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;

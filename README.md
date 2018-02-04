@@ -1,10 +1,10 @@
-# Stekeblad's Youtube Uploader
+# Stekeblad's Video Uploader
 ## Easier bulk uploads to YouTube
 Helps people who upload a lot of videos to YouTube by automatically
 setting video title, description, tags, playlist,
 category, ... the user saves a lot of monotone work.
 
-With Stekeblad's Youtube Uploader you can first create a "preset"
+With Stekeblad's Video Uploader you can first create a "preset"
 that is a predefined and reusable set of video details, like the default
 tags/description feature on youtube, but with more settings and you can create several of them.
 After that you select the files to upload, a preset to apply and press upload.
@@ -15,14 +15,14 @@ video details for all videos one at a time on Youtube's upload page!
 
 ##### Help
 There are a few videos further down about how to use the program and
-a couple of pages on the [wiki](https://github.com/Stekeblad/Stekeblads-Youtube-Uploader/wiki).
- For other problems or question please look under [issues](https://github.com/Stekeblad/Stekeblads-Youtube-Uploader/issues)
+a couple of pages on the [wiki](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki).
+ For other problems or question please look under [issues](https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues)
  and create one if no one already asked about the same thing.
 
 
 ### Download
 Downloads can be found under "Releases" tab close to the top of this page
-[or by clicking here](https://github.com/Stekeblad/Stekeblads-Youtube-Uploader/releases)
+[or by clicking here](https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases)
 
 ### Images
 ![Image](https://drive.google.com/uc?export=download&id=1O2RIIqx0yxySeAtzZP4K3nCaDuVi30aH)

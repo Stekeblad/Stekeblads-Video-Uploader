@@ -1,8 +1,8 @@
-package io.github.stekeblad.youtubeuploader.settings;
+package io.github.stekeblad.videouploader.settings;
 
-import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
-import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -73,7 +73,7 @@ public class LocalizeCategoriesWindowController implements Initializable{
         if(configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
                     "To use the Youtube API you must grant this application permission to access your Youtube channel. " +
-                            "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
+                            "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
                             "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
                             "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
                             "\n\nPress yes to open your browser for authentication or no to cancel")

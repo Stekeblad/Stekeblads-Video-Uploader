@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.utils;
+package io.github.stekeblad.videouploader.utils;
 
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -9,8 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
+import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
 
 public class PickFile {
     public static File pickThumbnail() {

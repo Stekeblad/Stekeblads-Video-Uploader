@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.youtube;
+package io.github.stekeblad.videouploader.youtube;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -19,7 +19,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.stekeblad.youtubeuploader.utils.Constants.AUTH_DIR;
+import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 
 public class Auth {
 
@@ -29,7 +29,6 @@ public class Auth {
     //AUTH_DIR
 
     public static Credential authUser() throws IOException {
-        //List<String> scope = Arrays.asList(YouTubeScopes.YOUTUBE_UPLOAD);
         List<String> scope = new ArrayList<>();
         scope.add(YouTubeScopes.YOUTUBE_UPLOAD);
         scope.add(YouTubeScopes.YOUTUBE);

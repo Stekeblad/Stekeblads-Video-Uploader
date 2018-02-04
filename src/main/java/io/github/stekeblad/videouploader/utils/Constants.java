@@ -1,7 +1,7 @@
-package io.github.stekeblad.youtubeuploader.utils;
+package io.github.stekeblad.videouploader.utils;
 
 public class Constants {
-    public static final String DATA_DIR = "YoutubeUploader data";
+    public static final String DATA_DIR = "VideoUploader data";
     public static final String AUTH_DIR = DATA_DIR + "/.auth";
     public static final String PRESET_DIR = DATA_DIR + "/presets";
     public static final String UPLOAD_DIR = DATA_DIR + "/waiting uploads";

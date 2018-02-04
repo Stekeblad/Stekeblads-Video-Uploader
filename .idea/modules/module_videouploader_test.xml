@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="module_youtubeuploader_test" default="compile.module.youtubeuploader_test">
-  <dirname property="module.youtubeuploader_test.basedir" file="${ant.file.module_youtubeuploader_test}"/>
+<project name="module_videouploader_test" default="compile.module.videouploader_test">
+  <dirname property="module.videouploader_test.basedir" file="${ant.file.module_videouploader_test}"/>
   
-  <property name="module.jdk.home.youtubeuploader_test" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.youtubeuploader_test" value="${project.jdk.bin}"/>
-  <property name="module.jdk.classpath.youtubeuploader_test" value="${project.jdk.classpath}"/>
+  <property name="module.jdk.home.videouploader_test" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.videouploader_test" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.videouploader_test" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.youtubeuploader_test" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  <property name="compiler.args.videouploader_test" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
   
-  <property name="youtubeuploader_test.output.dir" value="undefined"/>
-  <property name="youtubeuploader_test.testoutput.dir" value="${module.youtubeuploader_test.basedir}/../../out/test/classes"/>
+  <property name="videouploader_test.output.dir" value="undefined"/>
+  <property name="videouploader_test.testoutput.dir" value="${module.videouploader_test.basedir}/../../out/test/classes"/>
   
-  <path id="youtubeuploader_test.module.bootclasspath">
+  <path id="videouploader_test.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
-  <path id="youtubeuploader_test.module.production.classpath">
-    <path refid="${module.jdk.classpath.youtubeuploader_test}"/>
-    <pathelement location="${youtubeuploader_main.output.dir}"/>
+  <path id="videouploader_test.module.production.classpath">
+    <path refid="${module.jdk.classpath.videouploader_test}"/>
+    <pathelement location="${videouploader_main.output.dir}"/>
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
@@ -39,8 +39,8 @@
     <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
   </path>
   
-  <path id="youtubeuploader_test.runtime.production.module.classpath">
-    <path refid="youtubeuploader_main.runtime.production.module.classpath"/>
+  <path id="videouploader_test.runtime.production.module.classpath">
+    <path refid="videouploader_main.runtime.production.module.classpath"/>
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
@@ -62,9 +62,9 @@
     <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
   </path>
   
-  <path id="youtubeuploader_test.module.classpath">
-    <path refid="${module.jdk.classpath.youtubeuploader_test}"/>
-    <pathelement location="${youtubeuploader_main.output.dir}"/>
+  <path id="videouploader_test.module.classpath">
+    <path refid="${module.jdk.classpath.videouploader_test}"/>
+    <pathelement location="${videouploader_main.output.dir}"/>
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
@@ -86,9 +86,9 @@
     <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
   </path>
   
-  <path id="youtubeuploader_test.runtime.module.classpath">
-    <pathelement location="${youtubeuploader_test.testoutput.dir}"/>
-    <path refid="youtubeuploader_main.runtime.module.classpath"/>
+  <path id="videouploader_test.runtime.module.classpath">
+    <pathelement location="${videouploader_test.testoutput.dir}"/>
+    <path refid="videouploader_main.runtime.module.classpath"/>
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
@@ -111,23 +111,23 @@
   </path>
   
   
-  <patternset id="excluded.from.module.youtubeuploader_test">
+  <patternset id="excluded.from.module.videouploader_test">
     <patternset refid="ignored.files"/>
   </patternset>
   
-  <patternset id="excluded.from.compilation.youtubeuploader_test">
-    <patternset refid="excluded.from.module.youtubeuploader_test"/>
+  <patternset id="excluded.from.compilation.videouploader_test">
+    <patternset refid="excluded.from.module.videouploader_test"/>
   </patternset>
   
   
-  <target name="compile.module.youtubeuploader_test" depends="compile.module.youtubeuploader_test.production,compile.module.youtubeuploader_test.tests" description="Compile module youtubeuploader_test"/>
+  <target name="compile.module.videouploader_test" depends="compile.module.videouploader_test.production,compile.module.videouploader_test.tests" description="Compile module videouploader_test"/>
   
-  <target name="compile.module.youtubeuploader_test.production" depends="compile.module.youtubeuploader_main" description="Compile module youtubeuploader_test; production classes"/>
+  <target name="compile.module.videouploader_test.production" depends="compile.module.videouploader_main" description="Compile module videouploader_test; production classes"/>
   
-  <target name="compile.module.youtubeuploader_test.tests" depends="compile.module.youtubeuploader_test.production" description="compile module youtubeuploader_test; test classes" unless="skip.tests"/>
+  <target name="compile.module.videouploader_test.tests" depends="compile.module.videouploader_test.production" description="compile module videouploader_test; test classes" unless="skip.tests"/>
   
-  <target name="clean.module.youtubeuploader_test" description="cleanup module">
-    <delete dir="${youtubeuploader_test.output.dir}"/>
-    <delete dir="${youtubeuploader_test.testoutput.dir}"/>
+  <target name="clean.module.videouploader_test" description="cleanup module">
+    <delete dir="${videouploader_test.output.dir}"/>
+    <delete dir="${videouploader_test.testoutput.dir}"/>
   </target>
 </project>

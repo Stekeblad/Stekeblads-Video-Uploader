@@ -1,13 +1,13 @@
-package io.github.stekeblad.youtubeuploader.main;
+package io.github.stekeblad.videouploader.main;
 
-import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
-import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.utils.PickFile;
-import io.github.stekeblad.youtubeuploader.youtube.Uploader;
-import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
-import io.github.stekeblad.youtubeuploader.youtube.VideoUpload;
-import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
-import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.PickFile;
+import io.github.stekeblad.videouploader.youtube.Uploader;
+import io.github.stekeblad.videouploader.youtube.VideoPreset;
+import io.github.stekeblad.videouploader.youtube.VideoUpload;
+import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
+import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -26,10 +26,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.NODE_ID_PROGRESS;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.NODE_ID_UPLOADSTATUS;
+import static io.github.stekeblad.videouploader.utils.Constants.*;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.*;
+import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_PROGRESS;
+import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_UPLOADSTATUS;
 
 public class mainWindowController implements Initializable {
     public ListView<GridPane> listView;
@@ -232,7 +232,7 @@ public class mainWindowController implements Initializable {
             Stage stage = new Stage();
             stage.setMinWidth(725);
             stage.setMinHeight(550);
-            stage.setTitle("Settings - Stekeblads Youtube Uploader");
+            stage.setTitle("Settings - Stekeblads Video Uploader");
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
@@ -459,7 +459,7 @@ public class mainWindowController implements Initializable {
         if(configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
                     "To upload videos you must grant this application permission to access your Youtube channel. " +
-                            "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
+                            "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
                             "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
                             "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
                             "\n\nPress yes to open your browser for authentication or no to cancel")

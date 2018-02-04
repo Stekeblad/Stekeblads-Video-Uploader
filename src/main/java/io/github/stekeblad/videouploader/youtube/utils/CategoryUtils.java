@@ -1,11 +1,11 @@
-package io.github.stekeblad.youtubeuploader.youtube.utils;
+package io.github.stekeblad.videouploader.youtube.utils;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.VideoCategory;
 import com.google.api.services.youtube.model.VideoCategoryListResponse;
-import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.youtube.Auth;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.youtube.Auth;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public enum CategoryUtils {
         try {
             Credential creds = Auth.authUser();
             YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Youtube Uploader").build();
+                    "Stekeblads Video Uploader").build();
 
             YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list("snippet");
             videoCategoriesListForRegionRequest.setHl(lang);

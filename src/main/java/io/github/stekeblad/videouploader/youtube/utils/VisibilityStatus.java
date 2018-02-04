@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.youtube.utils;
+package io.github.stekeblad.videouploader.youtube.utils;
 
 public enum VisibilityStatus {
     PUBLIC("public"),

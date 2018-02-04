@@ -1,6 +1,6 @@
-package io.github.stekeblad.youtubeuploader.youtube;
+package io.github.stekeblad.videouploader.youtube;
 
-import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
+import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;

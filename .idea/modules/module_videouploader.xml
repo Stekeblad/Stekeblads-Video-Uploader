@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_videouploader" default="compile.module.videouploader">
+  <dirname property="module.videouploader.basedir" file="${ant.file.module_videouploader}"/>
+  
+  <property name="module.jdk.home.videouploader" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.videouploader" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.videouploader" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.videouploader" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="videouploader.output.dir" value="${module.videouploader.basedir}/../../out/production/videouploader"/>
+  <property name="videouploader.testoutput.dir" value="${module.videouploader.basedir}/../../out/test/videouploader"/>
+  
+  <path id="videouploader.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="videouploader.module.production.classpath">
+    <path refid="${module.jdk.classpath.videouploader}"/>
+  </path>
+  
+  <path id="videouploader.runtime.production.module.classpath">
+    <pathelement location="${videouploader.output.dir}"/>
+  </path>
+  
+  <path id="videouploader.module.classpath">
+    <path refid="${module.jdk.classpath.videouploader}"/>
+    <pathelement location="${videouploader.output.dir}"/>
+  </path>
+  
+  <path id="videouploader.runtime.module.classpath">
+    <pathelement location="${videouploader.testoutput.dir}"/>
+    <pathelement location="${videouploader.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.videouploader">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.videouploader">
+    <patternset refid="excluded.from.module.videouploader"/>
+  </patternset>
+  
+  
+  <target name="compile.module.videouploader" depends="compile.module.videouploader.production,compile.module.videouploader.tests" description="Compile module videouploader"/>
+  
+  <target name="compile.module.videouploader.production" description="Compile module videouploader; production classes"/>
+  
+  <target name="compile.module.videouploader.tests" depends="compile.module.videouploader.production" description="compile module videouploader; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.videouploader" description="cleanup module">
+    <delete dir="${videouploader.output.dir}"/>
+    <delete dir="${videouploader.testoutput.dir}"/>
+  </target>
+</project>

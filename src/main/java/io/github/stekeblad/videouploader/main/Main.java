@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.main;
+package io.github.stekeblad.videouploader.main;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
         Parent root = loader.load();
-        primaryStage.setTitle("Stekeblads Youtube Uploader");
+        primaryStage.setTitle("Stekeblads Video Uploader");
         primaryStage.setScene(new Scene(root, 900, 825));
         mainWindowController controller = loader.getController();
         primaryStage.setOnCloseRequest(event -> {

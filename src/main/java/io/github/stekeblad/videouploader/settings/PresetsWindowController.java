@@ -1,12 +1,12 @@
-package io.github.stekeblad.youtubeuploader.settings;
+package io.github.stekeblad.videouploader.settings;
 
-import io.github.stekeblad.youtubeuploader.utils.AlertUtils;
-import io.github.stekeblad.youtubeuploader.utils.ConfigManager;
-import io.github.stekeblad.youtubeuploader.utils.PickFile;
-import io.github.stekeblad.youtubeuploader.youtube.VideoPreset;
-import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
-import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
-import io.github.stekeblad.youtubeuploader.youtube.utils.VisibilityStatus;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.PickFile;
+import io.github.stekeblad.videouploader.youtube.VideoPreset;
+import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
+import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
+import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
-import static io.github.stekeblad.youtubeuploader.youtube.VideoInformationBase.*;
+import static io.github.stekeblad.videouploader.utils.Constants.*;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.*;
 
 
 public class PresetsWindowController implements Initializable {
@@ -146,7 +146,7 @@ public class PresetsWindowController implements Initializable {
         if (configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
                     "To download your playlists you must grant this application permission to access your Youtube channel. " +
-                    "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
+                    "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
                     "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
                     "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
                     "\n\nPress yes to open your browser for authentication or no to cancel")

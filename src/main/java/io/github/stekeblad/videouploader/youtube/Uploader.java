@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.youtube;
+package io.github.stekeblad.videouploader.youtube;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
@@ -8,8 +8,8 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
-import io.github.stekeblad.youtubeuploader.youtube.utils.CategoryUtils;
-import io.github.stekeblad.youtubeuploader.youtube.utils.PlaylistUtils;
+import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
+import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import static io.github.stekeblad.youtubeuploader.youtube.VideoUpload.*;
+import static io.github.stekeblad.videouploader.youtube.VideoUpload.*;
 
 public class Uploader {
     private HashMap<String, Future> tasks = new HashMap<>();
@@ -86,12 +86,10 @@ public class Uploader {
     private void upload(VideoUpload video) throws IOException {
 
         Credential creds = Auth.authUser();
-        //YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-        //        "Stekeblads Youtube Uploader").build();
         YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, request -> {
             creds.initialize(request);
             request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(new ExponentialBackOff()));
-        }).setApplicationName("Stekeblads Youtube Uploader").build();
+        }).setApplicationName("Stekeblads Video Uploader").build();
 
         Video videoObject = new Video();
 

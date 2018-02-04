@@ -1,4 +1,4 @@
-package io.github.stekeblad.youtubeuploader.utils;
+package io.github.stekeblad.videouploader.utils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.zip.DataFormatException;
 
-import static io.github.stekeblad.youtubeuploader.utils.Constants.*;
+import static io.github.stekeblad.videouploader.utils.Constants.*;
 
 // Using enum to make class singleton, something about that just sounds weird
 public enum ConfigManager {
@@ -41,6 +41,8 @@ public enum ConfigManager {
                 System.err.println("Could not find or create directory for presets!");
                 e.printStackTrace();
             }
+            // just initialize presetStringsMap
+            presetStringsMap = new HashMap<>();
         } else { // do not attempt to load presets if presets directory did not exist
 
             ArrayList<String> presetNames = loadSavedPresetNamesList();
@@ -94,7 +96,7 @@ public enum ConfigManager {
         OutputStream output = null;
         try {
             output = new FileOutputStream(filesPath + "/settings.properties");
-                    mainProp.store(output, "main settings file for Stekeblads Youtube Uploader");
+                    mainProp.store(output, "main settings file for Stekeblads Video Uploader");
         } catch (FileNotFoundException e) {
             System.err.println("File is not a file or do not have permission to create settings file");
         } catch (IOException e) {
