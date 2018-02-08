@@ -53,6 +53,11 @@ public class mainWindowController implements Initializable {
     private Uploader uploader;
     private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
 
+    /**
+     * Initialize things when the window is opened
+     * @param location provided by fxml
+     * @param resources provided by fxml
+     */
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -62,6 +67,7 @@ public class mainWindowController implements Initializable {
         configManager = ConfigManager.INSTANCE;
         configManager.configManager();
         if (configManager.getNoSettings()) {
+            // If no settings was loaded, open settings window
             onSettingsClicked(new ActionEvent());
             configManager.setNoSettings(false);
             configManager.saveSettings();
@@ -73,12 +79,14 @@ public class mainWindowController implements Initializable {
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
         btn_startAll.setTooltip(new Tooltip("Starts all uploads that have the \"Start Upload\" button visible"));
 
+        // Only allow numbers in autoNum textField
         text_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 text_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
         text_autoNum.setTooltip(new Tooltip("Requires the $(ep) tag in preset video title"));
+
         uploader = new Uploader();
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
 
@@ -97,7 +105,12 @@ public class mainWindowController implements Initializable {
         }
     }
 
-    // returns true if window is allowed to be closed
+    /**
+     * This method is called when this window's close button is clicked.
+     * If one or more uploads is queued a confirmation dialog will be showed to ask the user if they want to
+     * abort them or not.
+     * @return true if the window should to be closed, false if not
+     */
     public boolean onWindowClose() {
         // Check if uploads is in progress, if not then directly return true
         if (! uploader.getIsActive()) {
@@ -130,6 +143,11 @@ public class mainWindowController implements Initializable {
         return false;
     }
 
+    /**
+     * Called when the pick files button is pressed.
+     * Opens a file chooser and sets the list of selected files to the left of the button
+     * @param actionEvent the click event
+     */
     public void onPickFile(ActionEvent actionEvent) {
         videosToAdd = PickFile.pickVideos();
         ArrayList<String> filenames = new ArrayList<>();
@@ -142,18 +160,26 @@ public class mainWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Called when the apply preset button is clicked.
+     * Takes the files in the selected files list and applies the selected preset or uses a blank preset if none is selected.
+     * Populates the uploads list.
+     * @param actionEvent the click event
+     */
     public void onApplyPresetClicked(ActionEvent actionEvent) {
         if(videosToAdd == null || videosToAdd.size() == 0 ) {
             AlertUtils.simpleClose("No files selected", "Please select files to upload").show();
             return;
         }
+        // Check what preset / if a preset is selected
         if(choice_presets.getSelectionModel().getSelectedIndex() == -1) {
-            // add videos to upload list with file name as title and blank/default values on the rest
+            // No preset, add videos to upload list with file name as title and blank/default values on the rest
             for(File videoFile : videosToAdd) {
                 VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
                         null, null, null, false, null,
                         UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
                 uploadQueueVideos.add(newUpload);
+                // Enables the upload to be edited because the lack of details.
                 onEdit(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + "_fakeButton");
                 uploadPaneCounter++;
             }
@@ -166,6 +192,7 @@ public class mainWindowController implements Initializable {
             } catch (NumberFormatException e) {
                 autoNum = 1;
             }
+            // Load details of the selected preset
             try {
                 chosenPreset = new VideoPreset(configManager.getPresetString(
                         choice_presets.getSelectionModel().getSelectedItem()), "preset");
@@ -175,12 +202,16 @@ public class mainWindowController implements Initializable {
             }
             // Get playlist url if available
             String playlistUrl = playlistUtils.getPlaylistUrl(chosenPreset.getPlaylist());
-            if (playlistUrl == null) playlistUrl = "";
+            if (playlistUrl == null) {
+                playlistUrl = "";
+            }
+            // Iterate over all selected video files
             for (File videoFile : videosToAdd) {
+                // Apply automatic numbering on video name
                 String name = chosenPreset.getVideoName().replace("$(ep)", String.valueOf(autoNum++));
+                // Insert playlist URL in description
                 String description = chosenPreset.getVideoDescription()
                         .replace("$(playlist)", playlistUrl);
-                        //.replaceAll(Matcher.quoteReplacement("$(playlist)"), playlistUrl);
 
                 VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()
                         .setVideoName(name)
@@ -218,12 +249,18 @@ public class mainWindowController implements Initializable {
             // update autoNum textField
             text_autoNum.setText(String.valueOf(autoNum));
         }
+        // Removes the newly added uploads from the selected files list and update UI
         videosToAdd = null;
         chosen_files.setItems(FXCollections.observableArrayList(new ArrayList<>()));
         updateUploadList();
         actionEvent.consume();
     }
 
+    /**
+     * Called when the settings button is clicked.
+     * Opens the settings window.
+     * @param actionEvent the click event
+     */
     public void onSettingsClicked(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -234,7 +271,7 @@ public class mainWindowController implements Initializable {
             stage.setMinHeight(550);
             stage.setTitle("Settings - Stekeblads Video Uploader");
             stage.setScene(scene);
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -244,7 +281,13 @@ public class mainWindowController implements Initializable {
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
     }
 
+    /**
+     * Called when the start all ready uploads button is clicked.
+     * If a upload is allowed to be started (the start upload button is visible) then that button is clicked by this method.
+     * @param actionEvent the click event
+     */
     public void onStartAllUploads(ActionEvent actionEvent) {
+        // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
         if(configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
                     "To upload videos you must grant this application permission to access your Youtube channel. " +
@@ -263,6 +306,7 @@ public class mainWindowController implements Initializable {
                 }
             }
         }
+        // Permission given, start uploads
         for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
             if (uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
                 onStartUpload(uploadQueueVideo.getButton3Id());
@@ -271,6 +315,11 @@ public class mainWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Called when the remove all finished uploads button is clicked.
+     * Clicks the hide button on all uploads that has that button visible
+     * @param actionEvent the click event
+     */
     public void onRemoveFinishedUploads(ActionEvent actionEvent) {
         for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
             if (uploadQueueVideo.getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
@@ -280,6 +329,9 @@ public class mainWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Re-adds all elements to the uploadQueuePanes so the UI is up-to-date
+     */
     private void updateUploadList() {
         List<GridPane> uploadQueuePanes = new ArrayList<>();
         for(VideoUpload vid : uploadQueueVideos) {
@@ -288,6 +340,11 @@ public class mainWindowController implements Initializable {
         listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
     }
 
+    /**
+     * Takes a node Id and checks if there is a upload with that id and if so returns its index inside uploadQueueVideos.
+     * @param nameToTest a Node id
+     * @return the index of a upload with that id inside uploadQueueVideos or -1 if it was not found in uploadQueueVideos.
+     */
     private int getUploadIndexByName(String nameToTest) {
         int videoIndex = -1;
         for(int i = 0; i < uploadQueueVideos.size(); i++) {
@@ -299,6 +356,11 @@ public class mainWindowController implements Initializable {
         return videoIndex;
     }
 
+    /**
+     * Called when the edit button for a upload is clicked
+     * Enables editing for that upload, takes a backup of its state to be able to revert and changes the available buttons
+     * @param callerId the id of the upload + button name
+     */
     private void onEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -306,6 +368,7 @@ public class mainWindowController implements Initializable {
             System.err.println("edit button belongs to a invalid or non-existing parent");
             return;
         }
+        // Create a backup to be able to revert
         editBackups.put(uploadQueueVideos.get(selected).getPaneId(), uploadQueueVideos.get(selected).copy(null)); //null -> same id
         uploadQueueVideos.get(selected).setEditable(true);
         uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
@@ -335,7 +398,7 @@ public class mainWindowController implements Initializable {
         Button cancelButton = new Button("Cancel");
         cancelButton.setId(parentId + BUTTON_CANCEL);
         cancelButton.setOnMouseClicked(event -> onCancel(cancelButton.getId()));
-        //Button three is not used but I do not want it to be invisible
+        //Button three is not used and I do not want the previous one to be visible
         Button ghostButton = new Button("");
         ghostButton.setVisible(false);
 
@@ -347,6 +410,11 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+    /**
+     * Called when the save button for a upload is clicked.
+     * Saves all changes made to the upload, disables editing and changes the visible buttons.
+     * @param callerId the id of the upload + button name
+     */
     private void onSave(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -386,6 +454,11 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+    /**
+     * Called when the cancel button for a upload is clicked.
+     * disables editing, reverts all changes made to the upload and changes the visible buttons.
+     * @param callerId the id of the upload + button name
+     */
     private void onCancel(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -421,6 +494,11 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+    /**
+     * Called when the delete button for a upload is clicked.
+     * Shows a confirmation dialog and removes the upload from the list if the user select yes
+     * @param callerId the id of the upload + button name
+     */
     private void onDelete(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -441,6 +519,11 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+    /**
+     * Called when the start upload button for a upload is clicked.
+     * Schedules the upload to be uploaded after performing a few checks.
+     * @param callerId the id of the upload + button name
+     */
     private void onStartUpload(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -456,6 +539,7 @@ public class mainWindowController implements Initializable {
             AlertUtils.simpleClose("Can not start", "Category is not selected or invalid").show();
         }
 
+        // If the user has not given the program permission to access their youtube channel, ask the user to do so.
         if(configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
                     "To upload videos you must grant this application permission to access your Youtube channel. " +
@@ -491,6 +575,7 @@ public class mainWindowController implements Initializable {
         uploadQueueVideos.get(selected).setButton2(abortButton);
         uploadQueueVideos.get(selected).setButton3(ghostButton2);
 
+        // make progressbar visible and set text to show it is waiting to be uploaded.
         uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(true);
         ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Waiting...");
 
@@ -498,6 +583,10 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+    /**
+     * Called when the abort button is clicked on a upload that is scheduled or in progress
+     * @param callerId the id of the upload + button name
+     */
     private void onAbort(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -507,13 +596,13 @@ public class mainWindowController implements Initializable {
         }
         // Abort upload
         boolean abortSuccess = uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId());
-        // Set label text and reset progress bar
 
         if (abortSuccess) {
+            // Set label text and reset progress bar
             uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(false);
             ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Aborted");
         } else {
-        AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
+            AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
         }
 
         // Change buttons
@@ -535,6 +624,11 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+    /**
+     * Called when a upload finishes.
+     * Places the hide button
+     * @param paneId the id of the upload
+     */
     private void onUploadFinished(String paneId) {
         int index = getUploadIndexByName(paneId);
         if (index == -1) {
@@ -548,6 +642,12 @@ public class mainWindowController implements Initializable {
         updateUploadList();
     }
 
+
+    /**
+     * Called when the hide button that appears then a upload finishes is clicked.
+     * Removes that upload from the list
+     * @param callerId the id of the upload + button name
+     */
     private void onRemoveFinishedUpload(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);

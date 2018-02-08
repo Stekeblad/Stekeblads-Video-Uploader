@@ -6,6 +6,10 @@ import javafx.stage.Modality;
 
 import java.util.Optional;
 
+/**
+ * A set of prepared Alert dialogs that can easy be created and used.
+ * Several properties is already defined you just need to provide the text to be displayed.
+ */
 public class AlertUtils {
 
     /**
@@ -35,7 +39,6 @@ public class AlertUtils {
      *         doOnNo();
      *     }
      * }
-     * </pre>
      *
      * @param header Header to display in window title
      * @param content The message to display to the user
@@ -50,6 +53,15 @@ public class AlertUtils {
         return alert;
     }
 
+    /**
+     * A Dialog with three button where you define not only the header and content text but also the text on the buttons
+     * @param header Header to display in window title
+     * @param content The message to display to the user
+     * @param btn1Text The text on the first button
+     * @param btn2Text The text on the second button
+     * @param btn3Text The text on the third button
+     * @return the text on the button that was clicked or null if no button result is available
+     */
     public static String threeButtons(String header, String content, String btn1Text, String btn2Text, String btn3Text) {
         Alert alert = new Alert(Alert.AlertType.NONE);
         alert.initModality(Modality.APPLICATION_MODAL);

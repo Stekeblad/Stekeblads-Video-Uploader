@@ -11,7 +11,9 @@ import java.util.zip.DataFormatException;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 
-// Using enum to make class singleton, something about that just sounds weird
+/**
+ * A Enum-Singleton class for handling different settings
+ */
 public enum ConfigManager {
     INSTANCE;
 
@@ -19,7 +21,11 @@ public enum ConfigManager {
     private Properties mainProp;
     private HashMap<String, String> presetStringsMap;
 
+    /**
+     * Like a constructor, call this method once before calling any other method in this class anywhere in the project
+     */
     public void configManager() {
+        // Check for the existence of configuration files and create their directories if not found
         filesPath = Paths.get(DATA_DIR).toAbsolutePath();
         Path presetsPath = Paths.get(PRESET_DIR).toAbsolutePath();
         Path waitingUploadsPath = Paths.get(UPLOAD_DIR).toAbsolutePath();
@@ -61,6 +67,9 @@ public enum ConfigManager {
         loadSettings();
     }
 
+    /**
+     * Reads the settings.properties file. If it is not found then it is created and default values is assigned to the variables
+     */
     private void loadSettings() {
         InputStream input = null;
         try {
@@ -92,6 +101,9 @@ public enum ConfigManager {
         }
     }
 
+    /**
+     * Saves the properties to the settings.properties file
+     */
     public void saveSettings() {
         OutputStream output = null;
         try {
@@ -154,6 +166,10 @@ public enum ConfigManager {
 
     // Presets
 
+    /**
+     * Reads the names of all saved presets from disc and return their names
+     * @return a ArrayList with the names of all saved presets
+     */
     private ArrayList<String> loadSavedPresetNamesList() {
         ArrayList<String> presetNames = new ArrayList<>();
         File dir = new File(PRESET_DIR);
@@ -166,6 +182,10 @@ public enum ConfigManager {
         return presetNames;
     }
 
+    /**
+     * Loads the presets in presetNames from disc
+     * @param presetNames the presets to load
+     */
     private void loadSavedPresets(ArrayList<String> presetNames) {
         presetStringsMap = new HashMap<>();
         for(String presetName : presetNames) {
@@ -178,6 +198,12 @@ public enum ConfigManager {
         }
     }
 
+    /**
+     * Loads the preset presetName from disc
+     * @param presetName name of the preset to load
+     * @return the string representation of the preset
+     * @throws IOException if presetName does not exist or could not be accessed
+     */
     private String loadPreset(String presetName) throws IOException {
         if (Files.exists(Paths.get(PRESET_DIR + "/" + presetName))) {
             BufferedReader reader = new BufferedReader(new FileReader(
@@ -199,6 +225,11 @@ public enum ConfigManager {
         }
     }
 
+    /**
+     * Writes a preset to disc
+     * @param presetName the name of the preset
+     * @param stringRepresentation the string representation of the preset.
+     */
     public void savePreset(String presetName, String stringRepresentation) {
         BufferedWriter writer = null;
         try {
@@ -219,6 +250,11 @@ public enum ConfigManager {
         presetStringsMap.put(presetName, stringRepresentation);
     }
 
+    /**
+     * Deletes a preset from disc.
+     * @param presetName the name of the preset file to delete.
+     * @return true on success, false on failure.
+     */
     public boolean deletePreset(String presetName) {
         Path path = Paths.get(PRESET_DIR + "/" + presetName);
         if (!Files.exists(path)) {
@@ -235,6 +271,10 @@ public enum ConfigManager {
         return true;
     }
 
+    /**
+     *
+     * @return a ArrayList with the names of all loaded presets.
+     */
     public ArrayList<String> getPresetNames() {
         if(presetStringsMap != null) {
             return new ArrayList<>(presetStringsMap.keySet());
@@ -242,6 +282,11 @@ public enum ConfigManager {
         return null;
     }
 
+    /**
+     *
+     * @param presetName the name of a loaded preset
+     * @return the string representation of that preset or null if it does not exist
+     */
     public String getPresetString(String presetName) {
         if (presetStringsMap != null) {
             return presetStringsMap.getOrDefault(presetName, null);
@@ -251,6 +296,10 @@ public enum ConfigManager {
 
     // Playlists
 
+    /**
+     * Writes the list of playlists to disc
+     * @param playlistData the playlist data to save
+     */
     public void savePlaylistCache(String playlistData) {
         BufferedWriter writer = null;
         try {
@@ -270,6 +319,10 @@ public enum ConfigManager {
         }
     }
 
+    /**
+     * Reads stored playlists from disc
+     * @return a ArrayList with one row of the save file per element
+     */
     public ArrayList<String> loadPlaylistCache() {
         BufferedReader reader;
         ArrayList<String> playlistString = new ArrayList<>();
@@ -295,12 +348,20 @@ public enum ConfigManager {
 
     // Waiting Uploads
 
+    /**
+     * Checks if there is any waiting uploads stored
+     * @return true if there are at least one, false if zero.
+     */
     public boolean hasWaitingUploads() {
         File dir = new File(UPLOAD_DIR);
         File[] directoryListing = dir.listFiles();
         return directoryListing != null;
     }
 
+    /**
+     *
+     * @return a list of string representations of uploads that was saved
+     */
     public ArrayList<String> getWaitingUploads() {
         File dir = new File(UPLOAD_DIR);
         File[] directoryListing = dir.listFiles();
@@ -320,7 +381,13 @@ public enum ConfigManager {
         return uploads;
     }
 
-    public void saveWaitingUpload(String waitingUpload, String fileName) { // filename does not really matter as long as it is valid
+    /**
+     * Save waiting uploads to disc so they can be recreate next time.
+     * @param waitingUpload string representation of the upload to save
+     * @param fileName name of the file to save it in, does not really matter as long as it is valid for the OS. It is
+     *                 to the caller to make sure a previously saved upload is not overwritten.
+     */
+    public void saveWaitingUpload(String waitingUpload, String fileName) {
         BufferedWriter writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(
@@ -339,6 +406,11 @@ public enum ConfigManager {
         }
     }
 
+    /**
+     * Loads a waiting upload from disc.
+     * @param waitingUpload name of the file
+     * @return the content of the file (a string representation of the upload)
+     */
     private String loadWaitingUploadsFile(File waitingUpload) {
         BufferedReader reader = null;
         StringBuilder stringBuilder = new StringBuilder();
@@ -369,6 +441,10 @@ public enum ConfigManager {
 
     // Categories
 
+    /**
+     * Writes categoryData to the categories file
+     * @param categoryData information about categories that should be saved
+     */
     public void saveLocalizedCategories(String categoryData) {
         BufferedWriter writer = null;
         try {
@@ -388,6 +464,10 @@ public enum ConfigManager {
         }
     }
 
+    /**
+     * Reads the content of the categories file
+     * @return the content of the categories file with one line per element in the ArrayList
+     */
     public ArrayList<String> loadLocalizedCategories() {
         BufferedReader reader;
         ArrayList<String> playlistString = new ArrayList<>();

@@ -6,6 +6,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * The program starts here, opens MainWindow and waits for all windows to close
+ */
 public class Main extends Application {
 
     @Override
@@ -14,9 +17,11 @@ public class Main extends Application {
         Parent root = loader.load();
         primaryStage.setTitle("Stekeblads Video Uploader");
         primaryStage.setScene(new Scene(root, 900, 825));
+        // Register MainWindowController.onWindowClose() to be called when the close button is clicked
         mainWindowController controller = loader.getController();
         primaryStage.setOnCloseRequest(event -> {
             if(! controller.onWindowClose()) {
+                // Close or not close based on return value
                 event.consume();
             }
         });

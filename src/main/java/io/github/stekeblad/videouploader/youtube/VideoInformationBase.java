@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
+/**
+ * Base class to VideoUpload and VideoPreset that contains all their common features
+ */
 public class VideoInformationBase {
 
     // Constants
@@ -39,31 +42,63 @@ public class VideoInformationBase {
     private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
 
     // Getters
+
+    /**
+     * @return the content of the video name TextField
+     */
     public String getVideoName() {
         return ((TextField) videoBasePane.lookup("#" + paneId + NODE_ID_TITLE)).getText();
     }
+
+    /**
+     * @return returns the content of the video description TextArea
+     */
     public String getVideoDescription() {
         return ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_DESCRIPTION)).getText();
     }
+
+    /**
+     * @return returns the selected value of the visibility ChoiceBox as a uppercase String
+     */
     @SuppressWarnings("unchecked")
     public VisibilityStatus getVisibility() {
         return VisibilityStatus.valueOf(((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY)).getSelectionModel().getSelectedItem().toUpperCase());
     }
+
+    /**
+     * @return returns the tags in the tags TextArea as a ArrayList of Strings, the tags are split on ", "
+     */
     public List<String> getVideoTags() {
         return new ArrayList<>(Arrays.asList(((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_TAGS)).getText().split(", ")));
     }
+
+    /**
+     * @return returns the name of the selected playlist in the playlist ChoiceBox
+     */
     @SuppressWarnings("unchecked")
     public String getPlaylist() {
         return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).getSelectionModel().getSelectedItem();
     }
+
+    /**
+     * @return returns the name of the category selected in the categories ChoiceBox
+     */
     @SuppressWarnings("unchecked")
     public String getCategory() {
         return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).getSelectionModel().getSelectedItem();
     }
+
+    /**
+     * @return returns true if do tell subscribers in the tellSubs ChoiceBox is selected and false if do not tell subscribers is selected
+     */
     @SuppressWarnings("unchecked")
     public boolean isTellSubs() { // only two choices, do notify subscribers is the second choice (index 1)
         return (((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS)).getSelectionModel().isSelected(1));
     }
+
+    /**
+     * @return returns the selected thumbnail file or null if no custom thumbnail is selected
+     */
     public File getThumbNail() {
         if(thumbNailFile == null || thumbNailFile.toURI().toString().endsWith("_")) {
             return null;
@@ -71,14 +106,34 @@ public class VideoInformationBase {
             return thumbNailFile;
         }
     }
+
+    /**
+     * @return returns the id of the Pane
+     */
     public String getPaneId() {
         return paneId;
     }
+
+    /**
+     * @return returns the entire UI Pane.
+     * The pane itself has the Id of getPaneId() and all nodes in it is named like this:
+     * <pre>{@code
+     *     getNodeId() + NODE_ID_TITLE    for the video name field
+     *     getNodeId() + NODE_ID_TAGS     for the tags field
+     *
+     *
+     */
     public GridPane getPane() {
         return videoBasePane;
     }
 
     //Setters (mostly done directly on the GridPane)
+
+    /**
+     * Sets the thumbnail
+     * @param thumbnail the thumbnail image file
+     * @throws Exception if editing is not allowed
+     */
     public void setThumbNailFile(File thumbnail) throws Exception {
         if (!allowEdit) {
             throw new Exception("Edit not allowed");
@@ -89,6 +144,10 @@ public class VideoInformationBase {
         }
     }
 
+    /**
+     * Sets the playlists that will appear in the playlists ChoiceBox
+     * @param playlistNames A ArrayList with the names of all playlists
+     */
     @SuppressWarnings("unchecked")
     public void setPlaylists(ArrayList<String> playlistNames) {
         if (playlistNames != null) {
@@ -96,6 +155,10 @@ public class VideoInformationBase {
         }
     }
 
+    /**
+     * Sets the categories that will appear in the categories ChoiceBox
+     * @param categories A ArrayList with the names of all categories
+     */
     @SuppressWarnings("unchecked")
     public void setCategories(ArrayList<String> categories) {
         if(categories != null) {
@@ -105,6 +168,18 @@ public class VideoInformationBase {
 
     // other methods
 
+    /**
+     * Constructor for VideoInformationBase. There is also the VideoInformationBase.Builder class if that is preferred.
+     * @param videoName Title of the video
+     * @param videoDescription Content of the description field
+     * @param visibility If the video should be public, private or unlisted
+     * @param videoTags A List of string with all tags for the video
+     * @param playlist The name of a playlist for this video to be in
+     * @param category Name of a Youtube category
+     * @param tellSubs Set to true if subscribers should be notified
+     * @param thumbNailPath File path to a image to use as thumbnail
+     * @param paneId A string used for naming all UI elements
+     */
     public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                                 String playlist, String category, boolean tellSubs, String thumbNailPath, String paneId) {
 
@@ -124,6 +199,12 @@ public class VideoInformationBase {
         allowEdit = false;
     }
 
+    /**
+     * Reconstructs a VideoInformationBase form its string version created by calling toString()
+     * @param fromString The string representation of a VideoInformationBase
+     * @param paneId A string used for naming all UI elements
+     * @throws Exception If the string could not be converted to a VideoInformationBase
+     */
     public VideoInformationBase(String fromString, String paneId) throws Exception {
 
         this.paneId = paneId;
@@ -137,27 +218,35 @@ public class VideoInformationBase {
         boolean tellSubs = false;
         String thumbnailPath = null;
 
+        // Splitting up the data for easy reading, one thing per row -> on thing per array element
         String[] lines = fromString.split("\n");
         String line;
+        // For all lines
         for(int i = 0; i < lines.length; i++) {
             line = lines[i];
+            // Locate the separator between field name and value
             int colonIndex = line.indexOf(':');
             if (colonIndex < 0) {
                 System.err.println(fromString);
                 throw new Exception("Malformed string representation of class");
             } else {
+                // Switch on field name
                 switch (line.substring(0, colonIndex)) {
                     case NODE_ID_TITLE:
                         videoName = line.substring(colonIndex + 1);
                         break;
                     case NODE_ID_DESCRIPTION:
+                        // A bit special to allow descriptions to be multi-lined with actual enters in.
                         StringBuilder descBuilder = new StringBuilder();
                         descBuilder.append(line.substring(colonIndex + 1));
+                        // Skips lines in the outer loop because they are not valid
                         i++;
+                        // As long as the next line not starts with "_" treat it as a part of the description
                         while(!lines[i].startsWith("_")) {
                             descBuilder.append("\n").append(lines[i]);
                             i++;
                         }
+                        // Line started with _ ,go back one so the increment in the loop does not cause this line to be skipped
                         i--;
                         videoDescription = descBuilder.toString();
                         break;
@@ -178,15 +267,11 @@ public class VideoInformationBase {
                         tellSubs = Boolean.valueOf(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_THUMBNAIL:
-                        if (line.equals("_")) {
-                            thumbnailPath = null; //use default
+                        thumbnailPath = line.substring(colonIndex + 1);
+                        if(thumbnailPath.equals("_")) {
+                            this.thumbNailFile = null; // use default
                         } else {
-                            thumbnailPath = line.substring(colonIndex + 1);
-                            if(thumbnailPath != null) {
-                                this.thumbNailFile = new File(thumbnailPath);
-                            } else {
-                                this.thumbNailFile = null;
-                            }
+                            this.thumbNailFile = new File(thumbnailPath);
                         }
                         break;
                     default:
@@ -197,11 +282,26 @@ public class VideoInformationBase {
         makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbnailPath);
     }
 
+    /**
+     * Returns a copy of this VideoInformationBase with a potentially different node naming
+     * @param paneIdForCopy The paneId used for naming the nodes in the copy, use null to get the same as original.
+     *                      if null is given then the original and the copy may not be able to be on screen at the same time,
+     *                      the nodes will be considered to be the same and when placing the second one of them it will cause the
+     *                      nodes from the first to be moved to the location of the second.
+     * @return A copy of this VideoInformationBase
+     */
     public VideoInformationBase copy(String paneIdForCopy) {
+        if (paneIdForCopy == null) {
+            paneIdForCopy = getPaneId();
+        }
         return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
                 getPlaylist(), getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy);
     }
 
+    /**
+     * Used for building a VideoInformationBase one attribute at the time.
+     * Call build() to get a real VideoInformationBase when you are done setting attributes.
+     */
     public static class Builder {
         private String videoName;
         private String videoDescription;
@@ -264,94 +364,106 @@ public class VideoInformationBase {
         }
     }
 
+    /**
+     * Creates the UI Pane so it can be be retrieved by front end code with getPane()
+     * @param videoName Content of the video title field
+     * @param videoDescription Content of the video description field
+     * @param visibility The VisibilityStatus to be selected by default
+     * @param videoTags The tags to be inside th tags field
+     * @param playlist The name of the element to be selected by default
+     * @param category The category to be selected by default
+     * @param tellSubs The default value of tellSubs
+     * @param thumbNailPath The path to the selected thumbnail or null for the no thumbnail selected image
+     */
      protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                                       String playlist, String category, boolean tellSubs, String thumbNailPath) {
-        videoBasePane = new GridPane();
-        videoBasePane.setId(paneId);
-        videoBasePane.setPrefSize(680, 100);
-        videoBasePane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+         // Creating the pane, id, size, border
+         videoBasePane = new GridPane();
+         videoBasePane.setId(paneId);
+         videoBasePane.setPrefSize(680, 100);
+         videoBasePane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
-        if(videoName == null) videoName = "";
-        if(videoDescription == null) videoDescription = "";
+         if(videoName == null) videoName = "";
+         if(videoDescription == null) videoDescription = "";
 
 
-        TextField title = new TextField();
-        title.setId(paneId + NODE_ID_TITLE);
-        title.setPromptText("Video title");
-        title.setText(videoName);
-        title.setEditable(false);
+         TextField title = new TextField();     // Creating the video title TextField
+         title.setId(paneId + NODE_ID_TITLE);   // Naming it
+         title.setPromptText("Video title");    // Faded text to tell the user what should be entered here
+         title.setText(videoName);              // Set text to be shown
+         title.setEditable(false);              // Do not allow the content in the TextField to be changed by the user
 
-        TextArea description = new TextArea();
-        description.setId(paneId + NODE_ID_DESCRIPTION);
-        description.setPromptText("Video description");
-        description.setText(videoDescription);
-        description.setEditable(false);
-        description.setWrapText(true);
+         TextArea description = new TextArea();
+         description.setId(paneId + NODE_ID_DESCRIPTION);
+         description.setPromptText("Video description");
+         description.setText(videoDescription);
+         description.setEditable(false);
+         // Visually start a new line when the edge of TextArea is reached so the user to not need to scroll sideways to
+         // read what they just entered. This type of automatic enter is only visible in the UI and is not a part of the
+         // string returned by description.getText()
+         description.setWrapText(true);
 
-        ChoiceBox<String> categoryChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(categoryUtils.getCategoryNames()));
-        categoryChoiceBox.setId(paneId + NODE_ID_CATEGORY);
-        categoryChoiceBox.getSelectionModel().select(category);
-        categoryChoiceBox.setTooltip(new Tooltip("Youtube Video Category"));
-        categoryChoiceBox.setDisable(true);
+         ChoiceBox<String> categoryChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(categoryUtils.getCategoryNames()));
+         categoryChoiceBox.setId(paneId + NODE_ID_CATEGORY);
+         categoryChoiceBox.getSelectionModel().select(category);
+         categoryChoiceBox.setTooltip(new Tooltip("Youtube Video Category"));
+         categoryChoiceBox.setDisable(true);    // prevent editing
 
-        TextArea tags = new TextArea();
-        tags.setId(paneId + NODE_ID_TAGS);
-        tags.setPromptText("list, of, tags, separated, with, comma, and, space");
-        StringBuilder tagsString = new StringBuilder();
-        if(videoTags != null && videoTags.size() > 0) {
+         TextArea tags = new TextArea();
+         tags.setId(paneId + NODE_ID_TAGS);
+         tags.setPromptText("list, of, tags, separated, with, comma, and, space");
+         StringBuilder tagsString = new StringBuilder();
+         if(videoTags != null && videoTags.size() > 0) {
+             // Add the tags to the screen with a ", " separation between them ...
             for (int i = 0; i < videoTags.size() - 1; i++) {
                 tagsString.append(videoTags.get(i)).append(", ");
             }
-            if (videoTags.size() > 0) {
-                tagsString.append(videoTags.get(videoTags.size() - 1));
-            }
-        }
-        tags.setText(tagsString.toString());
-        tags.setEditable(false);
-        tags.setWrapText(true);
-        tags.textProperty().addListener((observable, oldValue, newValue) -> { //Prevent newlines, allow text wrap
+            // ... without ", " after the last one
+             tagsString.append(videoTags.get(videoTags.size() - 1));
+         }
+         tags.setText(tagsString.toString());
+         tags.setEditable(false);
+         tags.setWrapText(true);
+         tags.textProperty().addListener((observable, oldValue, newValue) -> { //Prevent newlines, allow text wrap
                  tags.setText(newValue.replaceAll("\\R", ""));
          });
 
-
-
-
-        ArrayList<String> playlistStrings = new ArrayList<>();
-        if (playlist != null && !playlist.equals("")) {
+         ArrayList<String> playlistStrings = new ArrayList<>();
+         if (playlist != null && !playlist.equals("")) {
             playlistStrings.add(playlist);
-        } else {
+         } else {
             playlistStrings.add("select a playlist");
-        }
-        ChoiceBox<String> playlistChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
-        playlistChoiceBox.setId(paneId + NODE_ID_PLAYLIST);
-        playlistChoiceBox.getSelectionModel().select(0);
-        playlistChoiceBox.setTooltip(new Tooltip("Select a playlist to add this video to"));
-        playlistChoiceBox.setDisable(true);
+         }
+         ChoiceBox<String> playlistChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
+         playlistChoiceBox.setId(paneId + NODE_ID_PLAYLIST);
+         playlistChoiceBox.getSelectionModel().select(0);
+         playlistChoiceBox.setTooltip(new Tooltip("Select a playlist to add this video to"));
+         playlistChoiceBox.setDisable(true);
 
-        ArrayList<VisibilityStatus> statuses = new ArrayList<>(EnumSet.allOf(VisibilityStatus.class));
-        ArrayList<String> visibilityStrings = new ArrayList<>();
-        for (VisibilityStatus status : statuses) {
+         ArrayList<VisibilityStatus> statuses = new ArrayList<>(EnumSet.allOf(VisibilityStatus.class));
+         ArrayList<String> visibilityStrings = new ArrayList<>();
+         for (VisibilityStatus status : statuses) {
             visibilityStrings.add(status.getStatusName());
-        }
-        ChoiceBox<String> visibilityChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(visibilityStrings));
+         }
+         ChoiceBox<String> visibilityChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(visibilityStrings));
          visibilityChoiceBox.setId(paneId + NODE_ID_VISIBILITY);
          visibilityChoiceBox.getSelectionModel().select(visibility.getStatusName());
          visibilityChoiceBox.setTooltip(new Tooltip("how will the video be accessible?"));
          visibilityChoiceBox.setDisable(true);
 
-        ArrayList<String> tellSubsOptions = new ArrayList<>();
-        tellSubsOptions.add("Do not Notify Subscribers");
-        tellSubsOptions.add("Notify Subscribers");
-        ChoiceBox<String> tellSubsChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(tellSubsOptions));
-        tellSubsChoiceBox.setId(paneId + NODE_ID_TELLSUBS);
-        if (tellSubs) {
+         ArrayList<String> tellSubsOptions = new ArrayList<>();
+         tellSubsOptions.add("Do not Notify Subscribers");
+         tellSubsOptions.add("Notify Subscribers");
+         ChoiceBox<String> tellSubsChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(tellSubsOptions));
+         tellSubsChoiceBox.setId(paneId + NODE_ID_TELLSUBS);
+         if (tellSubs) {
             tellSubsChoiceBox.getSelectionModel().select(1);
-        } else {
+         } else {
             tellSubsChoiceBox.getSelectionModel().select(0);
-        }
-        tellSubsChoiceBox.setTooltip(new Tooltip(
+         }
+         tellSubsChoiceBox.setTooltip(new Tooltip(
                 "Should the channel's subscribers be notified that a new video has been uploaded? Not recommended then uploading alot of videos \nBut why are you using this program then?"));
-        tellSubsChoiceBox.setDisable(true);
+         tellSubsChoiceBox.setDisable(true);
 
          Image thumbNailImage;
          try {
@@ -366,6 +478,7 @@ public class VideoInformationBase {
          thumbNailFrame.setId(paneId + NODE_ID_THUMBNAIL);
          thumbNailFrame.setPreserveRatio(true);
 
+         // Place the different nodes on the pane
          videoBasePane.add(title, 0, 0);
          videoBasePane.add(categoryChoiceBox, 1, 0);
          videoBasePane.add(playlistChoiceBox, 2, 0);
@@ -378,6 +491,10 @@ public class VideoInformationBase {
          videoBasePane.add(visibilityChoiceBox, 2, 3);
     }
 
+    /**
+     * Enables / Disables editing of all the fields on the pane
+     * @param newEditStatus true to allow edit, false to not allow
+     */
     public void setEditable(boolean newEditStatus) {
         allowEdit = newEditStatus;
         ((TextField) videoBasePane.lookup("#" + paneId + NODE_ID_TITLE)).setEditable(newEditStatus);
@@ -389,28 +506,36 @@ public class VideoInformationBase {
         videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
     }
 
+    /**
+     * Creates a string representation of the class that can be saved and later used to recreate the class as it
+     * looked like before with the VideoInformationBase(String, String) constructor
+     * @return A String representation of this class
+     */
     public String toString() {
         StringBuilder classString = new StringBuilder();
         String thumbnailSave;
-    try {
-            if (thumbNailFile == null) {
-                thumbnailSave = "_"; //no thumbnail set, default is selected
-            } else {
+
+        if (thumbNailFile == null) {
+            thumbnailSave = "_"; //no thumbnail set, default is selected
+        } else {
+            // Attempt to get the path of the thumbnail and if it fails fall back to the default thumbnail.
+            // Earlier the entire Instance of the class was lost.
+            try {
                 thumbnailSave = thumbNailFile.getCanonicalPath();
+            } catch (IOException e) {
+                System.err.println("Failed getting the path of the thumbnail while creating a string of " + getPaneId() + " named " + getVideoName());
+                thumbnailSave = "_";
             }
-            classString.append(NODE_ID_TITLE + ":").append(getVideoName()).append("\n")
-                    .append(NODE_ID_DESCRIPTION).append(":").append(getVideoDescription()).append("\n")
-                    .append(NODE_ID_VISIBILITY).append(":").append(getVisibility().getStatusName().toUpperCase()).append("\n")
-                    .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
-                    .append(NODE_ID_PLAYLIST).append(":").append(getPlaylist()).append("\n")
-                    .append(NODE_ID_CATEGORY).append(":").append(getCategory()).append("\n")
-                    .append(NODE_ID_TELLSUBS).append(":").append(Boolean.toString(isTellSubs())).append("\n")
-                    .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave);
-            return classString.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return "";
+        classString.append(NODE_ID_TITLE + ":").append(getVideoName()).append("\n")
+                .append(NODE_ID_DESCRIPTION).append(":").append(getVideoDescription()).append("\n")
+                .append(NODE_ID_VISIBILITY).append(":").append(getVisibility().getStatusName().toUpperCase()).append("\n")
+                .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
+                .append(NODE_ID_PLAYLIST).append(":").append(getPlaylist()).append("\n")
+                .append(NODE_ID_CATEGORY).append(":").append(getCategory()).append("\n")
+                .append(NODE_ID_TELLSUBS).append(":").append(Boolean.toString(isTellSubs())).append("\n")
+                .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave);
+        return classString.toString();
 
     }
 }

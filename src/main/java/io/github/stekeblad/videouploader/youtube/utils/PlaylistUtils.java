@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Enum-Singleton class for handling playlists. Initialize ConfigManager with the configManager() method before using
+ * this class
+ */
 public enum PlaylistUtils {
     INSTANCE;
 
@@ -19,16 +23,23 @@ public enum PlaylistUtils {
 
     private HashMap<String, String> playlistCache = null;
 
+    /**
+     * Gets playlists from Youtube. Does not check if permission has been given or not. If you want to display a warning
+     * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
+     */
     public void refreshPlaylist() {
         try {
+            // Authenticate user and create Youtube object
             Credential creds = Auth.authUser();
             YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
                     "Stekeblads Youtube Uploader").build();
 
+            // Prepare request
             YouTube.Playlists.List userPlaylists = youtube.playlists().list("snippet,contentDetails");
             userPlaylists.setMine(true);
             userPlaylists.setMaxResults(25L);
 
+            // Get response
             PlaylistListResponse response = userPlaylists.execute();
             List<Playlist> playlists = response.getItems();
 
@@ -42,6 +53,9 @@ public enum PlaylistUtils {
         }
     }
 
+    /**
+     * First attempts to load local playlists from disc, if no playlists is found then attempt to get playlists from youtube
+     */
     private void getUserPlaylists() {
         loadCache();
         if (playlistCache.isEmpty()) {
@@ -49,6 +63,10 @@ public enum PlaylistUtils {
         }
     }
 
+    /**
+     *
+     * @return a list with the names of all playlists
+     */
     public ArrayList<String> getUserPlaylistNames() {
         if(playlistCache == null) {
             getUserPlaylists();
@@ -56,6 +74,11 @@ public enum PlaylistUtils {
         return new ArrayList<>(playlistCache.keySet());
     }
 
+    /**
+     * Returns the playlist id for the playlist named playlistName
+     * @param playlistName the name of the playlist to get the id for
+     * @return the id of the playlist playlistName or null if their is no playlist named playlistName
+     */
     public String getPlaylistId(String playlistName) {
         if (playlistName == null) {
             return null;
@@ -63,6 +86,11 @@ public enum PlaylistUtils {
         return playlistCache.getOrDefault(playlistName, null);
     }
 
+    /**
+     * Returns a Youtube playlist URL that links to the playlist named playlistName
+     * @param playlistName the name of the playlist to get the URL to
+     * @return a Youtube playlist URL that points to playlistName or null if their is no playlist named playlistName
+     */
     public String getPlaylistUrl(String playlistName) {
         String id = getPlaylistId(playlistName);
         if(id != null) {
@@ -72,6 +100,9 @@ public enum PlaylistUtils {
         }
     }
 
+    /**
+     * Saves the playlists to disc
+     */
     private void saveCache() {
         StringBuilder saveString = new StringBuilder();
         playlistCache.forEach((k, v) -> saveString.append(v).append(":").append(k).append("\n"));
@@ -79,6 +110,9 @@ public enum PlaylistUtils {
         configManager.savePlaylistCache(saveString.toString());
     }
 
+    /**
+     * Loads playlists from disc
+     */
     public void loadCache() {
         playlistCache = new HashMap<>();
         ArrayList<String> loadedPlaylists = configManager.loadPlaylistCache();

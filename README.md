@@ -33,4 +33,5 @@ description of the videos in the image below has no playlist url
 ![Image](https://drive.google.com/uc?export=download&id=1CTwsjglQgb9m8Dz_9Sc1l-99gpfo1f6h)
 
 ### Videos
-I have made a few short videos introducing the program and how to use it: **Up soon!**
+I have made a few short videos introducing the program and how to use it:
+[Playlist](https://www.youtube.com/playlist?list=PLAA2832YwTI9mddiWDeZ_RDnIjaBa8dP-)

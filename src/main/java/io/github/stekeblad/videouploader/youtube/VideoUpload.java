@@ -10,6 +10,9 @@ import javafx.scene.layout.HBox;
 import java.io.File;
 import java.util.List;
 
+/**
+ * Can represents a video that is being prepared for uploading or currently being uploaded.
+ */
 public class VideoUpload extends VideoInformationBase{
 
     public static final String VIDEO_FILE_FORMAT = "video/";
@@ -20,37 +23,79 @@ public class VideoUpload extends VideoInformationBase{
     private File videoFile;
     private GridPane uploadPane;
 
+    /**
+     * @return returns a File object with the video file set to be used when uploading
+     */
     public File getVideoFile() {
         return this.videoFile;
     }
+
+    /**
+     * @return returns the entire UI pane for placement on screen
+     */
     public GridPane getUploadPane() {
         return this.uploadPane;
     }
 
+    /**
+     * Place a button in the first button slot with your own text, click behavior etc.
+     * @param btn1 A fully configured button
+     */
     public void setButton1(Button btn1) {
         ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(0, btn1);
     }
 
+    /**
+     * Place a button in the second button slot with your own text, click behavior etc.
+     * @param btn2 A fully configured button
+     */
     public void setButton2(Button btn2) {
         ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
     }
 
+    /**
+     * Place a button in the third button slot with your own text, click behavior etc.
+     * @param btn3 A fully configured button
+     */
     public void setButton3(Button btn3) {
         ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(2, btn3);
     }
 
+    /**
+     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
+     */
     public String getButton1Id() {
         return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
     }
 
+    /**
+     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
+     */
     public String getButton2Id() {
         return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
     }
 
+    /**
+     * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
+     */
     public String getButton3Id() {
         return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
     }
 
+    /**
+     * Constructor for VideoUpload. There is also the VideoUpload.Builder class if that is preferred.
+     * Everything set here can be edited later except paneId and videoFile
+     * @param videoName Title of the video that will be uploaded
+     * @param videoDescription Description of the video that will be uploaded
+     * @param visibility The visibility status of the video that will be uploaded
+     * @param videoTags The tags that the video that will be uploaded will have
+     * @param playlist The name of a playlist that will be selected for added to after uploading
+     * @param category The name of the category that should be selected
+     * @param tellSubs Set to true if subscribers should be notified when this videos is uploaded, set to false to not notify
+     * @param thumbNailPath File path to a thumbnail to use for this video or null to let thumbnail be selected automatically
+     * @param paneName A string used for naming all UI elements
+     * @param videoFile The video that will be uploaded
+     */
     public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                        String playlist, String category, boolean tellSubs, String thumbNailPath, String paneName, File videoFile) {
 
@@ -59,6 +104,12 @@ public class VideoUpload extends VideoInformationBase{
         makeUploadPane();
     }
 
+    /**
+     * Reconstructs a VideoUpload form its string version created by calling toString()
+     * @param fromString The string representation of a VideoUpload
+     * @param paneId A string used for naming all UI elements
+     * @throws Exception If the string could not be converted to a VideoUpload
+     */
     public VideoUpload(String fromString, String paneId) throws Exception{
         super(fromString, paneId);
         String[] lines = fromString.split("\n");
@@ -77,6 +128,14 @@ public class VideoUpload extends VideoInformationBase{
         makeUploadPane();
     }
 
+    /**
+     *Creates a copy of this VideoUpload with the same or different paneId.
+     * @param paneIdCopy The paneId used for naming the nodes in the copy, use null to get the same as original.
+     *                      if null is given then the original and the copy may not be able to be on screen at the same time,
+     *                      the nodes will be considered to be the same and when placing the second one of them it will cause the
+     *                      nodes from the first to be moved to the location of the second.
+     * @return a copy of this VideoUpload
+     */
     public VideoUpload copy(String paneIdCopy) {
         if(paneIdCopy == null) {
             paneIdCopy = getPaneId();
@@ -91,6 +150,10 @@ public class VideoUpload extends VideoInformationBase{
                 getCategory(), isTellSubs(), thumbnailPath, paneIdCopy, getVideoFile());
     }
 
+    /**
+     *  Used for building a VideoUpload one attribute at the time.
+     * Call build() to get a real VideoUpload when you are done setting attributes.
+     */
     public static class Builder {
         private String videoName;
         private String videoDescription;
@@ -159,8 +222,13 @@ public class VideoUpload extends VideoInformationBase{
         }
     }
 
+    /**
+     * Creates the UI Pane so it can be be retrieved by front end code with getUploadPane()
+     */
     protected void makeUploadPane() {
+        // The base class has already done most of the work
         uploadPane = super.getPane();
+        // Make the pane slightly larger to fit the extra nodes
         uploadPane.setPrefHeight(170);
 
         ProgressBar progressBar = new ProgressBar();
@@ -186,10 +254,20 @@ public class VideoUpload extends VideoInformationBase{
         uploadPane.add(buttonsBox, 2, 4);
     }
 
+    /**
+     * Enables / Disables editing of all fields of the pane
+     * @param newEditStatus true to allow edit, false to not allow
+     */
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
+        // Does not extend with any editable fields
     }
 
+    /**
+     * Creates a string representation of the class that can be saved and later used to recreate the class as it
+     * looked like before with the VideoUpload(String, String) constructor
+     * @return A String representation of this class
+     */
     public String toString() {
         String classString = super.toString();
         classString += "\n_videofile:" + videoFile.getAbsolutePath();

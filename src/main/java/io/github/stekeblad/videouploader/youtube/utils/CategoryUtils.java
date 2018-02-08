@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * A Enum-Singleton class that handles categories. Initialize ConfigManager with the configManager() method before using
+ * this class
+ */
 public enum CategoryUtils {
     INSTANCE;
 
@@ -19,25 +23,34 @@ public enum CategoryUtils {
 
     private HashMap<String, String> categories = null;
 
+    /**
+     * Gets Categories from Youtube. Does not check if permission has been given or not. If you want to display a warning
+     * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
+     */
     public void downloadCategories() {
+        // Get stored language and country settings
         String lang = configManager.getCategoryLanguage();
         String region = configManager.getCategoryCountry();
 
+        // quick check of stored settings
         if(lang.length() != 2 || region.length() != 2) {
             System.err.println("Invalid length of lang or region \nlang: " + lang + "\nregion: " + region);
             return;
         }
 
         try {
+            // Authenticate user and create Youtube object
             Credential creds = Auth.authUser();
             YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
                     "Stekeblads Video Uploader").build();
 
+            // Prepare and send request
             YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list("snippet");
             videoCategoriesListForRegionRequest.setHl(lang);
             videoCategoriesListForRegionRequest.setRegionCode(region);
             VideoCategoryListResponse response = videoCategoriesListForRegionRequest.execute();
 
+            // Process result
             List<VideoCategory> vidCat = response.getItems();
             categories = new HashMap<>();
             for(VideoCategory cat : vidCat) {
@@ -45,6 +58,7 @@ public enum CategoryUtils {
                     categories.put(cat.getSnippet().getTitle(), cat.getId());
                 }
             }
+            // Set default category if no results was returned
             if (categories.isEmpty()) {
                 categories.put("Categories not localized", "-1");
             }
@@ -56,6 +70,10 @@ public enum CategoryUtils {
         }
     }
 
+    /**
+     *
+     * @return a list of all category names that is allowed to be used
+     */
     public ArrayList<String> getCategoryNames() {
         if (categories == null) {
             loadCategories();
@@ -63,6 +81,11 @@ public enum CategoryUtils {
         return new ArrayList<>(categories.keySet());
     }
 
+    /**
+     * Returns the category Id that belongs to the category categoryName
+     * @param categoryName the category that you want the Id for
+     * @return the Id of categoryName as a String
+     */
     public String getCategoryId(String categoryName) {
         if (categories == null) {
             loadCategories();
@@ -70,6 +93,9 @@ public enum CategoryUtils {
         return categories.getOrDefault(categoryName, "-1");
     }
 
+    /**
+     * Saves the categories to disc
+     */
     private void saveCategories() {
         StringBuilder saveString = new StringBuilder();
         categories.forEach((k, v) -> saveString.append(v).append(":").append(k).append("\n"));
@@ -77,6 +103,9 @@ public enum CategoryUtils {
         configManager.saveLocalizedCategories(saveString.toString());
     }
 
+    /**
+     * Loads saved categories from disc, if no saved categories was found then a default no categories category is added.
+     */
     public void loadCategories() {
         categories = new HashMap<>();
         ArrayList<String> data = configManager.loadLocalizedCategories();

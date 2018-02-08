@@ -52,6 +52,11 @@ public class PresetsWindowController implements Initializable {
     
     private static final String PRESET_PANE_ID_PREFIX = "preset-";
 
+    /**
+     * Initialize a few things when the window is opened
+     * @param location provided by fxml
+     * @param resources provided by fxml
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         configManager = ConfigManager.INSTANCE;
@@ -60,6 +65,8 @@ public class PresetsWindowController implements Initializable {
         presetBackups = new HashMap<>();
 
         videoPresets = new ArrayList<>();
+
+        // Load all saved presets
         ArrayList<String> savedPresetNames = configManager.getPresetNames();
         if (savedPresetNames != null) {
             for (String presetName : savedPresetNames) {
@@ -88,6 +95,12 @@ public class PresetsWindowController implements Initializable {
         updatePresetList();
     }
 
+    /**
+     * Called when the add preset button is clicked.
+     * Takes the text in the text field to the left of the button and creates a preset with that name.
+     * The text field is not allowed to be empty or have the name of a already existing preset.
+     * @param actionEvent the click event
+     */
     public void onPresetAddNew(ActionEvent actionEvent) {
         if (txt_nameNewPreset.getText().equals("")) {
             AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
@@ -97,6 +110,8 @@ public class PresetsWindowController implements Initializable {
             AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
             return;
         }
+
+        // Create the new preset, enable editing on it and scroll so it is in focus (in case the user has a lot of presets)
         VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
                 null, null, false, null, PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         videoPresets.add(newPreset);
@@ -109,6 +124,11 @@ public class PresetsWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Called when the tips button is clicked.
+     * Shows a small dialog with a few tips and warnings.
+     * @param actionEvent the click event
+     */
     public void onTipsClicked(ActionEvent actionEvent) {
         String messageContent = "First warnings: \n- Do not start a line in the description box with a underscore (\"_\") as " +
                 "that preset will not be loadable again!" +
@@ -122,6 +142,11 @@ public class PresetsWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Called when the localize categories button is clicked.
+     * Opens the localize categories window.
+     * @param actionEvent the click event
+     */
     public void onLocalizeCategories(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -142,6 +167,11 @@ public class PresetsWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Called when the refresh playlist button is clicked.
+     * Downloads the user's playlist from youtube
+     * @param actionEvent the click event
+     */
     public void onRefreshPlaylists(ActionEvent actionEvent) {
         if (configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
@@ -163,7 +193,9 @@ public class PresetsWindowController implements Initializable {
                     AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
                 }
             }
-        } else { // has authenticated
+            // has authenticated
+        } else {
+            // Do not allow the button to be clicked again until the window is closed and reopened
             btn_refreshPlaylists.setDisable(true);
             playlistUtils.refreshPlaylist();
             AlertUtils.simpleClose("Playlists updated", "For the updated playlist list to show up you " +
@@ -172,6 +204,9 @@ public class PresetsWindowController implements Initializable {
         actionEvent.consume();
     }
 
+    /**
+     * Re-adds all presets to the listPreset to make sure the UI is up-to-date
+     */
     private void updatePresetList() {
         ArrayList<GridPane> presetPanes = new ArrayList<>();
         for (VideoPreset videoPreset : videoPresets) {
@@ -196,6 +231,11 @@ public class PresetsWindowController implements Initializable {
         return presetIndex;
     }
 
+    /**
+     * Called when the edit button on a preset is clicked.
+     * Enables editing of the preset and takes a backup of it to be able to revert
+     * @param callerId the id of the preset + button name
+     */
     private void onPresetEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getPresetIndexByName(parentId);
@@ -203,8 +243,12 @@ public class PresetsWindowController implements Initializable {
             System.err.println("Non-existing edit button was pressed!!!");
             return;
         }
+
+        // create backup and enable editing
         presetBackups.put(videoPresets.get(selected).getPaneId(), videoPresets.get(selected).copy(null));
         videoPresets.get(selected).setEditable(true);
+
+        // Sets the thumbnail clickable for changing
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
             File pickedThumbnail = PickFile.pickThumbnail();
             if(pickedThumbnail != null) {
@@ -215,6 +259,7 @@ public class PresetsWindowController implements Initializable {
                 }
             }
         });
+        // set the playlists list
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event-> {
             if(configManager.getNeverAuthed()) {
                 onRefreshPlaylists(new ActionEvent());
@@ -223,6 +268,7 @@ public class PresetsWindowController implements Initializable {
                 videoPresets.get(selected).setPlaylists(playlistUtils.getUserPlaylistNames());
             }
         });
+        //set categories
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
                 videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames()));
 
@@ -238,6 +284,11 @@ public class PresetsWindowController implements Initializable {
         videoPresets.get(selected).setButton2(saveButton);
     }
 
+    /**
+     * Called when the save button on a preset is clicked.
+     * Saves the changes, disables editing and deletes the backup.
+     * @param callerId the preset id + button name
+     */
     private void onPresetSave(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         // locate this preset
@@ -275,9 +326,13 @@ public class PresetsWindowController implements Initializable {
         videoPresets.get(selected).setButton2(deleteButton);
     }
 
+    /**
+     * Called when the cancel button on a preset is clicked.
+     * Disables editing and reverts the preset to how it was before editing.
+     * @param callerId
+     */
     private void onPresetCancelEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        //reload preset from disc
         int selected = getPresetIndexByName(parentId);
         if (selected == -1) {
             System.err.println("Non-existing cancelEdit button was pressed!!!");
@@ -285,8 +340,10 @@ public class PresetsWindowController implements Initializable {
         }
 
         videoPresets.get(selected).setEditable(false);
+
+        // test for the existence of a backup
         if (! presetBackups.containsKey(videoPresets.get(selected).getPaneId())) {
-            // assume preset is a newly added not saved preset, delete it directly
+            // If no backup, assume preset is a newly added not saved preset, delete it directly
             videoPresets.remove(selected);
             updatePresetList();
             return;
@@ -296,7 +353,6 @@ public class PresetsWindowController implements Initializable {
             presetBackups.remove(videoPresets.get(selected).getPaneId());
         }
         updatePresetList();
-
 
         //change buttons
         Button editButton = new Button("Edit");
@@ -310,6 +366,11 @@ public class PresetsWindowController implements Initializable {
         videoPresets.get(selected).setButton2(deleteButton);
     }
 
+    /**
+     * Called when the delete button on a preset is clicked.
+     * Shows a confirmation dialog and if the user press yes, delete the preset.
+     * @param callerId the preset id + button name
+     */
     private void onPresetDelete(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getPresetIndexByName(parentId);

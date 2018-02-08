@@ -32,6 +32,11 @@ import java.util.function.Consumer;
 
 import static io.github.stekeblad.videouploader.youtube.VideoUpload.*;
 
+/**
+ * Uploader handles the actual uploading to Youtube and contains a queue for all uploads. New uploads can be added,
+ * existing once can be aborted all at the same time or just a specific. It is possible to get if their is a upload
+ * in progress and set a method to be called for all finished uploads with the Id of the upload as the only parameter
+ */
 public class Uploader {
     private HashMap<String, Future> tasks = new HashMap<>();
     private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
@@ -40,42 +45,67 @@ public class Uploader {
 
     private ExecutorService exec = Executors.newSingleThreadExecutor(Thread::new);
 
-    // the callback will be called with the cancelName of the task that finished
+    /**
+     * Sets a method to be called every time a upload finishes. The parameter given to the callback will be the cancelName
+     * that was given in the add() method.
+     * @param callback the callback to be called after every finished upload.
+     */
     public void setUploadFinishedCallback(Consumer<String> callback) {
         this.uploadFinishedCallback = callback;
     }
 
+    /**
+     * Aborts a single upload, scheduled or active
+     * @param cancelName the cancelName that was given when the add() method was called
+     * @return true if the upload was aborted, false if it for some reason is not possible to abort it.
+     */
     public boolean abortUpload(String cancelName) {
         return tasks.get(cancelName).cancel(true);
     }
 
+    /**
+     *
+     * @return true if a upload is in progress, false if not.
+     */
     public boolean getIsActive() {
         return !tasks.keySet().isEmpty();
     }
 
-    // returns the cancelName of all unfinished uploads
+    /**
+     * Aborts all uploads
+     * @return the cancelName of all unfinished uploads
+     */
     public Set<String> kill() {
         exec.shutdownNow();
         return tasks.keySet();
     }
 
+    /**
+     * Adds video to the upload list
+     * @param video video to upload
+     * @param cancelName String to use for aborting the upload and used to report that its finished
+     */
     public void add(VideoUpload video, String cancelName) {
+        // Create the task
         Future upload = exec.submit(new Task<Void>() {
             @Override
+            // Define what it does
             public Void call() {
                 try {
+                    // Do the uploading
                     upload(video);
                 } catch (Exception e) {
-                    if(e.getMessage().equals("INTERRUPTED")) {
-                        System.out.println("Interrupted upload of: " + video.getVideoName());
-                    } else {
+                    // if not interrupted by the user, print the error
+                    if (! e.getMessage().equals("INTERRUPTED")) {
                         e.printStackTrace();
                     }
                     return null; // do not use callback on upload that throws exception
                 }
+                // If upload finished without errors and callback is set, give the cancel name to the callback
                 if(uploadFinishedCallback != null) {
                     uploadFinishedCallback.accept(cancelName);
                 }
+                // Remove the task from the list
                 tasks.remove(cancelName);
                 return null ;
             }
@@ -83,14 +113,23 @@ public class Uploader {
         tasks.put(cancelName, upload); // save the future to be able to abort upload
     }
 
+    /**
+     * Does the uploading
+     * @param video a VideoUpload with all the details needed for uploading
+     * @throws IOException if the user aborts the upload while it is uploading, there is a exception while reading the video
+     * or thumbnail file or there is a network error that could not be handled.
+     */
     private void upload(VideoUpload video) throws IOException {
 
+        // Auth the user and create the Youtube object
         Credential creds = Auth.authUser();
         YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, request -> {
             creds.initialize(request);
+            // Tell Youtube to attempt resume upload if a network error occur.
             request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(new ExponentialBackOff()));
         }).setApplicationName("Stekeblads Video Uploader").build();
 
+        // Start building the Youtube video object
         Video videoObject = new Video();
 
         videoObject.setStatus(new VideoStatus().setPrivacyStatus(video.getVisibility().getStatusName()));
@@ -110,11 +149,14 @@ public class Uploader {
                 .insert("snippet,statistics,status", videoObject, videoFileStream);
         videoInsert.setNotifySubscribers(video.isTellSubs());
 
+        // getMediaHttpUploader for being able to report progress
         MediaHttpUploader uploader = videoInsert.getMediaHttpUploader();
         uploader.setDirectUploadEnabled(false); // makes the upload resumable?
 
         MediaHttpUploaderProgressListener progressListener = uploader1 -> {
+            // If user has aborted this upload while it is uploading
             if(Thread.interrupted()) {
+                // Throw a exception (Only IOException allowed)
                 throw new IOException("INTERRUPTED");
             }
             switch (uploader1.getUploadState()) {
@@ -180,6 +222,11 @@ public class Uploader {
         makeLabelClickable("https://youtu.be/" + uploadedVideo.getId(), video);
     }
 
+    /**
+     * Updates the progress bar in the UI
+     * @param progress the upload progress as a value between 0 and 1
+     * @param video the video object with the progress bar to update
+     */
     private void setPaneProgressBarProgress(double progress, VideoUpload video) {
         if (progress >= 0 && progress <= 1) {
             Platform.runLater(() ->
@@ -187,11 +234,21 @@ public class Uploader {
         }
     }
 
+    /**
+     * Sets the text to be displayed on the status label in the UI
+     * @param text the text to show
+     * @param video the video object that owns the status label to update
+     */
     private void setStatusLabelText(String text, VideoUpload video) {
         Platform.runLater(() ->
         ((Label) video.getUploadPane().lookup("#" + video.getPaneId() + NODE_ID_UPLOADSTATUS)).setText(text));
     }
 
+    /**
+     * Sets a URL to open when the status label is clicked
+     * @param url the url to open
+     * @param video the video object that owns the status label to make clickable.
+     */
     private void makeLabelClickable(String url, VideoUpload video) {
         Platform.runLater(() ->
                 video.getUploadPane().lookup("#" + video.getPaneId() + NODE_ID_UPLOADSTATUS)

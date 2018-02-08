@@ -12,7 +12,18 @@ import java.util.List;
 import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
 import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
 
+/**
+ * Different fileChoosers for different types of files
+ */
 public class PickFile {
+
+    /**
+     * Thumbnail chooser dialog. Only allows files of the types
+     * io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT
+     * to be selected and with a max allowed size of 2MB.
+     * Displays a non-blocking dialog explaining the error if the selected file is to large and returns null.
+     * @return A file object for the selected file, null if no file is selected or the selected file is to large. (2MB +)
+     */
     public static File pickThumbnail() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a thumbnail");
@@ -31,6 +42,11 @@ public class PickFile {
         return null;
     }
 
+    /**
+     * Video file chooser dialog. Allows multiple files to be selected and filters out all files witch does not have a mimeType
+     * of "video/*". If one or more files was filtered out a non-blocking dialog is displayed telling some files was ignored.
+     * @return A List of File with all files that was select and not filtered out.
+     */
     public static List<File> pickVideos() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose video files to upload");

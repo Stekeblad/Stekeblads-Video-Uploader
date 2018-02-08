@@ -23,10 +23,8 @@ import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 
 public class Auth {
 
-    // Things needed
     public static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     public static final JsonFactory JSON_FACTORY = new JacksonFactory();
-    //AUTH_DIR
 
     public static Credential authUser() throws IOException {
         List<String> scope = new ArrayList<>();
