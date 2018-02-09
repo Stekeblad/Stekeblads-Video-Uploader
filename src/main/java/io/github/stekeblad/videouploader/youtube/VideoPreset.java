@@ -33,6 +33,29 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     /**
+     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton1Id() {
+        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+    }
+
+    /**
+     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton2Id() {
+        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+    }
+
+    /**
+     * Enables / Disables editing of all fields on the pane
+     * @param newEditStatus true to allow edit, false to not allow
+     */
+    public void setEditable(boolean newEditStatus) {
+        super.setEditable(newEditStatus);
+        ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setEditable(newEditStatus);
+    }
+
+    /**
      * Place a button in the first button slot with your own text, click behavior etc.
      * @param btn1 A fully configured button
      */
@@ -46,21 +69,6 @@ public class VideoPreset extends VideoInformationBase {
      */
     public void setButton2(Button btn2) {
         ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
-    }
-
-    /**
-     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton1Id() {
-        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
-    }
-
-
-    /**
-     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton2Id() {
-        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
     }
 
     /**
@@ -139,18 +147,19 @@ public class VideoPreset extends VideoInformationBase {
      * Used for building a VideoPreset one attribute at the time.
      * Call build() to get a real VideoPreset when you are done setting attributes.
      */
-    public static class Builder {
-        private String videoName;
-        private String videoDescription;
-        private VisibilityStatus visibility;
-        private List<String> videoTags;
-        private String playlist;
-        private String category;
-        private boolean tellSubs;
-        private String thumbNailPath;
-        private String presetName;
-        private String paneName;
+    public static class Builder extends VideoInformationBase.Builder{
+        String presetName;
 
+        public String getPresetName() {
+            return presetName;
+        }
+
+        public VideoPreset.Builder setPresetName(String presetName) {
+            this.presetName = presetName;
+            return this;
+        }
+        
+        // Re-implementation of setters in super to get the right return type
         public VideoPreset.Builder setVideoName(String videoName) {
             this.videoName = videoName;
             return this;
@@ -191,19 +200,14 @@ public class VideoPreset extends VideoInformationBase {
             return this;
         }
 
-        public VideoPreset.Builder setPresetName(String presetName) {
-            this.presetName = presetName;
-            return this;
-        }
-
         public VideoPreset.Builder setPaneName(String paneName) {
             this.paneName = paneName;
             return this;
         }
 
         public VideoPreset build() {
-            return new VideoPreset(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
-                    thumbNailPath, paneName, presetName);
+            return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
+                    getCategory(), isTellSubs(), getThumbNailPath(), getPresetName(), presetName);
         }
     }
 
@@ -232,15 +236,6 @@ public class VideoPreset extends VideoInformationBase {
 
         presetPane.add(presetName, 0, 4);
         presetPane.add(buttonsBox, 1, 4);
-    }
-
-    /**
-     * Enables / Disables editing of all fields on the pane
-      * @param newEditStatus true to allow edit, false to not allow
-     */
-    public void setEditable(boolean newEditStatus) {
-        super.setEditable(newEditStatus);
-        ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setEditable(newEditStatus);
     }
 
     /**

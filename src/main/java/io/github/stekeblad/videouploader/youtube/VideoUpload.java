@@ -7,7 +7,9 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
+import java.awt.*;
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -38,6 +40,36 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     /**
+     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton1Id() {
+        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+    }
+
+    /**
+     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton2Id() {
+        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+    }
+
+    /**
+     * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton3Id() {
+        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
+    }
+
+    /**
+     * Enables / Disables editing of all fields of the pane
+     * @param newEditStatus true to allow edit, false to not allow
+     */
+    public void setEditable(boolean newEditStatus) {
+        super.setEditable(newEditStatus);
+        // Does not extend with any editable fields
+    }
+
+    /**
      * Place a button in the first button slot with your own text, click behavior etc.
      * @param btn1 A fully configured button
      */
@@ -62,24 +94,38 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     /**
-     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
+     * Updates the progress bar in the UI
+     * @param progress the upload progress as a value between 0 and 1
      */
-    public String getButton1Id() {
-        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+    public void setProgressBarProgress(double progress) {
+        if (progress >=0 && progress <= 1) {
+            ((ProgressBar) uploadPane.lookup("#" + getPaneId() + NODE_ID_PROGRESS)).setProgress(progress);
+        }
     }
 
     /**
-     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
+     * Sets the text to be displayed on the status label in the UI
+     * @param text the text to show
      */
-    public String getButton2Id() {
-        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+    public void setStatusLabelText(String text) {
+        ((Label) uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)).setText(text);
     }
 
     /**
-     * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
+     * Sets a URL to open when the status label is clicked
+     * @param url the url to open
      */
-    public String getButton3Id() {
-        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
+    public void setStatusLabelOnClickUrl(String url) {
+        uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)
+                .setOnMouseClicked(event -> {
+                    if (Desktop.isDesktopSupported()) {
+                        try {
+                            Desktop.getDesktop().browse(new URI(url));
+                        } catch (Exception e) {
+                            System.err.println("Could not make upload label clickable");
+                        }
+                    }
+                });
     }
 
     /**
@@ -154,18 +200,19 @@ public class VideoUpload extends VideoInformationBase{
      *  Used for building a VideoUpload one attribute at the time.
      * Call build() to get a real VideoUpload when you are done setting attributes.
      */
-    public static class Builder {
-        private String videoName;
-        private String videoDescription;
-        private VisibilityStatus visibility;
-        private List<String> videoTags;
-        private String playlist;
-        private String category;
-        private boolean tellSubs;
-        private String thumbNailPath;
-        private String paneName;
-        private File videoFile;
+    public static class Builder extends VideoInformationBase.Builder{
+        File videoFile;
 
+        public File getVideoFile() {
+            return videoFile;
+        }
+
+        public VideoUpload.Builder setVideoFile(File videoFile) {
+            this.videoFile = videoFile;
+            return this;
+        }
+
+        // Re-implementation of setters in super to get the right return type
         public VideoUpload.Builder setVideoName(String videoName) {
             this.videoName = videoName;
             return this;
@@ -211,14 +258,9 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
-        public VideoUpload.Builder setVideoFile(File videoFile) {
-            this.videoFile = videoFile;
-            return this;
-        }
-
         public VideoUpload build() {
-            return new VideoUpload(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs,
-                    thumbNailPath, paneName, videoFile);
+            return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
+                    getCategory(), isTellSubs(), getThumbNailPath(), getPaneName(), videoFile);
         }
     }
 
@@ -252,15 +294,6 @@ public class VideoUpload extends VideoInformationBase{
         uploadPane.add(progressBar, 0, 4);
         uploadPane.add(uploadStatus, 1, 4);
         uploadPane.add(buttonsBox, 2, 4);
-    }
-
-    /**
-     * Enables / Disables editing of all fields of the pane
-     * @param newEditStatus true to allow edit, false to not allow
-     */
-    public void setEditable(boolean newEditStatus) {
-        super.setEditable(newEditStatus);
-        // Does not extend with any editable fields
     }
 
     /**

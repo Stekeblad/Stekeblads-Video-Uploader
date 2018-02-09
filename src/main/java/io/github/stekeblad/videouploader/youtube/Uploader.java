@@ -12,15 +12,11 @@ import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 
-import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -30,7 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import static io.github.stekeblad.videouploader.youtube.VideoUpload.*;
+import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
 
 /**
  * Uploader handles the actual uploading to Youtube and contains a queue for all uploads. New uploads can be added,
@@ -161,24 +157,24 @@ public class Uploader {
             }
             switch (uploader1.getUploadState()) {
                 case INITIATION_STARTED:
-                    setStatusLabelText("Preparing to Upload...", video);
+                    Platform.runLater(() -> video.setStatusLabelText("Preparing to Upload..."));
                     break;
                 case INITIATION_COMPLETE:
-                    setPaneProgressBarProgress(0, video);
-                    setStatusLabelText("Starting...", video);
+                    Platform.runLater(() -> video.setProgressBarProgress(0));
+                    Platform.runLater(() -> video.setStatusLabelText("Starting..."));
                     break;
                 case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
                     // the upload is slightly larger than the video file, but for longer videos it will be close enough
-                    setPaneProgressBarProgress((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length(), video);
-                    setStatusLabelText("Uploading: " + (int) Math.floor(
-                            ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%", video);
+                    Platform.runLater(() -> video.setProgressBarProgress((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()));
+                    Platform.runLater(() -> video.setStatusLabelText("Uploading: " + (int) Math.floor(
+                            ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%"));
                     break;
                 case MEDIA_COMPLETE:
-                    setPaneProgressBarProgress(1, video);
-                    setStatusLabelText("Upload Completed!", video);
+                    Platform.runLater(() -> video.setProgressBarProgress(1));
+                    Platform.runLater(() -> video.setStatusLabelText("Upload Completed!"));
                     break;
                 case NOT_STARTED:
-                    setStatusLabelText("Upload Not Started", video);
+                    Platform.runLater(() -> video.setStatusLabelText("Upload Not Started"));
                     break;
             }
         };
@@ -189,7 +185,7 @@ public class Uploader {
 
         // Set thumbnail if selected
         if (video.getThumbNail() != null) {
-            setStatusLabelText("Setting Thumbnail...", video);
+            Platform.runLater(() -> video.setStatusLabelText("Setting Thumbnail..."));
             File thumbFile = video.getThumbNail();
             String contentType = Files.probeContentType(Paths.get(thumbFile.toURI()));
 
@@ -203,7 +199,7 @@ public class Uploader {
         String playlistString = video.getPlaylist();
         if (playlistString != null && !playlistString.equals("null") &&
                 !playlistString.equals("select a playlist") && !playlistString.equals("")) {
-            setStatusLabelText("Adding to playlist \"" + video.getPlaylist() + "\"", video);
+            Platform.runLater(() -> video.setStatusLabelText("Adding to playlist \"" + video.getPlaylist() + "\""));
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
             resourceId.setVideoId(uploadedVideo.getId());
@@ -218,50 +214,7 @@ public class Uploader {
             YouTube.PlaylistItems.Insert playlistInsert = myTube.playlistItems().insert("snippet,contentDetails", playlistItem);
             playlistInsert.execute();
         }
-        setStatusLabelText("Done! Video is here: https://youtu.be/" + uploadedVideo.getId(), video);
-        makeLabelClickable("https://youtu.be/" + uploadedVideo.getId(), video);
+        Platform.runLater(() -> video.setStatusLabelText("Done! Video is here: https://youtu.be/" + uploadedVideo.getId()));
+        Platform.runLater(() -> video.setStatusLabelOnClickUrl("https://youtu.be/" + uploadedVideo.getId()));
     }
-
-    /**
-     * Updates the progress bar in the UI
-     * @param progress the upload progress as a value between 0 and 1
-     * @param video the video object with the progress bar to update
-     */
-    private void setPaneProgressBarProgress(double progress, VideoUpload video) {
-        if (progress >= 0 && progress <= 1) {
-            Platform.runLater(() ->
-            ((ProgressBar) video.getUploadPane().lookup("#" + video.getPaneId() + NODE_ID_PROGRESS)).setProgress(progress));
-        }
-    }
-
-    /**
-     * Sets the text to be displayed on the status label in the UI
-     * @param text the text to show
-     * @param video the video object that owns the status label to update
-     */
-    private void setStatusLabelText(String text, VideoUpload video) {
-        Platform.runLater(() ->
-        ((Label) video.getUploadPane().lookup("#" + video.getPaneId() + NODE_ID_UPLOADSTATUS)).setText(text));
-    }
-
-    /**
-     * Sets a URL to open when the status label is clicked
-     * @param url the url to open
-     * @param video the video object that owns the status label to make clickable.
-     */
-    private void makeLabelClickable(String url, VideoUpload video) {
-        Platform.runLater(() ->
-                video.getUploadPane().lookup("#" + video.getPaneId() + NODE_ID_UPLOADSTATUS)
-                        .setOnMouseClicked(event -> {
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    Desktop.getDesktop().browse(new URI(url));
-                                } catch (Exception e) {
-                                    System.err.println("Could not make upload label clickable");
-                                }
-                            }
-                        }));
-    }
-
-
 }

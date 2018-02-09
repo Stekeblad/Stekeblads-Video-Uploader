@@ -130,6 +130,21 @@ public class VideoInformationBase {
     //Setters (mostly done directly on the GridPane)
 
     /**
+     * Enables / Disables editing of all the fields on the pane
+     * @param newEditStatus true to allow edit, false to not allow
+     */
+    public void setEditable(boolean newEditStatus) {
+        allowEdit = newEditStatus;
+        ((TextField) videoBasePane.lookup("#" + paneId + NODE_ID_TITLE)).setEditable(newEditStatus);
+        ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_DESCRIPTION)).setEditable(newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY).setDisable(!newEditStatus);
+        ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_TAGS)).setEditable(newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setDisable(!newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY).setDisable(!newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
+    }
+
+    /**
      * Sets the thumbnail
      * @param thumbnail the thumbnail image file
      * @throws Exception if editing is not allowed
@@ -303,16 +318,54 @@ public class VideoInformationBase {
      * Call build() to get a real VideoInformationBase when you are done setting attributes.
      */
     public static class Builder {
-        private String videoName;
-        private String videoDescription;
-        private VisibilityStatus visibility;
-        private List<String> videoTags;
-        private String playlist;
-        private String category;
-        private boolean tellSubs;
-        private String thumbNailPath;
-        private String paneName;
+        String videoName;
+        String videoDescription;
+        VisibilityStatus visibility;
+        List<String> videoTags;
+        String playlist;
+        String category;
+        boolean tellSubs;
+        String thumbNailPath;
+        String paneName;
 
+        // Getters
+        public String getVideoName() {
+            return videoName;
+        }
+
+        public String getVideoDescription() {
+            return videoDescription;
+        }
+
+        public VisibilityStatus getVisibility() {
+            return visibility;
+        }
+
+        public List<String> getVideoTags() {
+            return videoTags;
+        }
+
+        public String getPlaylist() {
+            return playlist;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public boolean isTellSubs() {
+            return tellSubs;
+        }
+
+        public String getThumbNailPath() {
+            return thumbNailPath;
+        }
+
+        public String getPaneName() {
+            return paneName;
+        }
+
+        // Setters
         public VideoInformationBase.Builder setVideoName(String videoName) {
             this.videoName = videoName;
             return this;
@@ -491,20 +544,6 @@ public class VideoInformationBase {
          videoBasePane.add(visibilityChoiceBox, 2, 3);
     }
 
-    /**
-     * Enables / Disables editing of all the fields on the pane
-     * @param newEditStatus true to allow edit, false to not allow
-     */
-    public void setEditable(boolean newEditStatus) {
-        allowEdit = newEditStatus;
-        ((TextField) videoBasePane.lookup("#" + paneId + NODE_ID_TITLE)).setEditable(newEditStatus);
-        ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_DESCRIPTION)).setEditable(newEditStatus);
-        videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY).setDisable(!newEditStatus);
-        ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_TAGS)).setEditable(newEditStatus);
-        videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setDisable(!newEditStatus);
-        videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY).setDisable(!newEditStatus);
-        videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
-    }
 
     /**
      * Creates a string representation of the class that can be saved and later used to recreate the class as it

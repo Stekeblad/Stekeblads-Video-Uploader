@@ -329,7 +329,7 @@ public class PresetsWindowController implements Initializable {
     /**
      * Called when the cancel button on a preset is clicked.
      * Disables editing and reverts the preset to how it was before editing.
-     * @param callerId
+     * @param callerId the preset id + button name
      */
     private void onPresetCancelEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));

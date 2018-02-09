@@ -31,7 +31,7 @@ public class AlertUtils {
      * Convenient method for creating a @code{Alert} dialog with a YES and a NO button.
      * To set what to do on the buttons you can do like this:
      * <pre>{@code
-     * Optional<ButtonType> buttonChoice = alert.showAndWait();
+     * Optional<ButtonType> buttonChoice = AlertUtils.yesNo(...).showAndWait();
      * if (buttonChoice.isPresent()) {
      *     if (buttonChoice.get() == ButtonType.YES) {
      *         doOnYes();

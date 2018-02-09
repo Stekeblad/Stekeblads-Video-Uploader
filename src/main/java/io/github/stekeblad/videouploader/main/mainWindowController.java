@@ -307,9 +307,9 @@ public class mainWindowController implements Initializable {
             }
         }
         // Permission given, start uploads
-        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
-            if (uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
-                onStartUpload(uploadQueueVideo.getButton3Id());
+        for (int i = 0; i < uploadQueueVideos.size(); i++) {
+            if (uploadQueueVideos.get(i).getButton3Id().contains(BUTTON_START_UPLOAD)) {
+                onStartUpload(uploadQueueVideos.get(i).getButton3Id());
             }
         }
         actionEvent.consume();
@@ -321,11 +321,13 @@ public class mainWindowController implements Initializable {
      * @param actionEvent the click event
      */
     public void onRemoveFinishedUploads(ActionEvent actionEvent) {
-        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
-            if (uploadQueueVideo.getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
-                onRemoveFinishedUpload(uploadQueueVideo.getButton2Id());
+        for (int i = 0; i < uploadQueueVideos.size(); i++) {
+            if (uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
+                uploadQueueVideos.remove(i);
+                i--;
             }
         }
+        updateUploadList();
         actionEvent.consume();
     }
 
@@ -593,6 +595,16 @@ public class mainWindowController implements Initializable {
         if (selected == -1) {
             System.err.println("abort upload button belongs to a invalid or non-existing parent");
             return;
+        }
+        // Show confirmation dialog
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort upload?",
+                "Are you sure you want to abort the uploading of " +
+                "\"" + uploadQueueVideos.get(selected).getVideoName() + "\"?").showAndWait();
+        if (buttonChoice.isPresent()) {
+            if (buttonChoice.get() != ButtonType.YES) {
+                // ButtonType.NO or Closed with [X] button
+                return;
+            }
         }
         // Abort upload
         boolean abortSuccess = uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId());
