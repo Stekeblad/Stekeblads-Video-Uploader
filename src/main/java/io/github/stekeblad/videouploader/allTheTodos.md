@@ -7,8 +7,6 @@
 (where? In all dialogs...?)
 
 #### More important things to do
-- Nothing prevents a preset to be created with or renamed to the same name as
-another preset and overwriting the old one.
 - Then getting playlists, get ALL, not just the 25 first. Filter playlists
 to appear in choiceBox and maybe also create new inside program
 

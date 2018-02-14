@@ -102,13 +102,16 @@ public class PresetsWindowController implements Initializable {
      * @param actionEvent the click event
      */
     public void onPresetAddNew(ActionEvent actionEvent) {
+        // Test so the name of the new preset is not blank or the same as an existing one
         if (txt_nameNewPreset.getText().equals("")) {
             AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
             return;
         }
-        if (getPresetIndexByName(txt_nameNewPreset.getText()) > -1) {
-            AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
-            return;
+        for (VideoPreset videoPreset : videoPresets) {
+            if (videoPreset.getPresetName().equals(txt_nameNewPreset.getText())) {
+                AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
+                return;
+            }
         }
 
         // Create the new preset, enable editing on it and scroll so it is in focus (in case the user has a lot of presets)
@@ -216,11 +219,11 @@ public class PresetsWindowController implements Initializable {
     }
 
     /**
-     * Returns the index in videoPresets that has a preset named nameToTest or -1 if no preset has that name
-     * @param nameToTest preset name to test for
-     * @return the index of where the preset named nameToTest inside videoPresets or -1 if it does not exist a preset with that name
+     * Returns the index in videoPresets that has a preset with the paneId nameToTest or -1 if no preset has that name
+     * @param nameToTest paneId to test for
+     * @return the index of where the preset with the paneId nameToTest inside videoPresets or -1 if it does not exist a preset with that paneId
      */
-    private int getPresetIndexByName(String nameToTest) {
+    private int getPresetIndexByPaneId(String nameToTest) {
         int presetIndex = -1;
         for (int i = 0; i < videoPresets.size(); i++) {
             if (videoPresets.get(i).getPresetPane().getId().equals(nameToTest)) {
@@ -238,7 +241,7 @@ public class PresetsWindowController implements Initializable {
      */
     private void onPresetEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getPresetIndexByName(parentId);
+        int selected = getPresetIndexByPaneId(parentId);
         if(selected == -1) {
             System.err.println("Non-existing edit button was pressed!!!");
             return;
@@ -292,7 +295,7 @@ public class PresetsWindowController implements Initializable {
     private void onPresetSave(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         // locate this preset
-        int selected = getPresetIndexByName(parentId);
+        int selected = getPresetIndexByPaneId(parentId);
         if(selected == -1) {
             System.err.println("Can't find witch preset to save");
             return;
@@ -300,6 +303,21 @@ public class PresetsWindowController implements Initializable {
         // make sure preset name is not empty
         if(videoPresets.get(selected).getPresetName().equals("")) {
             AlertUtils.simpleClose("Invalid preset name", "Preset names can not be empty").show();
+            return;
+        }
+        // Test if the preset name has been changed and now is equal to another preset, if so abort saving
+        int otherPreset = -1;
+        for (int i = 0; i < videoPresets.size(); i++) {
+            if (i == selected) {
+                continue; // this case is not interesting
+            }
+            if (videoPresets.get(i).getPresetName().equals(videoPresets.get(selected).getPresetName())) {
+                otherPreset = i;
+                break;
+            }
+        }
+        if (otherPreset > -1) {
+            AlertUtils.simpleClose("Invalid preset name", "There is already a preset with that name, choose another name").show();
             return;
         }
         // if there is a backup it needs to be deleted
@@ -333,7 +351,7 @@ public class PresetsWindowController implements Initializable {
      */
     private void onPresetCancelEdit(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getPresetIndexByName(parentId);
+        int selected = getPresetIndexByPaneId(parentId);
         if (selected == -1) {
             System.err.println("Non-existing cancelEdit button was pressed!!!");
             return;
@@ -373,7 +391,7 @@ public class PresetsWindowController implements Initializable {
      */
     private void onPresetDelete(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getPresetIndexByName(parentId);
+        int selected = getPresetIndexByPaneId(parentId);
         if(selected == -1) {
             System.err.println("Non-existing delete button was pressed!!!");
             return;
