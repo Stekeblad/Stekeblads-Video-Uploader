@@ -12,14 +12,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,9 +37,9 @@ public class PresetsWindowController implements Initializable {
     public ListView<GridPane> listPresets;
     public Button btn_tips;
     public Button addNewPreset;
-    public Button btn_refreshPlaylists;
     public TextField txt_nameNewPreset;
     public Button btn_localizeCategories;
+    public Button btn_managePlaylists;
 
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
@@ -91,8 +89,36 @@ public class PresetsWindowController implements Initializable {
                 presetCounter++;
             }
         }
-
+        btn_localizeCategories.setTooltip(new Tooltip(
+                "Get the categories that are allowed to be used in your country translated to a language you understand"));
+        btn_managePlaylists.setTooltip(new Tooltip(
+                "Get your YouTube playlists into the program and filter witch to appear in the dropdown boxes"));
         updatePresetList();
+    }
+
+    /**
+     * Executed when the user click on the close button on this window
+     * @param windowEvent provided by FXML, if the event is consumed in the method the window will not be closed
+     */
+    public void onWindowClose(WindowEvent windowEvent) {
+        boolean editingPreset = false;
+        for(VideoPreset aPreset : videoPresets) {
+            if(aPreset.getButton2Id().contains(BUTTON_SAVE)) {
+                editingPreset = true;
+                break;
+            }
+        }
+        if(editingPreset) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Unsaved changes", "One or more presets " +
+                    "is in edit mode, if you close this window now all unsaved changes to presets will be lost. " +
+                    "Do you want to close this window?").showAndWait();
+            System.out.println(buttonChoice);
+            if(buttonChoice.isPresent()) {
+                if(buttonChoice.get() == ButtonType.NO) {
+                    windowEvent.consume(); // do not close the window
+                }
+            }
+        }
     }
 
     /**
@@ -175,37 +201,26 @@ public class PresetsWindowController implements Initializable {
      * Downloads the user's playlist from youtube
      * @param actionEvent the click event
      */
-    public void onRefreshPlaylists(ActionEvent actionEvent) {
-        if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
-                    "To download your playlists you must grant this application permission to access your Youtube channel. " +
-                    "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
-                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                    "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                    "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                    btn_refreshPlaylists.setDisable(true);
-                    playlistUtils.refreshPlaylist();
-                    AlertUtils.simpleClose("Playlists updated", "For the updated playlist list to show up " +
-                            "you may need to save any preset you are currently editing and press 'edit' again").showAndWait();
-                } else { // ButtonType.NO or closed [X]
-                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
-                }
-            }
-            // has authenticated
-        } else {
-            // Do not allow the button to be clicked again until the window is closed and reopened
-            btn_refreshPlaylists.setDisable(true);
-            playlistUtils.refreshPlaylist();
-            AlertUtils.simpleClose("Playlists updated", "For the updated playlist list to show up you " +
-                    "may need to save any preset you are currently editing and press 'edit' again").showAndWait();
+    public void onManagePlaylists(ActionEvent actionEvent) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/ManagePlaylistsWindow.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 400, 500);
+            Stage stage = new Stage();
+            stage.setMinWidth(350);
+            stage.setMinHeight(250);
+            stage.setTitle("Manage Playlists");
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            ManagePlaylistsWindowController controller = fxmlLoader.getController();
+            stage.setOnCloseRequest(controller::onWindowClose);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         actionEvent.consume();
     }
+
 
     /**
      * Re-adds all presets to the listPreset to make sure the UI is up-to-date
@@ -265,10 +280,10 @@ public class PresetsWindowController implements Initializable {
         // set the playlists list
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event-> {
             if(configManager.getNeverAuthed()) {
-                onRefreshPlaylists(new ActionEvent());
+                onManagePlaylists(new ActionEvent());
             }
             if (! configManager.getNeverAuthed()) {
-                videoPresets.get(selected).setPlaylists(playlistUtils.getUserPlaylistNames());
+                videoPresets.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
             }
         });
         //set categories

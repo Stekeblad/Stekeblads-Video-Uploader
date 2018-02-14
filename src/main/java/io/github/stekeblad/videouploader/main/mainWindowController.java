@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.settings.PresetsWindowController;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.PickFile;
@@ -272,6 +273,8 @@ public class mainWindowController implements Initializable {
             stage.setTitle("Settings - Stekeblads Video Uploader");
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
+            PresetsWindowController controller = fxmlLoader.getController();
+            stage.setOnCloseRequest(controller::onWindowClose);
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -387,7 +390,7 @@ public class mainWindowController implements Initializable {
             if(configManager.getNeverAuthed()) {
                 AlertUtils.simpleClose("No playlists", "No playlists synced yet, go to the settings window to sync with Youtube").show();
             } else {
-                uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getUserPlaylistNames());
+                uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
             }
         });
         uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->

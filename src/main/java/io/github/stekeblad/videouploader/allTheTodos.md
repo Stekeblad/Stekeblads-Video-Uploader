@@ -7,12 +7,12 @@
 (where? In all dialogs...?)
 
 #### More important things to do
-- Then getting playlists, get ALL, not just the 25 first. Filter playlists
-to appear in choiceBox and maybe also create new inside program
+- Update wiki about the new playlist system before next release
 
 #### Less important things to do
 - Creating localization support and moving all strings visible for the users there (resourceBundle)
-- warn then trying to close preset/settings window while presets are being edited
+- Wiki article about how to withdraw the program's permission to access
+the user's youtube account
 
 #### Thinking about
 - Keep even unstarted uploads on close?

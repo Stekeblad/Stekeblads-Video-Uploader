@@ -7,7 +7,7 @@
    <ToolBar layoutX="10.0" layoutY="6.0" prefHeight="40.0" prefWidth="725.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <Button fx:id="btn_tips" mnemonicParsing="false" onAction="#onTipsClicked" text="tips" />
       <Button fx:id="btn_localizeCategories" mnemonicParsing="false" onAction="#onLocalizeCategories" text="Localize Categories" />
-      <Button fx:id="btn_refreshPlaylists" mnemonicParsing="false" onAction="#onRefreshPlaylists" text="Refresh Playlists" />
+      <Button fx:id="btn_managePlaylists" mnemonicParsing="false" onAction="#onManagePlaylists" text="Manage Playlists" />
       <TextField fx:id="txt_nameNewPreset" prefHeight="25.0" prefWidth="142.0" promptText="New Preset Name" />
       <Button fx:id="addNewPreset" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onPresetAddNew" prefHeight="25.0" prefWidth="106.0" text="Add New Preset" />
    </ToolBar>

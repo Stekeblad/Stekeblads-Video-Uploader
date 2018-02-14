@@ -16,14 +16,14 @@
             <RowConstraints maxHeight="35.0" minHeight="25.0" prefHeight="35.0" vgrow="SOMETIMES" />
         </rowConstraints>
         <TextArea fx:id="txt_description" editable="false" prefHeight="276.0" prefWidth="413.0" wrapText="true" GridPane.columnSpan="3" />
-        <Label text="language code" GridPane.rowIndex="1" />
+        <Label text="language id" GridPane.rowIndex="1" />
         <TextField fx:id="txt_lang" prefHeight="25.0" prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       <Button fx:id="btn_codeListLang" mnemonicParsing="false" onAction="#onCodeListLangClicked" text="Code list" GridPane.columnIndex="2" GridPane.rowIndex="1">
          <GridPane.margin>
             <Insets left="10.0" />
          </GridPane.margin>
       </Button>
-        <Label text="Country code" GridPane.rowIndex="2" />
+        <Label text="Country id" GridPane.rowIndex="2" />
         <TextField fx:id="txt_country" prefHeight="25.0" prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
       <Button fx:id="btn_codeListCountry" mnemonicParsing="false" onAction="#onCodeListCountryClicked" text="Code list" GridPane.columnIndex="2" GridPane.rowIndex="2">
          <GridPane.margin>
