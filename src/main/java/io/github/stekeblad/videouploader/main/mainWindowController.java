@@ -30,7 +30,6 @@ import java.util.*;
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.*;
 import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_PROGRESS;
-import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_UPLOADSTATUS;
 
 public class mainWindowController implements Initializable {
     public ListView<GridPane> listView;
@@ -43,6 +42,7 @@ public class mainWindowController implements Initializable {
     public Button btn_applyPreset;
     public Button btn_removeFinished;
     public Button btn_startAll;
+    public Button btn_abortAll;
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
@@ -53,6 +53,7 @@ public class mainWindowController implements Initializable {
     private HashMap<String, VideoUpload> editBackups;
     private Uploader uploader;
     private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
+    private boolean bybassAbortWarning = false;
 
     /**
      * Initialize things when the window is opened
@@ -164,7 +165,7 @@ public class mainWindowController implements Initializable {
      * Opens a file chooser and sets the list of selected files to the left of the button
      * @param actionEvent the click event
      */
-    public void onPickFile(ActionEvent actionEvent) {
+    public void onPickFileClicked(ActionEvent actionEvent) {
         videosToAdd = PickFile.pickVideos();
         ArrayList<String> filenames = new ArrayList<>();
         if(videosToAdd != null) {
@@ -304,7 +305,7 @@ public class mainWindowController implements Initializable {
      * If a upload is allowed to be started (the start upload button is visible) then that button is clicked by this method.
      * @param actionEvent the click event
      */
-    public void onStartAllUploads(ActionEvent actionEvent) {
+    public void onStartAllUploadsClicked(ActionEvent actionEvent) {
         // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
         if(configManager.getNeverAuthed()) {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
@@ -339,7 +340,7 @@ public class mainWindowController implements Initializable {
      * Clicks the hide button on all uploads that has that button visible
      * @param actionEvent the click event
      */
-    public void onRemoveFinishedUploads(ActionEvent actionEvent) {
+    public void onRemoveFinishedUploadsClicked(ActionEvent actionEvent) {
         for (int i = 0; i < uploadQueueVideos.size(); i++) {
             if (uploadQueueVideos.get(i).getButton2Id() != null &&
                     uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
@@ -348,6 +349,35 @@ public class mainWindowController implements Initializable {
             }
         }
         updateUploadList();
+        actionEvent.consume();
+    }
+
+    /**
+     * Aborts all uploads that have been started
+     * @param actionEvent the button click event
+     */
+    public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
+        // Show confirmation dialog
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort ALL Uploads?",
+                "Are you sure you want to abort the uploading of all started uploads?").showAndWait();
+        if (buttonChoice.isPresent()) {
+            if (buttonChoice.get() != ButtonType.YES) {
+                // ButtonType.NO or Closed with [X] button
+                return;
+            }
+        }
+        // Prevent the "Are you sure you want to abort X?" dialog for every upload
+        bybassAbortWarning = true;
+        // Abort the uploads in the reversed order of that they was most likely started in
+        // to avoid that the program attempts to start a new upload that will also be aborted, and then the next one...
+        for (int i = uploadQueueVideos.size() - 1; i >= 0; i--) {
+            if(uploadQueueVideos.get(i).getButton2Id() != null &&
+                    uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_ABORT_UPLOAD)) {
+                onAbort(uploadQueueVideos.get(i).getButton2Id());
+            }
+        }
+        // Re-enable the individual confirmation on aborts
+        bybassAbortWarning = false;
         actionEvent.consume();
     }
 
@@ -599,7 +629,7 @@ public class mainWindowController implements Initializable {
 
         // make progressbar visible and set text to show it is waiting to be uploaded.
         uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(true);
-        ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Waiting...");
+        uploadQueueVideos.get(selected).setStatusLabelText("Waiting...");
 
         // Make sure visual change get to the UI
         updateUploadList();
@@ -616,14 +646,16 @@ public class mainWindowController implements Initializable {
             System.err.println("abort upload button belongs to a invalid or non-existing parent");
             return;
         }
-        // Show confirmation dialog
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort upload?",
-                "Are you sure you want to abort the uploading of " +
-                "\"" + uploadQueueVideos.get(selected).getVideoName() + "\"?").showAndWait();
-        if (buttonChoice.isPresent()) {
-            if (buttonChoice.get() != ButtonType.YES) {
-                // ButtonType.NO or Closed with [X] button
-                return;
+        // Show confirmation dialog, but not if abort all button was clicked
+        if(! bybassAbortWarning) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort upload?",
+                    "Are you sure you want to abort the uploading of " +
+                            "\"" + uploadQueueVideos.get(selected).getVideoName() + "\"?").showAndWait();
+            if (buttonChoice.isPresent()) {
+                if (buttonChoice.get() != ButtonType.YES) {
+                    // ButtonType.NO or Closed with [X] button
+                    return;
+                }
             }
         }
         // Abort upload
@@ -632,7 +664,7 @@ public class mainWindowController implements Initializable {
         if (abortSuccess) {
             // Set label text and reset progress bar
             uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(false);
-            ((Label) uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_UPLOADSTATUS)).setText("Aborted");
+            uploadQueueVideos.get(selected).setStatusLabelText("Aborted");
         } else {
             AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
         }

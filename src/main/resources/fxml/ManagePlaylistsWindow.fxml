@@ -19,12 +19,12 @@
     <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1">
         <TextField fx:id="txt_newPlaylistName" promptText="new playlist name" />
         <ChoiceBox fx:id="choice_privacyStatus" prefHeight="25.0" prefWidth="82.0" />
-        <Button fx:id="btn_addNewPlaylist" mnemonicParsing="false" onAction="#onAddNewPlaylist" text="Create new playlist" />
+        <Button fx:id="btn_addNewPlaylist" mnemonicParsing="false" onAction="#onAddNewPlaylistClicked" text="Create new playlist" />
     </ToolBar>
     <ListView fx:id="list_playlists" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
       <GridPane.margin>
          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
       </GridPane.margin></ListView>
    <Label prefWidth="276.0" text="Select the playlists to be visible in the playlist dropdowns, unchecked will be hidden" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-     <Button fx:id="btn_refreshPlaylists" mnemonicParsing="false" onAction="#onRefreshPlaylists" text="Refresh Playlists" GridPane.rowIndex="2" />
+     <Button fx:id="btn_refreshPlaylists" mnemonicParsing="false" onAction="#onRefreshPlaylistsClicked" text="Refresh Playlists" GridPane.rowIndex="2" />
 </GridPane>

@@ -127,7 +127,7 @@ public class PresetsWindowController implements Initializable {
      * The text field is not allowed to be empty or have the name of a already existing preset.
      * @param actionEvent the click event
      */
-    public void onPresetAddNew(ActionEvent actionEvent) {
+    public void onPresetAddNewClicked(ActionEvent actionEvent) {
         // Test so the name of the new preset is not blank or the same as an existing one
         if (txt_nameNewPreset.getText().equals("")) {
             AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
@@ -176,7 +176,7 @@ public class PresetsWindowController implements Initializable {
      * Opens the localize categories window.
      * @param actionEvent the click event
      */
-    public void onLocalizeCategories(ActionEvent actionEvent) {
+    public void onLocalizeCategoriesClicked(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/LocalizeCategoriesWindow.fxml"));
@@ -201,7 +201,7 @@ public class PresetsWindowController implements Initializable {
      * Downloads the user's playlist from youtube
      * @param actionEvent the click event
      */
-    public void onManagePlaylists(ActionEvent actionEvent) {
+    public void onManagePlaylistsClicked(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/ManagePlaylistsWindow.fxml"));
@@ -280,7 +280,7 @@ public class PresetsWindowController implements Initializable {
         // set the playlists list
         videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event-> {
             if(configManager.getNeverAuthed()) {
-                onManagePlaylists(new ActionEvent());
+                onManagePlaylistsClicked(new ActionEvent());
             }
             if (! configManager.getNeverAuthed()) {
                 videoPresets.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());

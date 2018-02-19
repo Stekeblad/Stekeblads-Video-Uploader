@@ -6,10 +6,10 @@
    <ListView fx:id="listPresets" layoutX="14.0" layoutY="389.0" prefHeight="375.0" prefWidth="876.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="65.0" />
    <ToolBar layoutX="10.0" layoutY="6.0" prefHeight="40.0" prefWidth="725.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <Button fx:id="btn_tips" mnemonicParsing="false" onAction="#onTipsClicked" text="tips" />
-      <Button fx:id="btn_localizeCategories" mnemonicParsing="false" onAction="#onLocalizeCategories" text="Localize Categories" />
-      <Button fx:id="btn_managePlaylists" mnemonicParsing="false" onAction="#onManagePlaylists" text="Manage Playlists" />
+      <Button fx:id="btn_localizeCategories" mnemonicParsing="false" onAction="#onLocalizeCategoriesClicked" text="Localize Categories" />
+      <Button fx:id="btn_managePlaylists" mnemonicParsing="false" onAction="#onManagePlaylistsClicked" text="Manage Playlists" />
       <TextField fx:id="txt_nameNewPreset" prefHeight="25.0" prefWidth="142.0" promptText="New Preset Name" />
-      <Button fx:id="addNewPreset" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onPresetAddNew" prefHeight="25.0" prefWidth="106.0" text="Add New Preset" />
+      <Button fx:id="addNewPreset" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onPresetAddNewClicked" prefHeight="25.0" prefWidth="106.0" text="Add New Preset" />
    </ToolBar>
    <Label layoutX="92.0" layoutY="104.0" prefHeight="17.0" prefWidth="107.0" text="Saved Presets" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="45.0" />
 </AnchorPane>
