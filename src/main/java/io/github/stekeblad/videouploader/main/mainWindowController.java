@@ -96,7 +96,22 @@ public class mainWindowController implements Initializable {
             if (waitingUploads != null) {
                 for(String waitingUpload : waitingUploads) {
                     try {
-                        uploadQueueVideos.add(new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++)));
+                        VideoUpload loadedUpload = new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++));
+                        Button editButton = new Button("Edit");
+                        editButton.setId(loadedUpload.getPaneId() + BUTTON_EDIT);
+                        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
+                        Button deleteButton = new Button("Delete");
+                        deleteButton.setId(loadedUpload.getPaneId() + BUTTON_DELETE);
+                        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
+                        Button startUploadButton = new Button("Start Upload");
+                        startUploadButton.setId(loadedUpload.getPaneId() + BUTTON_START_UPLOAD);
+                        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
+
+                        loadedUpload.setButton1(editButton);
+                        loadedUpload.setButton2(deleteButton);
+                        loadedUpload.setButton3(startUploadButton);
+
+                        uploadQueueVideos.add(loadedUpload);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -311,7 +326,8 @@ public class mainWindowController implements Initializable {
         }
         // Permission given, start uploads
         for (int i = 0; i < uploadQueueVideos.size(); i++) {
-            if (uploadQueueVideos.get(i).getButton3Id().contains(BUTTON_START_UPLOAD)) {
+            if (uploadQueueVideos.get(i).getButton3Id() != null &&
+                    uploadQueueVideos.get(i).getButton3Id().contains(BUTTON_START_UPLOAD)) {
                 onStartUpload(uploadQueueVideos.get(i).getButton3Id());
             }
         }
@@ -325,7 +341,8 @@ public class mainWindowController implements Initializable {
      */
     public void onRemoveFinishedUploads(ActionEvent actionEvent) {
         for (int i = 0; i < uploadQueueVideos.size(); i++) {
-            if (uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
+            if (uploadQueueVideos.get(i).getButton2Id() != null &&
+                    uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
                 uploadQueueVideos.remove(i);
                 i--;
             }

@@ -73,6 +73,9 @@ public enum PlaylistUtils {
     }
 
     public ArrayList<LocalPlaylist> getAllPlaylists() {
+        if (playlistCache == null) {
+            return null;
+        }
         return new ArrayList<>(playlistCache.values());
     }
 

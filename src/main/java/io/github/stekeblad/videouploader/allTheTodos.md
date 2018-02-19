@@ -16,4 +16,4 @@ the user's youtube account
 
 #### Thinking about
 - Keep even unstarted uploads on close?
-- add Constant ApplicationName to use instead of hardcoded string
+- add Constant ApplicationName to use instead of hardcoded string?

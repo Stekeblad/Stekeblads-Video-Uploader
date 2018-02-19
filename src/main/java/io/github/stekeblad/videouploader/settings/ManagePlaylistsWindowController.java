@@ -43,6 +43,7 @@ public class ManagePlaylistsWindowController implements Initializable {
             visibilityStrings.add(status.getStatusName());
         }
         choice_privacyStatus.setItems(FXCollections.observableArrayList(visibilityStrings));
+        choice_privacyStatus.getSelectionModel().select(VisibilityStatus.PUBLIC.getStatusName());
         choice_privacyStatus.setTooltip(new Tooltip("Yes, playlists can be public, unlisted or private"));
 
         btn_refreshPlaylists.setTooltip(new Tooltip("Downloads a list of all your playlists from YouTube"));
@@ -127,11 +128,13 @@ public class ManagePlaylistsWindowController implements Initializable {
     private void updatePlaylistList() {
         ArrayList<CheckBox> playlistCheckBoxes = new ArrayList<>();
         ArrayList<LocalPlaylist> playlists = playlistUtils.getAllPlaylists();
-        for (LocalPlaylist playlist : playlists) {
-            CheckBox cb = new CheckBox(playlist.getName());
-            cb.setSelected(playlist.isVisible());
-            playlistCheckBoxes.add(cb);
+        if (playlists != null) {
+            for (LocalPlaylist playlist : playlists) {
+                CheckBox cb = new CheckBox(playlist.getName());
+                cb.setSelected(playlist.isVisible());
+                playlistCheckBoxes.add(cb);
+            }
+            list_playlists.setItems(FXCollections.observableArrayList(playlistCheckBoxes));
         }
-        list_playlists.setItems(FXCollections.observableArrayList(playlistCheckBoxes));
     }
 }
