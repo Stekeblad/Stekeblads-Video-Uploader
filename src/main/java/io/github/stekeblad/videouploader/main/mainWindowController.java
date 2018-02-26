@@ -80,6 +80,7 @@ public class mainWindowController implements Initializable {
         categoryUtils.loadCategories();
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
         btn_startAll.setTooltip(new Tooltip("Starts all uploads that have the \"Start Upload\" button visible"));
+        btn_abortAll.setTooltip(new Tooltip("Aborts all uploads that have the \"Abort\" button visible"));
 
         // Only allow numbers in autoNum textField
         text_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {

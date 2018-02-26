@@ -10,10 +10,10 @@
 - Update wiki about the new playlist system before next release
 
 #### Less important things to do
-- Creating localization support and moving all strings visible for the users there (resourceBundle)
+- Creating localization support and moving all strings visible for the
+users there (resourceBundle)
 - Wiki article about how to withdraw the program's permission to access
 the user's youtube account
 
 #### Thinking about
 - Keep even unstarted uploads on close?
-- add Constant ApplicationName to use instead of hardcoded string?

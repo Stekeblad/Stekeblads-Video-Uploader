@@ -145,7 +145,6 @@ public class PresetsWindowController implements Initializable {
                 null, null, false, null, PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         videoPresets.add(newPreset);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
-        updatePresetList();
         listPresets.scrollTo(listPresets.getItems().size() -1);
         txt_nameNewPreset.setText("");
         presetCounter++;
