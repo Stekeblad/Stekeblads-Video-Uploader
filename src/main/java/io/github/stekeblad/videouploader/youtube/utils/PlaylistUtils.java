@@ -196,7 +196,7 @@ public enum PlaylistUtils {
     /**
      * Saves the playlists to disc
      */
-    private void saveCache() {
+    public void saveCache() {
         StringBuilder saveString = new StringBuilder();
         playlistCache.forEach((k, v) -> saveString.append(Boolean.toString(v.isVisible())).append(":")
                 .append(v.getId()).append(":").append(v.getName()).append("\n"));

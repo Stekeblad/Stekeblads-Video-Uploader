@@ -13,10 +13,7 @@ import javafx.scene.control.*;
 import javafx.stage.WindowEvent;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class ManagePlaylistsWindowController implements Initializable {
     public Button btn_refreshPlaylists;
@@ -61,6 +58,7 @@ public class ManagePlaylistsWindowController implements Initializable {
         for (CheckBox listItem : listItems) {
             playlistUtils.setVisible(listItem.getText(), listItem.isSelected());
         }
+        playlistUtils.saveCache();
         // event not consumed, it would cause the window to remain open
     }
 
@@ -152,6 +150,8 @@ public class ManagePlaylistsWindowController implements Initializable {
                 cb.setSelected(playlist.isVisible());
                 playlistCheckBoxes.add(cb);
             }
+            // Sorts the playlists lexicographically
+            playlistCheckBoxes.sort(Comparator.comparing(Labeled::getText));
             list_playlists.setItems(FXCollections.observableArrayList(playlistCheckBoxes));
         }
     }

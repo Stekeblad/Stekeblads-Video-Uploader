@@ -26,5 +26,8 @@
         <Button fx:id="btn_addNewPlaylist" mnemonicParsing="false" onAction="#onAddNewPlaylistClicked" text="Create new playlist" />
     </ToolBar>
    <Label prefWidth="276.0" text="Select the playlists to be visible in the playlist dropdowns, unchecked will be hidden" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-     <Button fx:id="btn_refreshPlaylists" mnemonicParsing="false" onAction="#onRefreshPlaylistsClicked" text="Refresh Playlists" GridPane.rowIndex="2" />
+     <Button fx:id="btn_refreshPlaylists" mnemonicParsing="false" onAction="#onRefreshPlaylistsClicked" text="Refresh Playlists" GridPane.rowIndex="2">
+      <GridPane.margin>
+         <Insets left="5.0" />
+      </GridPane.margin></Button>
 </GridPane>
