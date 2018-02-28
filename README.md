@@ -25,12 +25,20 @@ Downloads can be found under "Releases" tab close to the top of this page
 [or by clicking here](https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases)
 
 ### Images
-![Image](https://drive.google.com/uc?export=download&id=1O2RIIqx0yxySeAtzZP4K3nCaDuVi30aH)
+Thanks to [IsosceleTriangle](https://www.twitch.tv/isosceletriangle) for the Images!
 
-Because playlist in the second preset in the image above is "null" the
-description of the videos in the image below has no playlist url
+Main window, example of uploading videos:
 
-![Image](https://drive.google.com/uc?export=download&id=1CTwsjglQgb9m8Dz_9Sc1l-99gpfo1f6h)
+![Image](https://drive.google.com/uc?export=download&id=1k0d8u9IL7XNiMG3pyNAZC_-3JvZ_L4si)
+
+Example of presets:
+
+![Image](https://drive.google.com/uc?export=download&id=1hF091bMMy2OfTUaXSjENhwGEzSWBZU85)
+
+Managing playlists:
+
+![Image](https://drive.google.com/uc?export=download&id=12sL1dRCQKD3zm8Vx1lvotoq8U9zfPiN9)
+
 
 ### Videos
 I have made a few short videos introducing the program and how to use it:
