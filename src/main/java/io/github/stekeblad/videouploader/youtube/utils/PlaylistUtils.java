@@ -53,9 +53,8 @@ public enum PlaylistUtils {
                 List<Playlist> playlists = response.getItems();
                 for (Playlist aPlaylist : playlists) {
                     String title = aPlaylist.getSnippet().getTitle();
-                    LocalPlaylist oldPlaylist = oldCache.get(title);
                     LocalPlaylist newPlaylist;
-                    if (oldPlaylist != null) {
+                    if (oldCache != null && oldCache.get(title) != null) {
                         newPlaylist = new LocalPlaylist(oldCache.get(title).isVisible(), aPlaylist.getId(), title);
                     } else {
                         newPlaylist = new LocalPlaylist(true, aPlaylist.getId(), title);

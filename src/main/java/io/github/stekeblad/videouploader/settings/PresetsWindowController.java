@@ -112,7 +112,6 @@ public class PresetsWindowController implements Initializable {
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Unsaved changes", "One or more presets " +
                     "is in edit mode, if you close this window now all unsaved changes to presets will be lost. " +
                     "Do you want to close this window?").showAndWait();
-            System.out.println(buttonChoice);
             if(buttonChoice.isPresent()) {
                 if(buttonChoice.get() == ButtonType.NO) {
                     windowEvent.consume(); // do not close the window
