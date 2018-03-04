@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.youtube;
 
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -7,9 +8,9 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
-import java.awt.*;
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -118,12 +119,10 @@ public class VideoUpload extends VideoInformationBase{
     public void setStatusLabelOnClickUrl(String url) {
         uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)
                 .setOnMouseClicked(event -> {
-                    if (Desktop.isDesktopSupported()) {
-                        try {
-                            Desktop.getDesktop().browse(new URI(url));
-                        } catch (Exception e) {
-                            System.err.println("Could not make upload label clickable");
-                        }
+                    try {
+                        new OpenInBrowser(new URI(url), (t, e) -> e.printStackTrace());
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
                     }
                 });
     }

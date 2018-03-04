@@ -2,17 +2,15 @@ package io.github.stekeblad.videouploader.settings;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.*;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.awt.*;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -104,21 +102,43 @@ public class LocalizeCategoriesWindowController implements Initializable{
             }
         }
 
-        // Send the request
+        // Visually indicate the program is working
         btn_getCategories.setText("Downloading...");
         btn_cancel.setDisable(true);
         btn_getCategories.setDisable(true);
-        categoryUtils.downloadCategories();
 
-        // Handle negative result
-        if (categoryUtils.getCategoryNames().size() < 2) { // < 2 because of default "no categories" category
-            AlertUtils.simpleClose("Error", "The selected language or country code is not valid or not " +
-                    "supported by Youtube, did not receive any categories").showAndWait();
-            actionEvent.consume();
-            return;
-        }
+        // Send the request in the background
+        // Tell it what to do
+        Task<Void> backgroundTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                categoryUtils.downloadCategories();
+                Platform.runLater(() -> {
+                    if (categoryUtils.getCategoryNames().size() < 2) { // < 2 because of default "no categories" category
+                        AlertUtils.simpleClose("Error", "The selected language or country code is not valid or not " +
+                                "supported by Youtube, did not receive any categories").showAndWait();
+                        btn_getCategories.setText("Get Categories");
+                        btn_cancel.setDisable(false);
+                        btn_getCategories.setDisable(false);
+                        return;
+                    }
+                    onCancelClicked(new ActionEvent());
+                });
+                return null;
+            }
+        };
 
-        onCancelClicked(actionEvent);
+        Thread backgroundThread = new Thread(backgroundTask);
+        // Define a handler for exceptions
+        backgroundThread.setUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> {
+            AlertUtils.simpleClose("Error", "Request to get categories failed").showAndWait();
+            e.printStackTrace();
+            onCancelClicked(new ActionEvent());
+        }));
+
+        // Actually do the thing, start the process of getting the categories!
+        backgroundThread.start();
+        actionEvent.consume();
     }
 
     /**
@@ -137,19 +157,14 @@ public class LocalizeCategoriesWindowController implements Initializable{
      * @param actionEvent the click event
      */
     public void onCodeListCountryClicked(ActionEvent actionEvent) {
-        if(Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().browse(new URI("https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements"));
-                actionEvent.consume();
-                return;
-            } catch (IOException | URISyntaxException e) {
-                System.err.println("Failed open country code list (Wikipedia)");
-            }
-        } else {
-            System.err.println("Desktop not supported, cant open Wikipedia country code list");
+        try {
+            new OpenInBrowser(new URI("https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements"),
+                    (t, e) -> Platform.runLater(() -> AlertUtils.simpleClose("Sorry!",
+                            "For some reason we cant open the web page in your default browser, but this is the url:\n " +
+                                    "https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements").showAndWait()));
+        } catch (URISyntaxException e) {
+            System.err.println("URI Error");
         }
-        AlertUtils.simpleClose("Sorry!", "For some reason we cant open the web page in your default browser, but this is the url:\n " +
-                "https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements").showAndWait();
         actionEvent.consume();
     }
 
@@ -159,19 +174,15 @@ public class LocalizeCategoriesWindowController implements Initializable{
      * @param actionEvent the click event
      */
     public void onCodeListLangClicked(ActionEvent actionEvent) {
-        if(Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().browse(new URI("https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes"));
-                actionEvent.consume();
-                return;
-            } catch (IOException | URISyntaxException e) {
-                System.err.println("Failed open language code list (Wikipedia)");
-            }
-        } else {
-            System.err.println("Desktop not supported, cant open Wikipedia language code list");
+        try {
+            new OpenInBrowser(new URI("https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes"),
+                    (t, e) -> Platform.runLater(() -> AlertUtils.simpleClose("Sorry!",
+                            "For some reason we cant open the web page in your default browser, but this is the url:\n " +
+                                    "https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes").showAndWait()));
+        } catch (URISyntaxException e) {
+            System.err.println("URI Error");
+
         }
-        AlertUtils.simpleClose("Sorry!", "For some reason we cant open the web page in your default browser, but this is the url:\n " +
-                "https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes").showAndWait();
         actionEvent.consume();
     }
 }

@@ -9,7 +9,8 @@
       <Button fx:id="btn_localizeCategories" mnemonicParsing="false" onAction="#onLocalizeCategoriesClicked" text="Localize Categories" />
       <Button fx:id="btn_managePlaylists" mnemonicParsing="false" onAction="#onManagePlaylistsClicked" text="Manage Playlists" />
       <TextField fx:id="txt_nameNewPreset" prefHeight="25.0" prefWidth="142.0" promptText="New Preset Name" />
-      <Button fx:id="addNewPreset" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onPresetAddNewClicked" prefHeight="25.0" prefWidth="106.0" text="Add New Preset" />
+       <Button fx:id="addNewPreset" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+               onAction="#onPresetAddNewClicked" prefHeight="25.0" text="Add New Preset"/>
    </ToolBar>
    <Label layoutX="92.0" layoutY="104.0" prefHeight="17.0" prefWidth="107.0" text="Saved Presets" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="45.0" />
 </AnchorPane>

@@ -5,8 +5,10 @@ import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -55,10 +57,12 @@ public class ManagePlaylistsWindowController implements Initializable {
      */
     public void onWindowClose(WindowEvent windowEvent) {
         ObservableList<CheckBox> listItems = list_playlists.getItems();
-        for (CheckBox listItem : listItems) {
-            playlistUtils.setVisible(listItem.getText(), listItem.isSelected());
+        if (listItems.size() > 0) {
+            for (CheckBox listItem : listItems) {
+                playlistUtils.setVisible(listItem.getText(), listItem.isSelected());
+            }
+            playlistUtils.saveCache();
         }
-        playlistUtils.saveCache();
         // event not consumed, it would cause the window to remain open
     }
 
@@ -89,8 +93,27 @@ public class ManagePlaylistsWindowController implements Initializable {
         // Auth done or user is ready to allow it
         // Do not allow the button to be clicked again until the window is closed and reopened
         btn_refreshPlaylists.setDisable(true);
-        playlistUtils.refreshPlaylist();
-        updatePlaylistList();
+
+        // Send the request in the background
+        Task<Void> backgroundTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                playlistUtils.refreshPlaylist();
+                Platform.runLater(() -> updatePlaylistList());
+                return null;
+            }
+        };
+
+        Thread backgroundThread = new Thread(backgroundTask);
+        // Define a handler for exceptions
+        backgroundThread.setUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> {
+            AlertUtils.simpleClose("Error", "Request to download playlists failed").showAndWait();
+            e.printStackTrace();
+            btn_refreshPlaylists.setDisable(false);
+        }));
+
+        // Start downloading playlists in the background and return
+        backgroundThread.start();
         actionEvent.consume();
     }
 
@@ -124,17 +147,41 @@ public class ManagePlaylistsWindowController implements Initializable {
             }
         }
 
-        // Auth OK
-        LocalPlaylist localPlaylist = playlistUtils.addPlaylist(
-                txt_newPlaylistName.getText(), choice_privacyStatus.getSelectionModel().getSelectedItem());
-        if(localPlaylist == null) {
-            return;
-        }
-        CheckBox cb = new CheckBox(localPlaylist.getName());
-        cb.setSelected(true);
-        list_playlists.getItems().add(cb);
-        txt_newPlaylistName.setText(""); // visually indicate its done by clearing the new playlist name textField
+        // Auth OK, add the playlist
+        btn_addNewPlaylist.setDisable(true);
+        btn_addNewPlaylist.setText("Adding...");
+        final String listName = txt_newPlaylistName.getText();
+        final String privacyLevel = choice_privacyStatus.getSelectionModel().getSelectedItem();
 
+        // Perform the request in a background thread
+        Task<Void> backgroundTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                LocalPlaylist localPlaylist = playlistUtils.addPlaylist(listName, privacyLevel);
+                if (localPlaylist == null) {
+                    Platform.runLater(() -> AlertUtils.simpleClose("Error", "Failed to create new playlist").show());
+                    return null;
+                }
+                CheckBox cb = new CheckBox(localPlaylist.getName());
+                cb.setSelected(true);
+                Platform.runLater(() -> {
+                    list_playlists.getItems().add(cb);
+                    txt_newPlaylistName.setText(""); // visually indicate its done by clearing the new playlist name textField
+                    btn_addNewPlaylist.setDisable(false);
+                    btn_addNewPlaylist.setText("Create new playlist");
+                });
+                return null;
+            }
+        };
+        Thread backgroundThread = new Thread(backgroundTask);
+        // Exception handler
+        backgroundThread.setUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> {
+            AlertUtils.simpleClose("Error", "Request to create new playlist failed").showAndWait();
+            e.printStackTrace();
+        }));
+
+        // Start the background thread and return
+        backgroundThread.start();
         actionEvent.consume();
     }
 
