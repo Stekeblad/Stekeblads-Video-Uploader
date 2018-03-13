@@ -19,18 +19,18 @@
         <TextField fx:id="text_autoNum" maxWidth="-Infinity" prefHeight="25.0" prefWidth="72.0" />
         <Button fx:id="btn_applyPreset" mnemonicParsing="false" onAction="#onApplyPresetClicked" text="Apply preset" />
     </VBox>
-    <VBox alignment="TOP_RIGHT" layoutX="809.0" layoutY="40.0" maxHeight="180.0" prefWidth="279.0" spacing="5.0"
-          AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="40.0">
+    <VBox alignment="TOP_RIGHT" layoutX="809.0" layoutY="40.0" maxHeight="180.0" prefHeight="145.0" prefWidth="279.0"
+          spacing="10.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="40.0">
         <opaqueInsets>
             <Insets/>
         </opaqueInsets>
-        <Button fx:id="btn_startAll" mnemonicParsing="false" onAction="#onStartAllUploadsClicked"
-                text="Start All Ready Uploads"/>
-        <Button fx:id="btn_removeFinished" mnemonicParsing="false" onAction="#onRemoveFinishedUploadsClicked"
-                text="Remove All Finished Uploads"/>
-        <Button fx:id="btn_abortAll" mnemonicParsing="false" onAction="#onAbortAllUploadsClicked"
-                text="Abort All Uploads"/>
-        <Button fx:id="btn_abortAndClear" mnemonicParsing="false" onAction="#onAbortAndClearClicked"
-                text="Abort All and Clear Uploads Area"/>
+        <Button fx:id="btn_startAll" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#onStartAllUploadsClicked" text="Start All Ready Uploads"/>
+        <Button fx:id="btn_removeFinished" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#onRemoveFinishedUploadsClicked" text="Remove All Finished Uploads"/>
+        <Button fx:id="btn_abortAll" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#onAbortAllUploadsClicked" text="Abort All Uploads"/>
+        <Button fx:id="btn_abortAndClear" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#onAbortAndClearClicked" text="Abort All and Clear Uploads Area"/>
     </VBox>
 </AnchorPane>

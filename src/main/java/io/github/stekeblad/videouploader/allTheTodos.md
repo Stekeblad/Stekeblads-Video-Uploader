@@ -3,9 +3,12 @@
 #### Right now
 - Bugs and small things
 
-#### More important things to do
+#### Higher priority things to do
+- Change "Abort all and clear" button to not affect started uploads.
+users can currently not remove all not started at once and it would
+only be two extra click to first abort all before clearing.
 
-#### Less important things to do
+#### Lower priority things to do
 - Creating localization support and moving all strings visible for the
 users there (resourceBundle)
 - add notice for that Edge does not work for authentication!

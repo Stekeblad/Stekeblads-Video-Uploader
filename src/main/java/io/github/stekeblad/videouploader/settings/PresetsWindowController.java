@@ -163,6 +163,7 @@ public class PresetsWindowController implements Initializable {
                 "comma a part of the tag.\nOk, tips!" +
                 "\n- In the video title field you can write \"$(ep)\" to tell the program where to insert the episode " +
                 "number/name defined  when adding videos for upload." +
+                "\n- In the video title field you can also write \"$(rawname)\" to insert the name of the video file used" +
                 "\n- In the description field you can add \"$(playlist)\" to insert a link to the playlist the " +
                 "video will be added to then uploaded.";
         AlertUtils.simpleClose("Tips", messageContent).showAndWait();

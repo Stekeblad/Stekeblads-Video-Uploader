@@ -7,6 +7,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
@@ -51,20 +52,20 @@ public class PickFile {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose video files to upload");
         Stage fileChooserStage = new Stage();
-        List<File> filesToUpload = fileChooser.showOpenMultipleDialog(fileChooserStage);
-        if (filesToUpload != null) {
+        List<File> chosenFiles = fileChooser.showOpenMultipleDialog(fileChooserStage);
+        List<File> filesToUpload = new ArrayList<>();
+        if (chosenFiles != null) {
             boolean fileWasSkipped = false;
-            for (int i = 0; i < filesToUpload.size(); i++) {
+            for (File chosenFile : chosenFiles) {
                 try { // Check file MIME to see if it is a video file
-                    if (!Files.probeContentType(Paths.get(filesToUpload.get(i).toURI())).startsWith(VIDEO_FILE_FORMAT)) {
+                    String contentType = Files.probeContentType(Paths.get(chosenFile.toURI()));
+                    if (contentType == null || !contentType.startsWith(VIDEO_FILE_FORMAT)) {
                         fileWasSkipped = true; // at leased one selected file is not a video file
-                        filesToUpload.remove(filesToUpload.get(i));
-                        i--;
+                    } else {
+                        filesToUpload.add(chosenFile);
                     }
                 } catch (Exception e) {
                     fileWasSkipped = true;
-                    filesToUpload.remove(filesToUpload.get(i));
-                    i--;
                 }
             }
             if (fileWasSkipped) {

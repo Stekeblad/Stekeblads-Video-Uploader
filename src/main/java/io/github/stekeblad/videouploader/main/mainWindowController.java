@@ -82,7 +82,7 @@ public class mainWindowController implements Initializable {
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
         btn_startAll.setTooltip(new Tooltip("Starts all uploads that have the \"Start Upload\" button visible"));
         btn_abortAll.setTooltip(new Tooltip("Aborts all uploads that have the \"Abort\" button visible"));
-        btn_abortAndClear.setTooltip(new Tooltip("Aborts all uploads and removes all uploads from the list below"));
+        btn_abortAndClear.setTooltip(new Tooltip("Aborts all started uploads and removes all uploads from the list below"));
 
         // Only allow numbers in autoNum textField
         text_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -229,6 +229,11 @@ public class mainWindowController implements Initializable {
             for (File videoFile : videosToAdd) {
                 // Apply automatic numbering on video name
                 String name = chosenPreset.getVideoName().replace("$(ep)", String.valueOf(autoNum++));
+                // Insert raw file name in title, exclude file extension
+                if (name.contains("$(rawname)")) {
+                    String rawFileName = videoFile.getName().substring(0, videoFile.getName().lastIndexOf("."));
+                    name = name.replace("$(rawname)", rawFileName);
+                }
                 // Insert playlist URL in description
                 String description = chosenPreset.getVideoDescription()
                         .replace("$(playlist)", playlistUrl);
@@ -361,12 +366,14 @@ public class mainWindowController implements Initializable {
      */
     public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
         // Show confirmation dialog
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort ALL Uploads?",
-                "Are you sure you want to abort the uploading of all started uploads?").showAndWait();
-        if (buttonChoice.isPresent()) {
-            if (buttonChoice.get() != ButtonType.YES) {
-                // ButtonType.NO or Closed with [X] button
-                return;
+        if (!bybassAbortWarning) { // can be set from onAbortAndClearClicked
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort ALL Uploads?",
+                    "Are you sure you want to abort the uploading of all started uploads?").showAndWait();
+            if (buttonChoice.isPresent()) {
+                if (buttonChoice.get() != ButtonType.YES) {
+                    // ButtonType.NO or Closed with [X] button
+                    return;
+                }
             }
         }
         // Prevent the "Are you sure you want to abort X?" dialog for every upload
@@ -394,6 +401,7 @@ public class mainWindowController implements Initializable {
                 "all started, aborted, finished and not yet started uploads?").showAndWait();
         if (choice.isPresent()) {
             if (choice.get() == ButtonType.YES) {
+                bybassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
                 onAbortAllUploadsClicked(new ActionEvent());
                 uploadQueueVideos.clear();
                 uploadPaneCounter = 0;
