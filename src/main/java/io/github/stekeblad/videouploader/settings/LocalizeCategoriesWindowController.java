@@ -18,6 +18,9 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.zip.DataFormatException;
 
+import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
+import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
+
 public class LocalizeCategoriesWindowController implements Initializable{
     public TextField txt_country;
     public TextField txt_lang;
@@ -26,6 +29,9 @@ public class LocalizeCategoriesWindowController implements Initializable{
     public Button btn_cancel;
     public Button btn_codeListCountry;
     public Button btn_codeListLang;
+
+    private ConfigManager configManager = ConfigManager.INSTANCE;
+    private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
 
     /**
      * Initialize things when the window is opened
@@ -60,6 +66,10 @@ public class LocalizeCategoriesWindowController implements Initializable{
         // set ToolTips
         btn_codeListCountry.setTooltip(new Tooltip("https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements"));
         btn_codeListLang.setTooltip(new Tooltip("https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes"));
+
+        // Insert the current country and language code in their text fields
+        txt_country.setText(configManager.getCategoryCountry());
+        txt_lang.setText(configManager.getCategoryLanguage());
     }
 
     /**
@@ -68,13 +78,12 @@ public class LocalizeCategoriesWindowController implements Initializable{
      * @param actionEvent the click event
      */
     public void onGetCategoriesClicked(ActionEvent actionEvent) {
-        ConfigManager configManager = ConfigManager.INSTANCE;
-        CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
 
         // test if the codes is of the correct length
         try {
             configManager.setCategoryCountry(txt_country.getText());
             configManager.setCategoryLanguage(txt_lang.getText());
+            configManager.saveSettings();
         } catch (DataFormatException e) {
             AlertUtils.simpleClose("Invalid Content", "A valid code for both country and language is two characters long").show();
             actionEvent.consume();
@@ -83,13 +92,7 @@ public class LocalizeCategoriesWindowController implements Initializable{
 
         // Authentication with youtube is required, check if the user has given permission, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
-                    "To use the Youtube API you must grant this application permission to access your Youtube channel. " +
-                            "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
-                            "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                            "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                            "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);

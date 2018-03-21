@@ -19,9 +19,10 @@ import java.util.List;
 public class VideoUpload extends VideoInformationBase{
 
     public static final String VIDEO_FILE_FORMAT = "video/";
-    public static final String NODE_ID_PROGRESS = "_progress";
-    public static final String NODE_ID_UPLOADSTATUS = "_status";
-    public static final String NODE_ID_BUTTONSBOX = "_buttons";
+
+    private static final String NODE_ID_PROGRESS = "_progress";
+    private static final String NODE_ID_UPLOADSTATUS = "_status";
+    private static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     private File videoFile;
     private GridPane uploadPane;
@@ -102,6 +103,15 @@ public class VideoUpload extends VideoInformationBase{
         if (progress >=0 && progress <= 1) {
             ((ProgressBar) uploadPane.lookup("#" + getPaneId() + NODE_ID_PROGRESS)).setProgress(progress);
         }
+    }
+
+    /**
+     * Sets the visibility of the progress bar
+     *
+     * @param show true if it should be visible, false if it should not
+     */
+    public void setProgressBarVisibility(boolean show) {
+        uploadPane.lookup("#" + getPaneId() + NODE_ID_PROGRESS).setVisible(show);
     }
 
     /**

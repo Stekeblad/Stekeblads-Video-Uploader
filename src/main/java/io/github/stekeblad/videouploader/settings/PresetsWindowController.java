@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
-import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.*;
 
 
 public class PresetsWindowController implements Initializable {
@@ -266,7 +265,7 @@ public class PresetsWindowController implements Initializable {
         videoPresets.get(selected).setEditable(true);
 
         // Sets the thumbnail clickable for changing
-        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
+        videoPresets.get(selected).setOnThumbnailClicked(event -> {
             File pickedThumbnail = PickFile.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
@@ -276,18 +275,21 @@ public class PresetsWindowController implements Initializable {
                 }
             }
         });
+
         // set the playlists list
-        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event-> {
-            if(configManager.getNeverAuthed()) {
+        videoPresets.get(selected).setOnPlaylistsClicked(event -> {
+            if (configManager.getNeverAuthed()) {
                 onManagePlaylistsClicked(new ActionEvent());
             }
-            if (! configManager.getNeverAuthed()) {
+            if (!configManager.getNeverAuthed()) {
                 videoPresets.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
             }
         });
+
         //set categories
-        videoPresets.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
-                videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames()));
+        videoPresets.get(selected).setOnCategoriesClicked(event ->
+                videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames())
+        );
 
         // Change buttons from "edit" and "delete" to "save" and "cancel"
         Button saveButton = new Button("Save");

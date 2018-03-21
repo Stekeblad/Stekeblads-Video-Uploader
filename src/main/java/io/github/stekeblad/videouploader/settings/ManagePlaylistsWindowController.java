@@ -17,6 +17,9 @@ import javafx.stage.WindowEvent;
 import java.net.URL;
 import java.util.*;
 
+import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
+import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
+
 public class ManagePlaylistsWindowController implements Initializable {
     public Button btn_refreshPlaylists;
     public Button btn_addNewPlaylist;
@@ -72,13 +75,7 @@ public class ManagePlaylistsWindowController implements Initializable {
      */
     public void onRefreshPlaylistsClicked(ActionEvent actionEvent) {
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
-                    "To download your playlists you must grant this application permission to access your Youtube channel. " +
-                    "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
-                    "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                    "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                    "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
@@ -127,13 +124,7 @@ public class ManagePlaylistsWindowController implements Initializable {
             return;
         }
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
-                    "To create a new playlist you must grant this application permission to access your Youtube channel. " +
-                            "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
-                            "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                            "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                            "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);

@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.youtube;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -25,14 +26,15 @@ public class VideoInformationBase {
 
     // Constants
     public static final List<String> THUMBNAIL_FILE_FORMAT = Arrays.asList("*.jpg", "*.png");
-    public static final String NODE_ID_TITLE = "_title";
-    public static final String NODE_ID_DESCRIPTION = "_description";
-    public static final String NODE_ID_CATEGORY = "_category";
-    public static final String NODE_ID_TAGS = "_tags";
-    public static final String NODE_ID_PLAYLIST = "_playlist";
-    public static final String NODE_ID_VISIBILITY = "_visibility";
-    public static final String NODE_ID_TELLSUBS = "_tellSubs";
-    public static final String NODE_ID_THUMBNAIL = "_thumbNail";
+
+    private static final String NODE_ID_TITLE = "_title";
+    private static final String NODE_ID_DESCRIPTION = "_description";
+    private static final String NODE_ID_CATEGORY = "_category";
+    private static final String NODE_ID_TAGS = "_tags";
+    private static final String NODE_ID_PLAYLIST = "_playlist";
+    private static final String NODE_ID_VISIBILITY = "_visibility";
+    private static final String NODE_ID_TELLSUBS = "_tellSubs";
+    private static final String NODE_ID_THUMBNAIL = "_thumbNail";
 
     // Variables
     private GridPane videoBasePane;
@@ -116,18 +118,12 @@ public class VideoInformationBase {
 
     /**
      * @return returns the entire UI Pane.
-     * The pane itself has the Id of getPaneId() and all nodes in it is named like this:
-     * <pre>{@code
-     *     getNodeId() + NODE_ID_TITLE    for the video name field
-     *     getNodeId() + NODE_ID_TAGS     for the tags field
-     *
-     *
      */
     public GridPane getPane() {
         return videoBasePane;
     }
 
-    //Setters (mostly done directly on the GridPane)
+    //Setters
 
     /**
      * Enables / Disables editing of all the fields on the pane
@@ -160,6 +156,18 @@ public class VideoInformationBase {
     }
 
     /**
+     * Define something to happen then the thumbnail is clicked, can be used with lambda like this:
+     * <pre>
+     *     setOnThumbnailClicked(event -> {System.out.println("Example");}
+     * </pre>
+     *
+     * @param clickEvent a handler for the click event
+     */
+    public void setOnThumbnailClicked(EventHandler clickEvent) {
+        videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL).setOnMouseClicked(clickEvent);
+    }
+
+    /**
      * Sets the playlists that will appear in the playlists ChoiceBox
      * @param playlistNames A ArrayList with the names of all playlists
      */
@@ -171,6 +179,18 @@ public class VideoInformationBase {
     }
 
     /**
+     * Define something to happen then the playlist choice box is clicked, can be used with lambda like this:
+     * <pre>
+     *     setOnPlaylistsClicked(event -> {System.out.println("Example");}
+     * </pre>
+     *
+     * @param clickEvent a handler for the click event
+     */
+    public void setOnPlaylistsClicked(EventHandler clickEvent) {
+        videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setOnMouseClicked(clickEvent);
+    }
+
+    /**
      * Sets the categories that will appear in the categories ChoiceBox
      * @param categories A ArrayList with the names of all categories
      */
@@ -179,6 +199,18 @@ public class VideoInformationBase {
         if(categories != null) {
             ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).setItems(FXCollections.observableArrayList(categories));
         }
+    }
+
+    /**
+     * Define something to happen then the categories choice box is clicked, can be used with lambda like this:
+     * <pre>
+     *     setOnCategoriesClicked(event -> {System.out.println("Example");}
+     * </pre>
+     *
+     * @param clickEvent a handler for the click event
+     */
+    public void setOnCategoriesClicked(EventHandler clickEvent) {
+        videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY).setOnMouseClicked(clickEvent);
     }
 
     // other methods

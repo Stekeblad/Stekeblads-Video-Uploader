@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class VideoPreset extends VideoInformationBase {
 
-    public static final String NODE_ID_PRESETNAME = "_presetName";
-    public static final String NODE_ID_BUTTONSBOX = "_buttons";
+    private static final String NODE_ID_PRESETNAME = "_presetName";
+    private static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     private GridPane presetPane;
 

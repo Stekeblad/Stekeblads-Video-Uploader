@@ -28,8 +28,9 @@ import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
-import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.*;
-import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_PROGRESS;
+import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
+import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
+//import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_PROGRESS;
 
 public class mainWindowController implements Initializable {
     public ListView<GridPane> listView;
@@ -316,13 +317,7 @@ public class mainWindowController implements Initializable {
     public void onStartAllUploadsClicked(ActionEvent actionEvent) {
         // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
-                    "To upload videos you must grant this application permission to access your Youtube channel. " +
-                            "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
-                            "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                            "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                            "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
@@ -453,7 +448,7 @@ public class mainWindowController implements Initializable {
         // Create a backup to be able to revert
         editBackups.put(uploadQueueVideos.get(selected).getPaneId(), uploadQueueVideos.get(selected).copy(null)); //null -> same id
         uploadQueueVideos.get(selected).setEditable(true);
-        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_THUMBNAIL).setOnMouseClicked(event -> {
+        uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
             File pickedThumbnail = PickFile.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
@@ -463,15 +458,18 @@ public class mainWindowController implements Initializable {
                 }
             }
         });
-        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PLAYLIST).setOnMouseClicked(event -> {
+
+        uploadQueueVideos.get(selected).setOnPlaylistsClicked(event -> {
             if(configManager.getNeverAuthed()) {
                 AlertUtils.simpleClose("No playlists", "No playlists synced yet, go to the settings window to sync with Youtube").show();
             } else {
                 uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
             }
         });
-        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_CATEGORY).setOnMouseClicked(event ->
-                uploadQueueVideos.get(selected).setCategories(categoryUtils.getCategoryNames()));
+        uploadQueueVideos.get(selected).setOnCategoriesClicked(event ->
+                uploadQueueVideos.get(selected).setCategories(categoryUtils.getCategoryNames())
+        );
+
 
         // Set buttons
         Button saveButton = new Button("Save");
@@ -623,13 +621,7 @@ public class mainWindowController implements Initializable {
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Authentication Required",
-                    "To upload videos you must grant this application permission to access your Youtube channel. " +
-                            "Do you want to allow \"Stekeblads Video Uploader\" to access Your channel?" +
-                            "\n\nPermission overview: \"YOUTUBE_UPLOAD\" for allowing the program to upload videos for you" +
-                            "\n\"YOUTUBE\" for basic account access, adding videos to playlists and setting thumbnails" +
-                            "\n\nPress yes to open your browser for authentication or no to cancel")
-                    .showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
@@ -658,7 +650,7 @@ public class mainWindowController implements Initializable {
         uploadQueueVideos.get(selected).setButton3(ghostButton2);
 
         // make progressbar visible and set text to show it is waiting to be uploaded.
-        uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(true);
+        uploadQueueVideos.get(selected).setProgressBarVisibility(true);
         uploadQueueVideos.get(selected).setStatusLabelText("Waiting...");
 
         // Make sure visual change get to the UI
@@ -693,7 +685,7 @@ public class mainWindowController implements Initializable {
 
         if (abortSuccess) {
             // Set label text and reset progress bar
-            uploadQueueVideos.get(selected).getPane().lookup("#" + parentId + NODE_ID_PROGRESS).setVisible(false);
+            uploadQueueVideos.get(selected).setProgressBarVisibility(false);
             uploadQueueVideos.get(selected).setStatusLabelText("Aborted");
         } else {
             AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");

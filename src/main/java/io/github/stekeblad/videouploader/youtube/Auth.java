@@ -21,7 +21,18 @@ import java.util.List;
 
 import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 
+/**
+ * Contains the logic of getting permission to access the user's YouTube account.
+ */
 public class Auth {
+
+    public static final String AUTHMSG_HEADER = "Authentication Required";
+    public static final String AUTHMSG_DESC = "To do this you must grant the application permission to access your Youtube channel. " +
+            "Do you want to allow \"Stekeblads Youtube Uploader\" to access Your channel?" +
+            "\n\nThe permissions is required for the program to upload videos to your channel, " +
+            "setting thumbnails, getting a list of video categories, adding videos to playlists and creating new playlists." +
+            "\n\nPress yes to open your browser for authentication or no to cancel. " +
+            "Authentication does not work in Microsoft Edge, if it is your default browser you need to temporary change to another one.";
 
     public static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     public static final JsonFactory JSON_FACTORY = new JacksonFactory();
