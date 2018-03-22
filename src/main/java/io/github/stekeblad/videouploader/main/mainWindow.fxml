@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.videouploader.main.mainWindowController">
-    <ToolBar prefHeight="40.0" prefWidth="1088.0">
+    <ToolBar fx:id="toolbar" prefHeight="40.0" prefWidth="1088.0">
       <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsClicked" text="Settings" />
     </ToolBar>
     <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" prefHeight="464.0" prefWidth="1070.0"
@@ -12,11 +12,12 @@
               AnchorPane.topAnchor="200.0"/>
    <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="154.0" prefWidth="309.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0" />
     <VBox layoutX="324.0" layoutY="40.0" prefHeight="145.0" prefWidth="177.0" spacing="4.0">
-        <Button fx:id="buttonPickFile" mnemonicParsing="false" onAction="#onPickFileClicked" prefHeight="25.0" prefWidth="148.0" text="Pick files to upload" />
-        <Label text="Select a preset" />
+        <Button fx:id="btn_pickFile" mnemonicParsing="false" onAction="#onPickFileClicked" prefHeight="25.0"
+                prefWidth="148.0" text="Pick files to upload"/>
+        <Label fx:id="label_selectPreset" text="Select a preset"/>
         <ChoiceBox id="choice_presets" fx:id="choice_presets" prefWidth="150.0" />
-        <Label text="Automatic numbering" />
-        <TextField fx:id="text_autoNum" maxWidth="-Infinity" prefHeight="25.0" prefWidth="72.0" />
+        <Label fx:id="label_numbering" text="Automatic numbering"/>
+        <TextField fx:id="txt_autoNum" maxWidth="-Infinity" prefHeight="25.0" prefWidth="72.0"/>
         <Button fx:id="btn_applyPreset" mnemonicParsing="false" onAction="#onApplyPresetClicked" text="Apply preset" />
     </VBox>
     <VBox alignment="TOP_RIGHT" layoutX="809.0" layoutY="40.0" maxHeight="180.0" prefHeight="145.0" prefWidth="279.0"

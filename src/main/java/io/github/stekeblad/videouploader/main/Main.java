@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.utils.Translations;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,7 +16,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
         Parent root = loader.load();
-        primaryStage.setTitle("Stekeblads Video Uploader");
+        Translations trans = new Translations("baseStrings");
+        primaryStage.setTitle(trans.getString("appName"));
         primaryStage.setScene(new Scene(root, 900, 825));
         // Register MainWindowController.onWindowClose() to be called when the close button is clicked
         mainWindowController controller = loader.getController();

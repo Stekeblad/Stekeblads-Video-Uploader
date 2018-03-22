@@ -4,6 +4,7 @@ import io.github.stekeblad.videouploader.settings.PresetsWindowController;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.PickFile;
+import io.github.stekeblad.videouploader.utils.Translations;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
@@ -30,21 +31,23 @@ import java.util.*;
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
 import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
-//import static io.github.stekeblad.videouploader.youtube.VideoUpload.NODE_ID_PROGRESS;
 
 public class mainWindowController implements Initializable {
-    public ListView<GridPane> listView;
-    public Button buttonPickFile;
-    public ListView<String> chosen_files;
-    public Button btn_presets;
-    public ChoiceBox<String> choice_presets;
     public AnchorPane mainWindowPane;
-    public TextField text_autoNum;
+    public ToolBar toolbar;
+    public ListView<GridPane> listView;
+    public ListView<String> chosen_files;
+    public ChoiceBox<String> choice_presets;
+    public TextField txt_autoNum;
+    public Button btn_presets;
+    public Button btn_pickFile;
     public Button btn_applyPreset;
     public Button btn_removeFinished;
     public Button btn_startAll;
     public Button btn_abortAll;
     public Button btn_abortAndClear;
+    public Label label_selectPreset;
+    public Label label_numbering;
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
@@ -55,7 +58,10 @@ public class mainWindowController implements Initializable {
     private HashMap<String, VideoUpload> editBackups;
     private Uploader uploader;
     private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
-    private boolean bybassAbortWarning = false;
+    private boolean bypassAbortWarning = false;
+
+    private Translations transMainWin;
+    private Translations transBasic;
 
     /**
      * Initialize things when the window is opened
@@ -64,6 +70,29 @@ public class mainWindowController implements Initializable {
      */
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
+
+        try {
+            transMainWin = new Translations("mainWindow");
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for main" +
+                    " window, the application will now close. Sorry!").showAndWait();
+            return;
+        }
+        transMainWin.autoTranslate(mainWindowPane);
+        // Bugged:
+        // System.out.println(toolbar.getChildrenUnmodifiable());
+        btn_presets.setText(transMainWin.getString("btn_presets"));
+
+        try {
+            transBasic = new Translations("baseStrings");
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
+                    ", the application will now close. Sorry!").showAndWait();
+            return;
+        }
+
 
         uploadPaneCounter = 0;
         uploadQueueVideos = new ArrayList<>();
@@ -81,17 +110,13 @@ public class mainWindowController implements Initializable {
         categoryUtils = CategoryUtils.INSTANCE;
         categoryUtils.loadCategories();
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
-        btn_startAll.setTooltip(new Tooltip("Starts all uploads that have the \"Start Upload\" button visible"));
-        btn_abortAll.setTooltip(new Tooltip("Aborts all uploads that have the \"Abort\" button visible"));
-        btn_abortAndClear.setTooltip(new Tooltip("Aborts all started uploads and removes all uploads from the list below"));
 
         // Only allow numbers in autoNum textField
-        text_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
+        txt_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                text_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
+                txt_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
-        text_autoNum.setTooltip(new Tooltip("Requires the $(ep) tag in preset video title"));
 
         uploader = new Uploader();
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
@@ -102,13 +127,13 @@ public class mainWindowController implements Initializable {
                 for(String waitingUpload : waitingUploads) {
                     try {
                         VideoUpload loadedUpload = new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++));
-                        Button editButton = new Button("Edit");
+                        Button editButton = new Button(transBasic.getString("edit"));
                         editButton.setId(loadedUpload.getPaneId() + BUTTON_EDIT);
                         editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-                        Button deleteButton = new Button("Delete");
+                        Button deleteButton = new Button(transBasic.getString("delete"));
                         deleteButton.setId(loadedUpload.getPaneId() + BUTTON_DELETE);
                         deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-                        Button startUploadButton = new Button("Start Upload");
+                        Button startUploadButton = new Button(transBasic.getString("startUpload"));
                         startUploadButton.setId(loadedUpload.getPaneId() + BUTTON_START_UPLOAD);
                         startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
 
@@ -138,28 +163,29 @@ public class mainWindowController implements Initializable {
             uploader.kill(); // just because it does not do anything it started and must be stopped
             return true;
         }
-        String choice = AlertUtils.threeButtons("Close Program?",
-                "Do you want to close, now? There is currently one or more uploads in progress and they will " +
-                        "be stopped if you close the program. What do you want to do?",
-                "Do not close", "Stop all uploads", "auto-restart started but unfinished uploads next time");
+        String op1 = transMainWin.getString("closeWarn_op1");
+        String op2 = transMainWin.getString("closeWarn_op2");
+        String op3 = transMainWin.getString("closeWarn_op3");
+        String choice = AlertUtils.threeButtons(transMainWin.getString("closeWarn_short"),
+                transMainWin.getString("closeWarn_full"), op1, op2, op3);
         if (choice == null) {
             return false;
         }
-        switch (choice) {
-            case "Do not close":
-                return false;
-            case "Stop all uploads":
-                uploader.kill();
-                return true;
-            case "auto-restart started but unfinished uploads next time":
-                Set<String> tasks = uploader.kill();
-                tasks.forEach(s -> {
-                    int index = getUploadIndexByName(s);
-                    if (index != -1) { // If a task does not have a index it has been removed and is not interesting, or bugged with a bad id, skip them
-                        configManager.saveWaitingUpload(uploadQueueVideos.get(index).toString(), String.valueOf(index));
-                    }
-                });
-                return true;
+        if (choice.equals(op1)) {
+            return false;
+        } else if (choice.equals(op2)) {
+            uploader.kill();
+            return true;
+        } else if (choice.equals(op3)) {
+
+            Set<String> tasks = uploader.kill();
+            tasks.forEach(s -> {
+                int index = getUploadIndexByName(s);
+                if (index != -1) { // If a task does not have a index it has been removed and is not interesting, or bugged with a bad id, skip them
+                    configManager.saveWaitingUpload(uploadQueueVideos.get(index).toString(), String.valueOf(index));
+                }
+            });
+            return true;
         }
         return false;
     }
@@ -189,7 +215,8 @@ public class mainWindowController implements Initializable {
      */
     public void onApplyPresetClicked(ActionEvent actionEvent) {
         if(videosToAdd == null || videosToAdd.size() == 0 ) {
-            AlertUtils.simpleClose("No files selected", "Please select files to upload").show();
+            AlertUtils.simpleClose(transMainWin.getString("noFiles_short"),
+                    transMainWin.getString("noFiles_full")).show();
             return;
         }
         // Check what preset / if a preset is selected
@@ -209,7 +236,7 @@ public class mainWindowController implements Initializable {
             // Get the auto numbering and preset
             int autoNum;
             try {
-                autoNum = Integer.valueOf(text_autoNum.getText());
+                autoNum = Integer.valueOf(txt_autoNum.getText());
             } catch (NumberFormatException e) {
                 autoNum = 1;
             }
@@ -255,13 +282,13 @@ public class mainWindowController implements Initializable {
                  VideoUpload newUpload = newUploadBuilder.build();
 
                 // Create the buttons
-                Button editButton = new Button("Edit");
+                Button editButton = new Button(transBasic.getString("edit"));
                 editButton.setId(newUpload.getPaneId() + BUTTON_EDIT);
                 editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-                Button deleteButton = new Button("Delete");
+                Button deleteButton = new Button(transBasic.getString("delete"));
                 deleteButton.setId(newUpload.getPaneId() + BUTTON_DELETE);
                 deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-                Button startUploadButton = new Button("Start Upload");
+                Button startUploadButton = new Button(transBasic.getString("startUpload"));
                 startUploadButton.setId(newUpload.getPaneId() + BUTTON_START_UPLOAD);
                 startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
 
@@ -273,7 +300,7 @@ public class mainWindowController implements Initializable {
                 uploadPaneCounter++;
             }
             // update autoNum textField
-            text_autoNum.setText(String.valueOf(autoNum));
+            txt_autoNum.setText(String.valueOf(autoNum));
         }
         // Removes the newly added uploads from the selected files list and update UI
         videosToAdd = null;
@@ -295,7 +322,7 @@ public class mainWindowController implements Initializable {
             Stage stage = new Stage();
             stage.setMinWidth(725);
             stage.setMinHeight(550);
-            stage.setTitle("Settings - Stekeblads Video Uploader");
+            stage.setTitle(transBasic.getString("settingsWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
             PresetsWindowController controller = fxmlLoader.getController();
@@ -323,7 +350,6 @@ public class mainWindowController implements Initializable {
                     configManager.setNeverAuthed(false);
                     configManager.saveSettings();
                 } else { // ButtonType.NO or closed [X]
-                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
                     return;
                 }
             }
@@ -361,9 +387,9 @@ public class mainWindowController implements Initializable {
      */
     public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
         // Show confirmation dialog
-        if (!bybassAbortWarning) { // can be set from onAbortAndClearClicked
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort ALL Uploads?",
-                    "Are you sure you want to abort the uploading of all started uploads?").showAndWait();
+        if (!bypassAbortWarning) { // can be set from onAbortAndClearClicked
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("abortAll_short"),
+                    transMainWin.getString("abortAll_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() != ButtonType.YES) {
                     // ButtonType.NO or Closed with [X] button
@@ -372,7 +398,7 @@ public class mainWindowController implements Initializable {
             }
         }
         // Prevent the "Are you sure you want to abort X?" dialog for every upload
-        bybassAbortWarning = true;
+        bypassAbortWarning = true;
         // Abort the uploads in the reversed order of that they was most likely started in
         // to avoid that the program attempts to start a new upload that will also be aborted, and then the next one...
         for (int i = uploadQueueVideos.size() - 1; i >= 0; i--) {
@@ -382,7 +408,7 @@ public class mainWindowController implements Initializable {
             }
         }
         // Re-enable the individual confirmation on aborts
-        bybassAbortWarning = false;
+        bypassAbortWarning = false;
         actionEvent.consume();
     }
 
@@ -392,11 +418,11 @@ public class mainWindowController implements Initializable {
      * @param actionEvent the button click event
      */
     public void onAbortAndClearClicked(ActionEvent actionEvent) {
-        Optional<ButtonType> choice = AlertUtils.yesNo("Confirmation", "Are you sure you want to abort all started uploads and remove" +
-                "all started, aborted, finished and not yet started uploads?").showAndWait();
+        Optional<ButtonType> choice = AlertUtils.yesNo(transMainWin.getString("abortAllClear_short"),
+                transMainWin.getString("abortAllClear_full")).showAndWait();
         if (choice.isPresent()) {
             if (choice.get() == ButtonType.YES) {
-                bybassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
+                bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
                 onAbortAllUploadsClicked(new ActionEvent());
                 uploadQueueVideos.clear();
                 uploadPaneCounter = 0;
@@ -460,8 +486,9 @@ public class mainWindowController implements Initializable {
         });
 
         uploadQueueVideos.get(selected).setOnPlaylistsClicked(event -> {
-            if(configManager.getNeverAuthed()) {
-                AlertUtils.simpleClose("No playlists", "No playlists synced yet, go to the settings window to sync with Youtube").show();
+            if (playlistUtils.getPlaylistNames().size() == 0) {
+                AlertUtils.simpleClose(transMainWin.getString("noPlaylists_short"),
+                        transMainWin.getString("noPlaylists_full")).show();
             } else {
                 uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
             }
@@ -472,10 +499,10 @@ public class mainWindowController implements Initializable {
 
 
         // Set buttons
-        Button saveButton = new Button("Save");
+        Button saveButton = new Button(transBasic.getString("save"));
         saveButton.setId(parentId + BUTTON_SAVE);
         saveButton.setOnMouseClicked(event -> onSave(saveButton.getId()));
-        Button cancelButton = new Button("Cancel");
+        Button cancelButton = new Button(transBasic.getString("cancel"));
         cancelButton.setId(parentId + BUTTON_CANCEL);
         cancelButton.setOnMouseClicked(event -> onCancel(cancelButton.getId()));
         //Button three is not used and I do not want the previous one to be visible
@@ -504,7 +531,8 @@ public class mainWindowController implements Initializable {
         }
         // Check fields
         if(uploadQueueVideos.get(selected).getVideoName().equals("")) {
-            AlertUtils.simpleClose("Title Required", "Video does not have a title").show();
+            AlertUtils.simpleClose(transMainWin.getString("noVidTitle_short"),
+                    transMainWin.getString("noVidTitle_full")).show();
             return;
         }
         // Everything else is not required or given a default value that can not be set to a invalid value
@@ -516,13 +544,13 @@ public class mainWindowController implements Initializable {
         }
 
         // Change buttons
-        Button editButton = new Button("Edit");
+        Button editButton = new Button(transBasic.getString("edit"));
         editButton.setId(parentId + BUTTON_EDIT);
         editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button(transBasic.getString("delete"));
         deleteButton.setId(parentId + BUTTON_DELETE);
         deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button("Start Upload");
+        Button startUploadButton = new Button(transBasic.getString("startUpload"));
         startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
         startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
 
@@ -552,17 +580,18 @@ public class mainWindowController implements Initializable {
             uploadQueueVideos.set(selected, editBackups.get(uploadQueueVideos.get(selected).getPaneId()));
             editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         } else {
-            AlertUtils.simpleClose("Can not change back", "Could not revert this upload to the state it was in before edit").show();
+            AlertUtils.simpleClose(transMainWin.getString("backupNoRestore_short"),
+                    transMainWin.getString("backupNoRestore_full")).show();
         }
 
         // Change buttons
-        Button editButton = new Button("Edit");
+        Button editButton = new Button(transBasic.getString("edit"));
         editButton.setId(parentId + BUTTON_EDIT);
         editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button(transBasic.getString("delete"));
         deleteButton.setId(parentId + BUTTON_DELETE);
         deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button("Start Upload");
+        Button startUploadButton = new Button(transBasic.getString("startUpload"));
         startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
         startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
 
@@ -586,9 +615,9 @@ public class mainWindowController implements Initializable {
             System.err.println("delete button belongs to a invalid or non-existing parent");
             return;
         }
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Confirm delete",
-                "Are you sure you want to remove \"" +  uploadQueueVideos.get(selected).getVideoName() +
-                "\" from the upload queue?").showAndWait();
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("confirmDelete_short"),
+                transMainWin.getString("confirmDelete_full_1") + uploadQueueVideos.get(selected).getVideoName() +
+                        transMainWin.getString("confirmDelete_full_2")).showAndWait();
         if (buttonChoice.isPresent()) {
             if(buttonChoice.get() == ButtonType.YES) {
                 uploadQueueVideos.remove(selected);
@@ -613,10 +642,12 @@ public class mainWindowController implements Initializable {
         }
         // a few small checks first
         if (uploadQueueVideos.get(selected).getVideoName().length() < 1) {
-            AlertUtils.simpleClose("Can not start", "Cant start the upload, the video does not have a name").show();
+            AlertUtils.simpleClose(transMainWin.getString("noStartUpload_short"),
+                    transMainWin.getString("noStartUpload_full_noTitle")).show();
         }
         if (categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
-            AlertUtils.simpleClose("Can not start", "Category is not selected or invalid").show();
+            AlertUtils.simpleClose(transMainWin.getString("noStartUpload_short"),
+                    transMainWin.getString("noStartUpload_full_noCategory")).show();
         }
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
@@ -627,7 +658,6 @@ public class mainWindowController implements Initializable {
                     configManager.setNeverAuthed(false);
                     configManager.saveSettings();
                 } else { // ButtonType.NO or closed [X]
-                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
                     return;
                 }
             }
@@ -639,7 +669,7 @@ public class mainWindowController implements Initializable {
         // Change Buttons and text
         Button ghostButton1 = new Button("just to give it width");
         ghostButton1.setVisible(false);
-        Button abortButton = new Button("Abort");
+        Button abortButton = new Button(transBasic.getString("abort"));
         abortButton.setId(parentId + BUTTON_ABORT_UPLOAD);
         abortButton.setOnMouseClicked(event -> onAbort(abortButton.getId()));
         Button ghostButton2 = new Button("");
@@ -651,7 +681,7 @@ public class mainWindowController implements Initializable {
 
         // make progressbar visible and set text to show it is waiting to be uploaded.
         uploadQueueVideos.get(selected).setProgressBarVisibility(true);
-        uploadQueueVideos.get(selected).setStatusLabelText("Waiting...");
+        uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("waiting"));
 
         // Make sure visual change get to the UI
         updateUploadList();
@@ -669,9 +699,9 @@ public class mainWindowController implements Initializable {
             return;
         }
         // Show confirmation dialog, but not if abort all button was clicked
-        if(! bybassAbortWarning) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Abort upload?",
-                    "Are you sure you want to abort the uploading of " +
+        if (!bypassAbortWarning) {
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("abortSingle_short"),
+                    transMainWin.getString("abortSingle_full") +
                             "\"" + uploadQueueVideos.get(selected).getVideoName() + "\"?").showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() != ButtonType.YES) {
@@ -686,19 +716,19 @@ public class mainWindowController implements Initializable {
         if (abortSuccess) {
             // Set label text and reset progress bar
             uploadQueueVideos.get(selected).setProgressBarVisibility(false);
-            uploadQueueVideos.get(selected).setStatusLabelText("Aborted");
+            uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("aborted"));
         } else {
-            AlertUtils.simpleClose("Error", "Failed to terminate upload for unknown reason");
+            AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason");
         }
 
         // Change buttons
-        Button editButton = new Button("Edit");
+        Button editButton = new Button(transBasic.getString("edit"));
         editButton.setId(parentId + BUTTON_EDIT);
         editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button(transBasic.getString("delete"));
         deleteButton.setId(parentId + BUTTON_DELETE);
         deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button("Start Upload");
+        Button startUploadButton = new Button(transBasic.getString("startUpload"));
         startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
         startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
 
@@ -721,7 +751,7 @@ public class mainWindowController implements Initializable {
             System.err.println("Unknown upload just finished: " + paneId);
             return;
         }
-        Button finishedUploadButton = new Button("hide");
+        Button finishedUploadButton = new Button(transBasic.getString("hide"));
         finishedUploadButton.setId(paneId + BUTTON_FINISHED_UPLOAD);
         finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
         uploadQueueVideos.get(index).setButton2(finishedUploadButton);
