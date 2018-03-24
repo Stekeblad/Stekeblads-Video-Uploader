@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.settings;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.PickFile;
+import io.github.stekeblad.videouploader.utils.Translations;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
@@ -32,13 +33,15 @@ import static io.github.stekeblad.videouploader.utils.Constants.*;
 
 public class PresetsWindowController implements Initializable {
 
-    public AnchorPane SettingsWindow;
+    public AnchorPane settingsWindow;
     public ListView<GridPane> listPresets;
+    public ToolBar toolbar;
     public Button btn_tips;
-    public Button addNewPreset;
-    public TextField txt_nameNewPreset;
+    public Button btn_addNewPreset;
     public Button btn_localizeCategories;
     public Button btn_managePlaylists;
+    public TextField txt_nameNewPreset;
+    public Label label_savedPresets;
 
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
@@ -46,6 +49,9 @@ public class PresetsWindowController implements Initializable {
     private CategoryUtils categoryUtils;
     private int presetCounter = 0;
     private HashMap<String, VideoPreset> presetBackups;
+
+    private Translations transPresetWin;
+    private Translations transBasic;
     
     private static final String PRESET_PANE_ID_PREFIX = "preset-";
 
@@ -59,9 +65,36 @@ public class PresetsWindowController implements Initializable {
         configManager = ConfigManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
         categoryUtils = CategoryUtils.INSTANCE;
-        presetBackups = new HashMap<>();
 
+        presetBackups = new HashMap<>();
         videoPresets = new ArrayList<>();
+
+        // Load Translations
+        try {
+            transPresetWin = new Translations("presetWindow");
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for preset" +
+                    " window, the window can not be opened. Sorry!").showAndWait();
+            return;
+        }
+        try {
+            transBasic = new Translations("baseStrings");
+        } catch (Exception e) {
+            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
+                    ", the window can not be opened. Sorry!").showAndWait();
+            return;
+        }
+        transPresetWin.autoTranslate(settingsWindow);
+
+        // Children of Toolbars can not be detected through code currently (probably a bug)
+        btn_managePlaylists.setText(transPresetWin.getString("btn_managePlaylists"));
+        btn_managePlaylists.setTooltip(new Tooltip(transPresetWin.getString("btn_managePlaylists_tt")));
+        btn_localizeCategories.setText(transPresetWin.getString("btn_localizeCategories"));
+        btn_localizeCategories.setTooltip(new Tooltip(transPresetWin.getString("btn_localizeCategories_tt")));
+        btn_tips.setText(transPresetWin.getString("btn_tips"));
+        btn_addNewPreset.setText(transPresetWin.getString("btn_addNewPreset"));
+        txt_nameNewPreset.setPromptText(transPresetWin.getString("txt_nameNewPreset_pt"));
 
         // Load all saved presets
         ArrayList<String> savedPresetNames = configManager.getPresetNames();
@@ -69,10 +102,10 @@ public class PresetsWindowController implements Initializable {
             for (String presetName : savedPresetNames) {
                 try {
                     VideoPreset videoPreset = new VideoPreset(configManager.getPresetString(presetName), PRESET_PANE_ID_PREFIX + presetCounter);
-                    Button editButton = new Button("Edit");
+                    Button editButton = new Button(transBasic.getString("edit"));
                     editButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_EDIT);
                     editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-                    Button deleteButton = new Button("Delete");
+                    Button deleteButton = new Button(transBasic.getString("delete"));
                     deleteButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_DELETE);
                     deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
                     videoPreset.setButton1(editButton);
@@ -88,10 +121,6 @@ public class PresetsWindowController implements Initializable {
                 presetCounter++;
             }
         }
-        btn_localizeCategories.setTooltip(new Tooltip(
-                "Get the categories that are allowed to be used in your country translated to a language you understand"));
-        btn_managePlaylists.setTooltip(new Tooltip(
-                "Get your YouTube playlists into the program and filter witch to appear in the dropdown boxes"));
         updatePresetList();
     }
 
@@ -108,9 +137,8 @@ public class PresetsWindowController implements Initializable {
             }
         }
         if(editingPreset) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Unsaved changes", "One or more presets " +
-                    "is in edit mode, if you close this window now all unsaved changes to presets will be lost. " +
-                    "Do you want to close this window?").showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transPresetWin.getString("diag_closeWarn_short"),
+                    transPresetWin.getString("diag_closeWarn_full")).showAndWait();
             if(buttonChoice.isPresent()) {
                 if(buttonChoice.get() == ButtonType.NO) {
                     windowEvent.consume(); // do not close the window
@@ -128,12 +156,14 @@ public class PresetsWindowController implements Initializable {
     public void onPresetAddNewClicked(ActionEvent actionEvent) {
         // Test so the name of the new preset is not blank or the same as an existing one
         if (txt_nameNewPreset.getText().equals("")) {
-            AlertUtils.simpleClose("name missing", "Enter a name for the new preset!").show();
+            AlertUtils.simpleClose(transPresetWin.getString("diag_presetNeedName_short"),
+                    transPresetWin.getString("diag_presetNeedName_full")).show();
             return;
         }
         for (VideoPreset videoPreset : videoPresets) {
             if (videoPreset.getPresetName().equals(txt_nameNewPreset.getText())) {
-                AlertUtils.simpleClose("Preset already exists", "Preset names must be unique, there is already a preset with that name!").show();
+                AlertUtils.simpleClose(transPresetWin.getString("diag_presetExist_short"),
+                        transPresetWin.getString("diag_presetExist_full")).show();
                 return;
             }
         }
@@ -156,16 +186,7 @@ public class PresetsWindowController implements Initializable {
      * @param actionEvent the click event
      */
     public void onTipsClicked(ActionEvent actionEvent) {
-        String messageContent = "First warnings: \n- Do not start a line in the description box with a underscore (\"_\") as " +
-                "that preset will not be loadable again!" +
-                "\n- Tags must be separated with a comma followed by a space, forgetting the space will make the " +
-                "comma a part of the tag.\nOk, tips!" +
-                "\n- In the video title field you can write \"$(ep)\" to tell the program where to insert the episode " +
-                "number/name defined  when adding videos for upload." +
-                "\n- In the video title field you can also write \"$(rawname)\" to insert the name of the video file used" +
-                "\n- In the description field you can add \"$(playlist)\" to insert a link to the playlist the " +
-                "video will be added to then uploaded.";
-        AlertUtils.simpleClose("Tips", messageContent).showAndWait();
+        AlertUtils.simpleClose("Tips", transPresetWin.getString("diag_tips")).showAndWait();
         actionEvent.consume();
     }
 
@@ -184,7 +205,7 @@ public class PresetsWindowController implements Initializable {
             stage.setMinHeight(450);
             stage.setMaxWidth(400);
             stage.setMaxHeight(450);
-            stage.setTitle("Get Categories");
+            stage.setTitle(transBasic.getString("app_locCatWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
@@ -207,7 +228,7 @@ public class PresetsWindowController implements Initializable {
             Stage stage = new Stage();
             stage.setMinWidth(350);
             stage.setMinHeight(250);
-            stage.setTitle("Manage Playlists");
+            stage.setTitle(transBasic.getString("app_manPlayWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             ManagePlaylistsWindowController controller = fxmlLoader.getController();
@@ -218,7 +239,6 @@ public class PresetsWindowController implements Initializable {
         }
         actionEvent.consume();
     }
-
 
     /**
      * Re-adds all presets to the listPreset to make sure the UI is up-to-date
@@ -292,10 +312,10 @@ public class PresetsWindowController implements Initializable {
         );
 
         // Change buttons from "edit" and "delete" to "save" and "cancel"
-        Button saveButton = new Button("Save");
+        Button saveButton = new Button(transBasic.getString("save"));
         saveButton.setId(parentId + BUTTON_SAVE);
         saveButton.setOnMouseClicked(event-> onPresetSave(saveButton.getId()));
-        Button cancelButton = new Button("Cancel");
+        Button cancelButton = new Button(transBasic.getString("cancel"));
         cancelButton.setId(parentId + BUTTON_CANCEL);
         cancelButton.setOnMouseClicked(event-> onPresetCancelEdit(cancelButton.getId()));
 
@@ -318,7 +338,8 @@ public class PresetsWindowController implements Initializable {
         }
         // make sure preset name is not empty
         if(videoPresets.get(selected).getPresetName().equals("")) {
-            AlertUtils.simpleClose("Invalid preset name", "Preset names can not be empty").show();
+            AlertUtils.simpleClose(transPresetWin.getString("diag_presetNeedName_short"),
+                    transPresetWin.getString("diag_presetNeedName_full")).show();
             return;
         }
         // Test if the preset name has been changed and now is equal to another preset, if so abort saving
@@ -333,7 +354,8 @@ public class PresetsWindowController implements Initializable {
             }
         }
         if (otherPreset > -1) {
-            AlertUtils.simpleClose("Invalid preset name", "There is already a preset with that name, choose another name").show();
+            AlertUtils.simpleClose(transPresetWin.getString("diag_presetExist_short"),
+                    transPresetWin.getString("diag_presetExist_full")).show();
             return;
         }
         // if there is a backup it needs to be deleted
@@ -349,10 +371,10 @@ public class PresetsWindowController implements Initializable {
         configManager.savePreset(videoPresets.get(selected).getPresetName(), videoPresets.get(selected).toString());
 
         //change back buttons
-        Button editButton = new Button("Edit");
+        Button editButton = new Button(transBasic.getString("edit"));
         editButton.setId(parentId + BUTTON_EDIT);
         editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button(transBasic.getString("delete"));
         deleteButton.setId(parentId + BUTTON_DELETE);
         deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
 
@@ -389,10 +411,10 @@ public class PresetsWindowController implements Initializable {
         updatePresetList();
 
         //change buttons
-        Button editButton = new Button("Edit");
+        Button editButton = new Button(transBasic.getString("edit"));
         editButton.setId(parentId + BUTTON_EDIT);
         editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button(transBasic.getString("delete"));
         deleteButton.setId(parentId + BUTTON_DELETE);
         deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
 
@@ -412,12 +434,14 @@ public class PresetsWindowController implements Initializable {
             System.err.println("Non-existing delete button was pressed!!!");
             return;
         }
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo("Confirm delete",
-                "Are you sure you want to delete preset " + videoPresets.get(selected).getPresetName() + "?").showAndWait();
+        String desc = String.format(transPresetWin.getString("diag_presetDelete_full"),
+                videoPresets.get(selected).getPresetName());
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
+                transPresetWin.getString("diag_presetDelete_short"), desc).showAndWait();
         if(buttonChoice.isPresent()) {
             if(buttonChoice.get() == ButtonType.YES) {
                 if (!configManager.deletePreset(videoPresets.get(selected).getPresetName())) {
-                    AlertUtils.simpleClose("Error", "Could not delete preset").show();
+                    AlertUtils.simpleClose(transBasic.getString("error"), "Could not delete preset").show();
                 } else {
                     videoPresets.remove(selected);
                     updatePresetList();

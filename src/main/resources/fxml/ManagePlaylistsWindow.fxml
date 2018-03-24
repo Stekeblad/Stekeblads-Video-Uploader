@@ -3,7 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="315.0" prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.videouploader.settings.ManagePlaylistsWindowController">
+<GridPane fx:id="window" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="315.0"
+          prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="io.github.stekeblad.videouploader.settings.ManagePlaylistsWindowController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="115.0" prefWidth="150.0"/>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="278.0" />
@@ -20,12 +23,14 @@
       <GridPane.margin>
          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
       </GridPane.margin></ListView>
-    <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1">
+    <ToolBar fx:id="toolbar" prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1">
         <TextField fx:id="txt_newPlaylistName" promptText="new playlist name" />
         <ChoiceBox fx:id="choice_privacyStatus" prefHeight="25.0" prefWidth="82.0" />
         <Button fx:id="btn_addNewPlaylist" mnemonicParsing="false" onAction="#onAddNewPlaylistClicked" text="Create new playlist" />
     </ToolBar>
-   <Label prefWidth="276.0" text="Select the playlists to be visible in the playlist dropdowns, unchecked will be hidden" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+    <Label fx:id="label_description" prefWidth="276.0"
+           text="Select the playlists to be visible in the playlist dropdowns, unchecked will be hidden" wrapText="true"
+           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
      <Button fx:id="btn_refreshPlaylists" mnemonicParsing="false" onAction="#onRefreshPlaylistsClicked" text="Refresh Playlists" GridPane.rowIndex="2">
       <GridPane.margin>
          <Insets left="5.0" />

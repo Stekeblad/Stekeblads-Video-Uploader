@@ -17,7 +17,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
         Parent root = loader.load();
         Translations trans = new Translations("baseStrings");
-        primaryStage.setTitle(trans.getString("appName"));
+        primaryStage.setTitle(trans.getString("app_name"));
         primaryStage.setScene(new Scene(root, 900, 825));
         // Register MainWindowController.onWindowClose() to be called when the close button is clicked
         mainWindowController controller = loader.getController();

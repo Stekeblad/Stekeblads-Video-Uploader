@@ -3,7 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="479.0" prefWidth="394.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.videouploader.settings.LocalizeCategoriesWindowController">
+<AnchorPane fx:id="window" prefHeight="479.0" prefWidth="394.0" xmlns="http://javafx.com/javafx/8.0.111"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="io.github.stekeblad.videouploader.settings.LocalizeCategoriesWindowController">
     <GridPane layoutX="14.0" layoutY="22.0" AnchorPane.bottomAnchor="39.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="22.0">
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="129.0" minWidth="10.0" prefWidth="129.0" />
@@ -16,14 +18,14 @@
             <RowConstraints maxHeight="35.0" minHeight="25.0" prefHeight="35.0" vgrow="SOMETIMES" />
         </rowConstraints>
         <TextArea fx:id="txt_description" editable="false" prefHeight="276.0" prefWidth="413.0" wrapText="true" GridPane.columnSpan="3" />
-        <Label text="language id" GridPane.rowIndex="1" />
+        <Label fx:id="label_langId" text="language id" GridPane.rowIndex="1"/>
         <TextField fx:id="txt_lang" prefHeight="25.0" prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       <Button fx:id="btn_codeListLang" mnemonicParsing="false" onAction="#onCodeListLangClicked" text="Code list" GridPane.columnIndex="2" GridPane.rowIndex="1">
          <GridPane.margin>
             <Insets left="10.0" />
          </GridPane.margin>
       </Button>
-        <Label text="Country id" GridPane.rowIndex="2" />
+        <Label fx:id="label_countryId" text="Country id" GridPane.rowIndex="2"/>
         <TextField fx:id="txt_country" prefHeight="25.0" prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
       <Button fx:id="btn_codeListCountry" mnemonicParsing="false" onAction="#onCodeListCountryClicked" text="Code list" GridPane.columnIndex="2" GridPane.rowIndex="2">
          <GridPane.margin>

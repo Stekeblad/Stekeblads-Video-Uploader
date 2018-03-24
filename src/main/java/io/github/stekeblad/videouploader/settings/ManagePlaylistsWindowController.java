@@ -2,6 +2,7 @@ package io.github.stekeblad.videouploader.settings;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Translations;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
@@ -12,6 +13,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
 
 import java.net.URL;
@@ -26,9 +28,14 @@ public class ManagePlaylistsWindowController implements Initializable {
     public TextField txt_newPlaylistName;
     public ListView<CheckBox> list_playlists;
     public ChoiceBox<String> choice_privacyStatus;
+    public GridPane window;
+    public ToolBar toolbar;
+    public Label label_description;
 
     private ConfigManager configManager = ConfigManager.INSTANCE;
     private PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
+    private Translations transPlaylistWindow;
+    private Translations transBasic;
 
     /**
      * Initialize a few things when the window is opened
@@ -40,6 +47,28 @@ public class ManagePlaylistsWindowController implements Initializable {
         // Insert the stored playlists into the list
         updatePlaylistList();
 
+        // Load Translations
+        try {
+            transBasic = new Translations("baseStrings");
+        } catch (Exception e) {
+            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
+                    ", the window can not be opened. Sorry!").showAndWait();
+            return;
+        }
+        try {
+            transPlaylistWindow = new Translations("manPlayWindow");
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for main" +
+                    " window, the application will now close. Sorry!").showAndWait();
+            return;
+        }
+        transPlaylistWindow.autoTranslate(window);
+        // cant autoTranslate Nodes in Toolbar (bug)
+        txt_newPlaylistName.setPromptText(transPlaylistWindow.getString("txt_newPlaylistName_pt"));
+        choice_privacyStatus.setTooltip(new Tooltip(transPlaylistWindow.getString("choice_privacyStatus_tt")));
+        btn_addNewPlaylist.setText(transPlaylistWindow.getString("btn_addNewPlaylist"));
+
         // Set choices in playlist privacy choiceBox
         ArrayList<VisibilityStatus> statuses = new ArrayList<>(EnumSet.allOf(VisibilityStatus.class));
         ArrayList<String> visibilityStrings = new ArrayList<>();
@@ -48,10 +77,6 @@ public class ManagePlaylistsWindowController implements Initializable {
         }
         choice_privacyStatus.setItems(FXCollections.observableArrayList(visibilityStrings));
         choice_privacyStatus.getSelectionModel().select(VisibilityStatus.PUBLIC.getStatusName());
-        choice_privacyStatus.setTooltip(new Tooltip("Yes, playlists can be public, unlisted or private"));
-
-        btn_refreshPlaylists.setTooltip(new Tooltip("Downloads a list of all your playlists from YouTube"));
-
     }
 
     /**
@@ -81,7 +106,6 @@ public class ManagePlaylistsWindowController implements Initializable {
                     configManager.setNeverAuthed(false);
                     configManager.saveSettings();
                 } else { // ButtonType.NO or closed [X]
-                    AlertUtils.simpleClose("Permission not Granted", "Permission to access your YouTube was denied, playlists will not be updated.").show();
                     actionEvent.consume();
                     return;
                 }
@@ -95,8 +119,8 @@ public class ManagePlaylistsWindowController implements Initializable {
         Task<Void> backgroundTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                playlistUtils.refreshPlaylist();
-                Platform.runLater(() -> updatePlaylistList());
+                playlistUtils.refreshPlaylist(); // Get playlists from Youtube on background thread
+                Platform.runLater(() -> updatePlaylistList()); // update list in window on UI thread
                 return null;
             }
         };
@@ -104,7 +128,8 @@ public class ManagePlaylistsWindowController implements Initializable {
         Thread backgroundThread = new Thread(backgroundTask);
         // Define a handler for exceptions
         backgroundThread.setUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> {
-            AlertUtils.simpleClose("Error", "Request to download playlists failed").showAndWait();
+            AlertUtils.simpleClose(transBasic.getString("error"),
+                    transPlaylistWindow.getString("diag_downloadFailed")).showAndWait();
             e.printStackTrace();
             btn_refreshPlaylists.setDisable(false);
         }));
@@ -115,12 +140,13 @@ public class ManagePlaylistsWindowController implements Initializable {
     }
 
     /**
-     * Creates a new playlist on the user's channel using the content of txt_newPlaylistName and choice_privacyStatus
+     * Creates a new playlist on the user's channel using the content of txt_newPlaylistName_pt and choice_privacyStatus
      * @param actionEvent the button click event
      */
     public void onAddNewPlaylistClicked(ActionEvent actionEvent) {
         if(txt_newPlaylistName.getText().isEmpty()) {
-            AlertUtils.simpleClose("Missing playlist name", "You need to specify a name to create a new playlist").show();
+            AlertUtils.simpleClose(transPlaylistWindow.getString("diag_noPlaylistName_short"),
+                    transPlaylistWindow.getString("diag_noPlaylistName_full")).show();
             return;
         }
         if (configManager.getNeverAuthed()) {
@@ -130,8 +156,6 @@ public class ManagePlaylistsWindowController implements Initializable {
                     configManager.setNeverAuthed(false);
                     configManager.saveSettings();
                 } else { // ButtonType.NO or closed [X]
-                    AlertUtils.simpleClose("Permission not Granted",
-                            "Permission to access your YouTube was denied, new playlist can not be created.").show();
                     actionEvent.consume();
                     return;
                 }
@@ -140,7 +164,7 @@ public class ManagePlaylistsWindowController implements Initializable {
 
         // Auth OK, add the playlist
         btn_addNewPlaylist.setDisable(true);
-        btn_addNewPlaylist.setText("Adding...");
+        btn_addNewPlaylist.setText(transPlaylistWindow.getString("creating"));
         final String listName = txt_newPlaylistName.getText();
         final String privacyLevel = choice_privacyStatus.getSelectionModel().getSelectedItem();
 
@@ -150,7 +174,8 @@ public class ManagePlaylistsWindowController implements Initializable {
             protected Void call() throws Exception {
                 LocalPlaylist localPlaylist = playlistUtils.addPlaylist(listName, privacyLevel);
                 if (localPlaylist == null) {
-                    Platform.runLater(() -> AlertUtils.simpleClose("Error", "Failed to create new playlist").show());
+                    Platform.runLater(() -> AlertUtils.simpleClose(transBasic.getString("error"),
+                            transPlaylistWindow.getString("diag_creatingFailed")).show());
                     return null;
                 }
                 CheckBox cb = new CheckBox(localPlaylist.getName());
@@ -159,7 +184,7 @@ public class ManagePlaylistsWindowController implements Initializable {
                     list_playlists.getItems().add(cb);
                     txt_newPlaylistName.setText(""); // visually indicate its done by clearing the new playlist name textField
                     btn_addNewPlaylist.setDisable(false);
-                    btn_addNewPlaylist.setText("Create new playlist");
+                    btn_addNewPlaylist.setText(transPlaylistWindow.getString("btn_addNewPlaylist"));
                 });
                 return null;
             }
@@ -167,7 +192,8 @@ public class ManagePlaylistsWindowController implements Initializable {
         Thread backgroundThread = new Thread(backgroundTask);
         // Exception handler
         backgroundThread.setUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> {
-            AlertUtils.simpleClose("Error", "Request to create new playlist failed").showAndWait();
+            AlertUtils.simpleClose(transBasic.getString("error"),
+                    transPlaylistWindow.getString("diag_creatingFailed")).showAndWait();
             e.printStackTrace();
         }));
 

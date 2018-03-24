@@ -3,4 +3,10 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
+  <component name="PropertiesSeparatorManager">
+    <file url="file://$PROJECT_DIR$/src/main/resources/strings/baseStrings/baseStrings" separator="\u005f" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/strings/locCatWindow/locCatWindow" separator="\u005f" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/strings/manPlayWindow/manPlayWindow" separator="\u005f" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/strings/presetWindow/presetWindow" separator="\u005f" />
+  </component>
 </project>

@@ -163,11 +163,11 @@ public class mainWindowController implements Initializable {
             uploader.kill(); // just because it does not do anything it started and must be stopped
             return true;
         }
-        String op1 = transMainWin.getString("closeWarn_op1");
-        String op2 = transMainWin.getString("closeWarn_op2");
-        String op3 = transMainWin.getString("closeWarn_op3");
-        String choice = AlertUtils.threeButtons(transMainWin.getString("closeWarn_short"),
-                transMainWin.getString("closeWarn_full"), op1, op2, op3);
+        String op1 = transMainWin.getString("diag_closeWarn_op1");
+        String op2 = transMainWin.getString("diag_closeWarn_op2");
+        String op3 = transMainWin.getString("diag_closeWarn_op3");
+        String choice = AlertUtils.threeButtons(transMainWin.getString("diag_closeWarn_short"),
+                transMainWin.getString("diag_closeWarn_full"), op1, op2, op3);
         if (choice == null) {
             return false;
         }
@@ -215,8 +215,8 @@ public class mainWindowController implements Initializable {
      */
     public void onApplyPresetClicked(ActionEvent actionEvent) {
         if(videosToAdd == null || videosToAdd.size() == 0 ) {
-            AlertUtils.simpleClose(transMainWin.getString("noFiles_short"),
-                    transMainWin.getString("noFiles_full")).show();
+            AlertUtils.simpleClose(transMainWin.getString("diag_noFiles_short"),
+                    transMainWin.getString("diag_noFiles_full")).show();
             return;
         }
         // Check what preset / if a preset is selected
@@ -322,7 +322,7 @@ public class mainWindowController implements Initializable {
             Stage stage = new Stage();
             stage.setMinWidth(725);
             stage.setMinHeight(550);
-            stage.setTitle(transBasic.getString("settingsWindowTitle"));
+            stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
             PresetsWindowController controller = fxmlLoader.getController();
@@ -388,8 +388,8 @@ public class mainWindowController implements Initializable {
     public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
         // Show confirmation dialog
         if (!bypassAbortWarning) { // can be set from onAbortAndClearClicked
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("abortAll_short"),
-                    transMainWin.getString("abortAll_full")).showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
+                    transMainWin.getString("diag_abortAll_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() != ButtonType.YES) {
                     // ButtonType.NO or Closed with [X] button
@@ -418,8 +418,8 @@ public class mainWindowController implements Initializable {
      * @param actionEvent the button click event
      */
     public void onAbortAndClearClicked(ActionEvent actionEvent) {
-        Optional<ButtonType> choice = AlertUtils.yesNo(transMainWin.getString("abortAllClear_short"),
-                transMainWin.getString("abortAllClear_full")).showAndWait();
+        Optional<ButtonType> choice = AlertUtils.yesNo(transMainWin.getString("diag_abortAllClear_short"),
+                transMainWin.getString("diag_abortAllClear_full")).showAndWait();
         if (choice.isPresent()) {
             if (choice.get() == ButtonType.YES) {
                 bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
@@ -487,8 +487,8 @@ public class mainWindowController implements Initializable {
 
         uploadQueueVideos.get(selected).setOnPlaylistsClicked(event -> {
             if (playlistUtils.getPlaylistNames().size() == 0) {
-                AlertUtils.simpleClose(transMainWin.getString("noPlaylists_short"),
-                        transMainWin.getString("noPlaylists_full")).show();
+                AlertUtils.simpleClose(transMainWin.getString("diag_noPlaylists_short"),
+                        transMainWin.getString("diag_noPlaylists_full")).show();
             } else {
                 uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
             }
@@ -531,8 +531,8 @@ public class mainWindowController implements Initializable {
         }
         // Check fields
         if(uploadQueueVideos.get(selected).getVideoName().equals("")) {
-            AlertUtils.simpleClose(transMainWin.getString("noVidTitle_short"),
-                    transMainWin.getString("noVidTitle_full")).show();
+            AlertUtils.simpleClose(transMainWin.getString("diag_noVidTitle_short"),
+                    transMainWin.getString("diag_noVidTitle_full")).show();
             return;
         }
         // Everything else is not required or given a default value that can not be set to a invalid value
@@ -580,8 +580,8 @@ public class mainWindowController implements Initializable {
             uploadQueueVideos.set(selected, editBackups.get(uploadQueueVideos.get(selected).getPaneId()));
             editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         } else {
-            AlertUtils.simpleClose(transMainWin.getString("backupNoRestore_short"),
-                    transMainWin.getString("backupNoRestore_full")).show();
+            AlertUtils.simpleClose(transMainWin.getString("diag_backupNoRestore_short"),
+                    transMainWin.getString("diag_backupNoRestore_full")).show();
         }
 
         // Change buttons
@@ -615,9 +615,10 @@ public class mainWindowController implements Initializable {
             System.err.println("delete button belongs to a invalid or non-existing parent");
             return;
         }
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("confirmDelete_short"),
-                transMainWin.getString("confirmDelete_full_1") + uploadQueueVideos.get(selected).getVideoName() +
-                        transMainWin.getString("confirmDelete_full_2")).showAndWait();
+        String desc = String.format(transMainWin.getString("diag_confirmDelete_full"),
+                uploadQueueVideos.get(selected).getVideoName());
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
+                transMainWin.getString("diag_confirmDelete_short"), desc).showAndWait();
         if (buttonChoice.isPresent()) {
             if(buttonChoice.get() == ButtonType.YES) {
                 uploadQueueVideos.remove(selected);
@@ -642,12 +643,12 @@ public class mainWindowController implements Initializable {
         }
         // a few small checks first
         if (uploadQueueVideos.get(selected).getVideoName().length() < 1) {
-            AlertUtils.simpleClose(transMainWin.getString("noStartUpload_short"),
-                    transMainWin.getString("noStartUpload_full_noTitle")).show();
+            AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
+                    transMainWin.getString("diag_noStartUpload_full_noTitle")).show();
         }
         if (categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
-            AlertUtils.simpleClose(transMainWin.getString("noStartUpload_short"),
-                    transMainWin.getString("noStartUpload_full_noCategory")).show();
+            AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
+                    transMainWin.getString("diag_noStartUpload_full_noCategory")).show();
         }
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
@@ -700,9 +701,9 @@ public class mainWindowController implements Initializable {
         }
         // Show confirmation dialog, but not if abort all button was clicked
         if (!bypassAbortWarning) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("abortSingle_short"),
-                    transMainWin.getString("abortSingle_full") +
-                            "\"" + uploadQueueVideos.get(selected).getVideoName() + "\"?").showAndWait();
+            String desc = String.format(transMainWin.getString("diag_abortSingle_full"), uploadQueueVideos.get(selected).getVideoName());
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
+                    transMainWin.getString("diag_abortSingle_short"), desc).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() != ButtonType.YES) {
                     // ButtonType.NO or Closed with [X] button
