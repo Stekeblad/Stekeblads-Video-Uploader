@@ -8,6 +8,7 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
+import io.github.stekeblad.videouploader.utils.Translations;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
@@ -34,12 +35,20 @@ import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_F
  * in progress and set a method to be called for all finished uploads with the Id of the upload as the only parameter
  */
 public class Uploader {
-    private HashMap<String, Future> tasks = new HashMap<>();
-    private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
-
+    private HashMap<String, Future> tasks;
+    private CategoryUtils categoryUtils;
     private Consumer<String> uploadFinishedCallback = null;
+    private ExecutorService exec;
+    private Translations translations;
 
-    private ExecutorService exec = Executors.newSingleThreadExecutor(Thread::new);
+
+    public Uploader() throws Exception {
+        translations = new Translations("uploader");
+        tasks = new HashMap<>();
+        categoryUtils = CategoryUtils.INSTANCE;
+        exec = Executors.newSingleThreadExecutor(Thread::new);
+
+    }
 
     /**
      * Sets a method to be called every time a upload finishes. The parameter given to the callback will be the cancelName
@@ -56,7 +65,11 @@ public class Uploader {
      * @return true if the upload was aborted, false if it for some reason is not possible to abort it.
      */
     public boolean abortUpload(String cancelName) {
-        return tasks.get(cancelName).cancel(true);
+        boolean success = tasks.get(cancelName).cancel(true);
+        if (success) {
+            tasks.remove(cancelName);
+        }
+        return success;
     }
 
     /**
@@ -69,7 +82,7 @@ public class Uploader {
 
     /**
      * Aborts all uploads
-     * @return the cancelName of all unfinished uploads
+     * @return a Set with the cancelName of all unfinished uploads
      */
     public Set<String> kill() {
         exec.shutdownNow();
@@ -79,7 +92,7 @@ public class Uploader {
     /**
      * Adds video to the upload list
      * @param video video to upload
-     * @param cancelName String to use for aborting the upload and used to report that its finished
+     * @param cancelName String to use for aborting the upload (and used to report that its finished if a callback is set)
      */
     public void add(VideoUpload video, String cancelName) {
         // Create the task
@@ -125,7 +138,7 @@ public class Uploader {
             request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(new ExponentialBackOff()));
         }).setApplicationName("Stekeblads Video Uploader").build();
 
-        // Start building the Youtube video object
+        // Start building the Youtube Video object
         Video videoObject = new Video();
 
         videoObject.setStatus(new VideoStatus().setPrivacyStatus(video.getVisibility().getStatusName()));
@@ -157,24 +170,26 @@ public class Uploader {
             }
             switch (uploader1.getUploadState()) {
                 case INITIATION_STARTED:
-                    Platform.runLater(() -> video.setStatusLabelText("Preparing to Upload..."));
+                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("preparing")));
                     break;
                 case INITIATION_COMPLETE:
                     Platform.runLater(() -> video.setProgressBarProgress(0));
-                    Platform.runLater(() -> video.setStatusLabelText("Starting..."));
+                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("starting")));
                     break;
                 case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
                     // the upload is slightly larger than the video file, but for longer videos it will be close enough
-                    Platform.runLater(() -> video.setProgressBarProgress((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()));
-                    Platform.runLater(() -> video.setStatusLabelText("Uploading: " + (int) Math.floor(
-                            ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length()) * 100) + "%"));
+                    double progress = ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length());
+                    Platform.runLater(() -> video.setProgressBarProgress(progress));
+                    String newStatusText = String.format(
+                            translations.getString("uploadWithProgress"), Math.floor(progress * 100));
+                    Platform.runLater(() -> video.setStatusLabelText(newStatusText));
                     break;
                 case MEDIA_COMPLETE:
-                    Platform.runLater(() -> video.setProgressBarProgress(1));
-                    Platform.runLater(() -> video.setStatusLabelText("Upload Completed!"));
+                    Platform.runLater(() -> video.setProgressBarProgress(1)); // 100% full
+                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("finished")));
                     break;
                 case NOT_STARTED:
-                    Platform.runLater(() -> video.setStatusLabelText("Upload Not Started"));
+                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("notStarted")));
                     break;
             }
         };
@@ -185,7 +200,7 @@ public class Uploader {
 
         // Set thumbnail if selected
         if (video.getThumbNail() != null) {
-            Platform.runLater(() -> video.setStatusLabelText("Setting Thumbnail..."));
+            Platform.runLater(() -> video.setStatusLabelText(translations.getString("thumbnail")));
             File thumbFile = video.getThumbNail();
             String contentType = Files.probeContentType(Paths.get(thumbFile.toURI()));
 
@@ -197,9 +212,9 @@ public class Uploader {
         }
         // Add to playlist if selected
         String playlistString = video.getPlaylist();
-        if (playlistString != null && !playlistString.equals("null") &&
-                !playlistString.equals("select a playlist") && !playlistString.equals("")) {
-            Platform.runLater(() -> video.setStatusLabelText("Adding to playlist \"" + video.getPlaylist() + "\""));
+        if (playlistString != null && !playlistString.equals("null") && !playlistString.equals("")) {
+            String newStatusText = String.format(translations.getString("playlist"), video.getPlaylist());
+            Platform.runLater(() -> video.setStatusLabelText(newStatusText));
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
             resourceId.setVideoId(uploadedVideo.getId());
@@ -214,7 +229,9 @@ public class Uploader {
             YouTube.PlaylistItems.Insert playlistInsert = myTube.playlistItems().insert("snippet,contentDetails", playlistItem);
             playlistInsert.execute();
         }
-        Platform.runLater(() -> video.setStatusLabelText("Done! Video is here: https://youtu.be/" + uploadedVideo.getId()));
-        Platform.runLater(() -> video.setStatusLabelOnClickUrl("https://youtu.be/" + uploadedVideo.getId()));
+        String link = "https://youtu.be/" + uploadedVideo.getId();
+        String newStatusText = String.format(translations.getString("doneWithLink"), link);
+        Platform.runLater(() -> video.setStatusLabelText(newStatusText));
+        Platform.runLater(() -> video.setStatusLabelOnClickUrl(link));
     }
 }

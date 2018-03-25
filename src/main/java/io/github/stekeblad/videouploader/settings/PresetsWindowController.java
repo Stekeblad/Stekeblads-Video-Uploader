@@ -23,10 +23,7 @@ import javafx.stage.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 
@@ -75,14 +72,15 @@ public class PresetsWindowController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.simpleClose("Error loading translations", "Failed loading translations for preset" +
-                    " window, the window can not be opened. Sorry!").showAndWait();
+                    " window, the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault())
+                    .showAndWait();
             return;
         }
         try {
             transBasic = new Translations("baseStrings");
         } catch (Exception e) {
             AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the window can not be opened. Sorry!").showAndWait();
+                    ", the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
             return;
         }
         transPresetWin.autoTranslate(settingsWindow);
@@ -336,6 +334,12 @@ public class PresetsWindowController implements Initializable {
             System.err.println("Can't find witch preset to save");
             return;
         }
+        // Make sure the category selected is valid
+        if (videoPresets.get(selected).getCategory() == null) {
+            AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
+                    transBasic.getString("diag_invalidCategory_full")).show();
+            return;
+        }
         // make sure preset name is not empty
         if(videoPresets.get(selected).getPresetName().equals("")) {
             AlertUtils.simpleClose(transPresetWin.getString("diag_presetNeedName_short"),
@@ -407,6 +411,14 @@ public class PresetsWindowController implements Initializable {
             // restore backup
             videoPresets.set(selected, presetBackups.get(videoPresets.get(selected).getPaneId()));
             presetBackups.remove(videoPresets.get(selected).getPaneId());
+        }
+
+        // Test if this preset exist on disc, if not it should be deleted from the UI
+        ArrayList<String> presetNames = configManager.getPresetNames();
+        if (presetNames != null && !presetNames.contains(videoPresets.get(selected).getPresetName())) {
+            videoPresets.remove(selected);
+            updatePresetList();
+            return;
         }
         updatePresetList();
 

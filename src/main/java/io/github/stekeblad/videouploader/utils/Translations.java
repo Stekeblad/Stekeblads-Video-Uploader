@@ -28,7 +28,9 @@ public class Translations {
 
     /**
      * Creates the translations object. It searches for translations files in the resources directory at strings/ for
-     * bundleName.properties and bundleName[userLocale].properties there [userLocale] is the locale in a format like _en_US
+     * bundleName.properties and bundleName[userLocale].properties there [userLocale] is the locale in a format like _en_US.
+     * If there is not a directly matching locale an attempt to search for a partially matching one is performed,
+     * say a translation for en_US is not found it may be one for en_GB to use instead
      *
      * @param bundleName name of the ResourceBundle file family
      * @throws Exception if the default translations file could not be found with the given bundleName
@@ -46,12 +48,41 @@ public class Translations {
                 FileInputStream fis = new FileInputStream(new File(url.toURI()));
                 localized = new PropertyResourceBundle(fis);
             } else {
-                System.err.println("Could not find translation for " + bundleName + " in locale " + locale);
-                localized = null;
+                try {
+                    URL url2 = mainWindowController.class.getClassLoader().getResource("strings/" + bundleName);
+                    if (url2 != null) {
+                        File dir = new File(url2.toURI());
+                        File[] files = dir.listFiles();
+                        if (files != null) {
+                            for (File aFile : files) {
+                                String matchString = bundleName + "_" + locale.toString().substring(0, 2);
+                                if (aFile.getName().contains(matchString)) {
+                                    FileInputStream fis = new FileInputStream(new File(aFile.toURI()));
+                                    localized = new PropertyResourceBundle(fis);
+                                    String[] localeStrings = aFile.getName().split("_");
+                                    String localeLang = localeStrings[1];
+                                    String localeCountry = localeStrings[2].substring(0, localeStrings[2].indexOf("."));
+                                    locale = new Locale(localeLang, localeCountry);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (localized == null) {
+                        System.out.println("Could not find a matching or partially matching translation for " + bundleName + " and " + locale);
+                    }
+
+                } catch (NullPointerException e1) {
+                    System.err.println("exception occurred while looking for similar translations");
+                    System.err.println(bundleName + " : " + locale);
+                    e1.printStackTrace();
+                }
             }
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             localized = null;
+            // Try find a similar translation, like en_GB instead of en_US
+
         }
 
         // Load default locale as backup if translation is missing or partially added

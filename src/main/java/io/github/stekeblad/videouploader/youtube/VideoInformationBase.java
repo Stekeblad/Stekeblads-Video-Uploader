@@ -233,9 +233,6 @@ public class VideoInformationBase {
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
         }
-        if(category == null) {
-            category = "Select a category";
-        }
         this.paneId = paneId;
         if(thumbNailPath != null) {
             this.thumbNailFile = new File(thumbNailPath);
@@ -516,8 +513,6 @@ public class VideoInformationBase {
          ArrayList<String> playlistStrings = new ArrayList<>();
          if (playlist != null && !playlist.equals("")) {
             playlistStrings.add(playlist);
-         } else {
-            playlistStrings.add("select a playlist");
          }
          ChoiceBox<String> playlistChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
          playlistChoiceBox.setId(paneId + NODE_ID_PLAYLIST);
@@ -547,7 +542,8 @@ public class VideoInformationBase {
             tellSubsChoiceBox.getSelectionModel().select(0);
          }
          tellSubsChoiceBox.setTooltip(new Tooltip(
-                "Should the channel's subscribers be notified that a new video has been uploaded? Not recommended then uploading alot of videos \nBut why are you using this program then?"));
+                 "Should the channel's subscribers be notified that a new video has been uploaded? " +
+                         "Not recommended then uploading a lot of videos"));
          tellSubsChoiceBox.setDisable(true);
 
          Image thumbNailImage;

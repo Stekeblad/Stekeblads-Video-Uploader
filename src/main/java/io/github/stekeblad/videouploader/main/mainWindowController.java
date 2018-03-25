@@ -29,8 +29,6 @@ import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
-import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
-import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
 
 public class mainWindowController implements Initializable {
     public AnchorPane mainWindowPane;
@@ -76,8 +74,9 @@ public class mainWindowController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.simpleClose("Error loading translations", "Failed loading translations for main" +
-                    " window, the application will now close. Sorry!").showAndWait();
-            return;
+                    " window, the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault())
+                    .showAndWait();
+            System.exit(-1);
         }
         transMainWin.autoTranslate(mainWindowPane);
         // Bugged:
@@ -89,8 +88,19 @@ public class mainWindowController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the application will now close. Sorry!").showAndWait();
-            return;
+                    ", the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
+            System.exit(-1);
+        }
+
+        try {
+            uploader = new Uploader();
+        } catch (Exception e) {
+            System.err.println("Could not instantiate Uploader");
+            e.printStackTrace();
+            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for " +
+                    "Uploader, the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault())
+                    .showAndWait();
+            System.exit(-1);
         }
 
 
@@ -117,8 +127,6 @@ public class mainWindowController implements Initializable {
                 txt_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
-
-        uploader = new Uploader();
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
 
         if(configManager.hasWaitingUploads()) {
@@ -344,7 +352,8 @@ public class mainWindowController implements Initializable {
     public void onStartAllUploadsClicked(ActionEvent actionEvent) {
         // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
@@ -529,10 +538,16 @@ public class mainWindowController implements Initializable {
             System.err.println("save button belongs to a invalid or non-existing parent");
             return;
         }
-        // Check fields
+        // Check fields, video name
         if(uploadQueueVideos.get(selected).getVideoName().equals("")) {
             AlertUtils.simpleClose(transMainWin.getString("diag_noVidTitle_short"),
                     transMainWin.getString("diag_noVidTitle_full")).show();
+            return;
+        }
+        // Make sure the category selected is valid
+        if (uploadQueueVideos.get(selected).getCategory() == null) {
+            AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
+                    transBasic.getString("diag_invalidCategory_full")).show();
             return;
         }
         // Everything else is not required or given a default value that can not be set to a invalid value
@@ -582,6 +597,12 @@ public class mainWindowController implements Initializable {
         } else {
             AlertUtils.simpleClose(transMainWin.getString("diag_backupNoRestore_short"),
                     transMainWin.getString("diag_backupNoRestore_full")).show();
+        }
+        // Make sure the category selected is valid, in case it was newly added
+        if (uploadQueueVideos.get(selected).getCategory() == null) {
+            AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
+                    transBasic.getString("diag_invalidCategory_full")).show();
+            return;
         }
 
         // Change buttons
@@ -653,7 +674,8 @@ public class mainWindowController implements Initializable {
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
@@ -701,7 +723,8 @@ public class mainWindowController implements Initializable {
         }
         // Show confirmation dialog, but not if abort all button was clicked
         if (!bypassAbortWarning) {
-            String desc = String.format(transMainWin.getString("diag_abortSingle_full"), uploadQueueVideos.get(selected).getVideoName());
+            String desc = String.format(transMainWin.getString("diag_abortSingle_full"),
+                    uploadQueueVideos.get(selected).getVideoName());
             Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
                     transMainWin.getString("diag_abortSingle_short"), desc).showAndWait();
             if (buttonChoice.isPresent()) {

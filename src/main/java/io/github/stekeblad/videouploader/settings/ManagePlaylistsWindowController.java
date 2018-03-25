@@ -19,9 +19,6 @@ import javafx.stage.WindowEvent;
 import java.net.URL;
 import java.util.*;
 
-import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
-import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
-
 public class ManagePlaylistsWindowController implements Initializable {
     public Button btn_refreshPlaylists;
     public Button btn_addNewPlaylist;
@@ -52,7 +49,7 @@ public class ManagePlaylistsWindowController implements Initializable {
             transBasic = new Translations("baseStrings");
         } catch (Exception e) {
             AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the window can not be opened. Sorry!").showAndWait();
+                    ", the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
             return;
         }
         try {
@@ -60,7 +57,8 @@ public class ManagePlaylistsWindowController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.simpleClose("Error loading translations", "Failed loading translations for main" +
-                    " window, the application will now close. Sorry!").showAndWait();
+                    " window, the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault())
+                    .showAndWait();
             return;
         }
         transPlaylistWindow.autoTranslate(window);
@@ -100,7 +98,8 @@ public class ManagePlaylistsWindowController implements Initializable {
      */
     public void onRefreshPlaylistsClicked(ActionEvent actionEvent) {
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
@@ -150,7 +149,8 @@ public class ManagePlaylistsWindowController implements Initializable {
             return;
         }
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);

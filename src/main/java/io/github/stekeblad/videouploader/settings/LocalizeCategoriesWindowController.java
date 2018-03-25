@@ -16,12 +16,10 @@ import javafx.stage.Stage;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.zip.DataFormatException;
-
-import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_DESC;
-import static io.github.stekeblad.videouploader.youtube.Auth.AUTHMSG_HEADER;
 
 public class LocalizeCategoriesWindowController implements Initializable{
     public AnchorPane window;
@@ -66,14 +64,15 @@ public class LocalizeCategoriesWindowController implements Initializable{
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.simpleClose("Error loading translations", "Failed loading translations for localize " +
-                    " categories window, the window can not be opened. Sorry!").showAndWait();
+                    " categories window, the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault())
+                    .showAndWait();
             return;
         }
         try {
             transBasic = new Translations("baseStrings");
         } catch (Exception e) {
             AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the window can not be opened. Sorry!").showAndWait();
+                    ", the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
             return;
         }
         transLocCatWin.autoTranslate(window);
@@ -111,7 +110,8 @@ public class LocalizeCategoriesWindowController implements Initializable{
 
         // Authentication with youtube is required, check if the user has given permission, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(AUTHMSG_HEADER, AUTHMSG_DESC).showAndWait();
+            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full")).showAndWait();
             if (buttonChoice.isPresent()) {
                 if (buttonChoice.get() == ButtonType.YES) {
                     configManager.setNeverAuthed(false);
