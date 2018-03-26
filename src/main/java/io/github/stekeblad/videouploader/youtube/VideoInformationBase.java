@@ -19,6 +19,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
+import static java.lang.Integer.MAX_VALUE;
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
+
 /**
  * Base class to VideoUpload and VideoPreset that contains all their common features
  */
@@ -462,7 +465,6 @@ public class VideoInformationBase {
          // Creating the pane, id, size, border
          videoBasePane = new GridPane();
          videoBasePane.setId(paneId);
-         videoBasePane.setPrefSize(680, 100);
          videoBasePane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
          if(videoName == null) videoName = "";
@@ -564,12 +566,22 @@ public class VideoInformationBase {
          videoBasePane.add(categoryChoiceBox, 1, 0);
          videoBasePane.add(playlistChoiceBox, 2, 0);
 
-         videoBasePane.add(description, 0, 1, 1, 3);
-         videoBasePane.add(tags, 1, 1, 1, 2);
+         videoBasePane.add(description, 0, 1, 1, 2);
+         videoBasePane.add(tags, 1, 1, 1, 1);
          videoBasePane.add(thumbNailFrame, 2, 1);
 
-         videoBasePane.add(tellSubsChoiceBox, 1, 3);
-         videoBasePane.add(visibilityChoiceBox, 2, 3);
+         videoBasePane.add(tellSubsChoiceBox, 1, 2);
+         videoBasePane.add(visibilityChoiceBox, 2, 2);
+
+         // Sizing
+         ColumnConstraints rightConstraint = new ColumnConstraints(260, 260, 260);
+         ColumnConstraints defaultConstraint = new ColumnConstraints(100, USE_COMPUTED_SIZE, MAX_VALUE);
+         videoBasePane.getColumnConstraints().setAll(defaultConstraint, defaultConstraint, rightConstraint);
+
+         RowConstraints r1 = new RowConstraints(30);
+         RowConstraints r2 = new RowConstraints(90);
+         RowConstraints r3 = new RowConstraints(30);
+         videoBasePane.getRowConstraints().setAll(r1, r2, r3);
     }
 
 

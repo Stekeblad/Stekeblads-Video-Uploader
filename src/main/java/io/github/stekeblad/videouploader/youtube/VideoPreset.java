@@ -1,10 +1,13 @@
 package io.github.stekeblad.videouploader.youtube;
 
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
 
 import java.util.List;
 
@@ -218,8 +221,6 @@ public class VideoPreset extends VideoInformationBase {
     protected void makePresetPane(String name) {
         // The base class has already done most of the work
         presetPane = super.getPane();
-        // make the pane slightly larger for the extra information to fit
-        presetPane.setPrefHeight(170);
 
         TextField presetName = new TextField();
         presetName.setId(getPaneId() + NODE_ID_PRESETNAME);
@@ -234,8 +235,19 @@ public class VideoPreset extends VideoInformationBase {
         HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2);
         buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
 
-        presetPane.add(presetName, 0, 4);
-        presetPane.add(buttonsBox, 1, 4);
+        // Add new Nodes on new row at the bottom
+        presetPane.add(presetName, 0, 3);
+        presetPane.add(buttonsBox, 1, 3);
+
+        // Sizing
+        RowConstraints newRow = new RowConstraints(30);
+        presetPane.getRowConstraints().add(newRow);
+
+
+        ObservableList<ColumnConstraints> colconstr = presetPane.getColumnConstraints();
+        ColumnConstraints newRightColConstr = new ColumnConstraints(170, 170, 170);
+
+        presetPane.getColumnConstraints().setAll(colconstr.get(0), colconstr.get(1), newRightColConstr);
     }
 
     /**

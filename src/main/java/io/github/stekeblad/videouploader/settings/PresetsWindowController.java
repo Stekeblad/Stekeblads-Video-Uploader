@@ -108,6 +108,7 @@ public class PresetsWindowController implements Initializable {
                     deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
                     videoPreset.setButton1(editButton);
                     videoPreset.setButton2(deleteButton);
+                    videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty()); // Auto Resize width
                     videoPresets.add(videoPreset);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -168,7 +169,11 @@ public class PresetsWindowController implements Initializable {
 
         // Create the new preset, enable editing on it and scroll so it is in focus (in case the user has a lot of presets)
         VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
-                null, null, false, null, PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
+                null, null, false, null,
+                PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
+        // Make so the preset change its width together with the list and the window
+        newPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty());
+
         videoPresets.add(newPreset);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
         listPresets.scrollTo(listPresets.getItems().size() -1);

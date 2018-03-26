@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
 
 import java.io.File;
 import java.net.URI;
@@ -279,8 +280,6 @@ public class VideoUpload extends VideoInformationBase{
     protected void makeUploadPane() {
         // The base class has already done most of the work
         uploadPane = super.getPane();
-        // Make the pane slightly larger to fit the extra nodes
-        uploadPane.setPrefHeight(170);
 
         ProgressBar progressBar = new ProgressBar();
         progressBar.setId(getPaneId() + NODE_ID_PROGRESS);
@@ -298,11 +297,15 @@ public class VideoUpload extends VideoInformationBase{
         ghostBtn3.setVisible(false);
         HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2, ghostBtn3);
         buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
-        buttonsBox.setMinWidth(200);
 
-        uploadPane.add(progressBar, 0, 4);
-        uploadPane.add(uploadStatus, 1, 4);
-        uploadPane.add(buttonsBox, 2, 4);
+        // Add the new Nodes on a new row at the bottom
+        uploadPane.add(progressBar, 0, 3);
+        uploadPane.add(uploadStatus, 1, 3);
+        uploadPane.add(buttonsBox, 2, 3);
+
+        // Update sizing
+        RowConstraints newRow = new RowConstraints(30);
+        uploadPane.getRowConstraints().add(newRow);
     }
 
     /**

@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
+import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 public class mainWindowController implements Initializable {
     public AnchorPane mainWindowPane;
@@ -234,6 +235,10 @@ public class mainWindowController implements Initializable {
                 VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
                         null, null, null, false, null,
                         UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
+
+                // make the upload change its width together with the uploads list and the window
+                newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+
                 uploadQueueVideos.add(newUpload);
                 // Enables the upload to be edited because the lack of details.
                 onEdit(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + "_fakeButton");
@@ -288,6 +293,8 @@ public class mainWindowController implements Initializable {
                     newUploadBuilder.setThumbNailPath(chosenPreset.getThumbNail().getAbsolutePath());
                 }
                  VideoUpload newUpload = newUploadBuilder.build();
+                // make the upload change its width together with the uploads list and the window
+                newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
 
                 // Create the buttons
                 Button editButton = new Button(transBasic.getString("edit"));
@@ -328,8 +335,6 @@ public class mainWindowController implements Initializable {
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/PresetsWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 725, 700);
             Stage stage = new Stage();
-            stage.setMinWidth(725);
-            stage.setMinHeight(550);
             stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
@@ -740,6 +745,7 @@ public class mainWindowController implements Initializable {
         if (abortSuccess) {
             // Set label text and reset progress bar
             uploadQueueVideos.get(selected).setProgressBarVisibility(false);
+            uploadQueueVideos.get(selected).setProgressBarProgress(INDETERMINATE_PROGRESS); // reset progBar to be animated
             uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("aborted"));
         } else {
             AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason");
