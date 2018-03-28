@@ -49,6 +49,7 @@ public class PresetsWindowController implements Initializable {
 
     private Translations transPresetWin;
     private Translations transBasic;
+    private Translations transPreset;
     
     private static final String PRESET_PANE_ID_PREFIX = "preset-";
 
@@ -84,6 +85,14 @@ public class PresetsWindowController implements Initializable {
             return;
         }
         transPresetWin.autoTranslate(settingsWindow);
+        try {
+            transPreset = new Translations("presetsUploads");
+        } catch (Exception e) {
+            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for saved " +
+                    "presets/Uploads, the window can not be opened. Sorry!\n\nDetected language: "
+                    + Locale.getDefault()).showAndWait();
+            return;
+        }
 
         // Children of Toolbars can not be detected through code currently (probably a bug)
         btn_managePlaylists.setText(transPresetWin.getString("btn_managePlaylists"));
@@ -109,6 +118,7 @@ public class PresetsWindowController implements Initializable {
                     videoPreset.setButton1(editButton);
                     videoPreset.setButton2(deleteButton);
                     videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty()); // Auto Resize width
+                    transPreset.autoTranslate(videoPreset.getPane(), videoPreset.getPaneId());
                     videoPresets.add(videoPreset);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -173,6 +183,7 @@ public class PresetsWindowController implements Initializable {
                 PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         // Make so the preset change its width together with the list and the window
         newPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty());
+        transPreset.autoTranslate(newPreset.getPane(), newPreset.getPaneId());
 
         videoPresets.add(newPreset);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
@@ -249,7 +260,7 @@ public class PresetsWindowController implements Initializable {
     private void updatePresetList() {
         ArrayList<GridPane> presetPanes = new ArrayList<>();
         for (VideoPreset videoPreset : videoPresets) {
-            presetPanes.add(videoPreset.getPresetPane());
+            presetPanes.add(videoPreset.getPane());
         }
         listPresets.setItems(FXCollections.observableArrayList(presetPanes));
     }
@@ -262,7 +273,7 @@ public class PresetsWindowController implements Initializable {
     private int getPresetIndexByPaneId(String nameToTest) {
         int presetIndex = -1;
         for (int i = 0; i < videoPresets.size(); i++) {
-            if (videoPresets.get(i).getPresetPane().getId().equals(nameToTest)) {
+            if (videoPresets.get(i).getPaneId().equals(nameToTest)) {
                 presetIndex = i;
                 break;
             }
@@ -415,6 +426,7 @@ public class PresetsWindowController implements Initializable {
         } else {
             // restore backup
             videoPresets.set(selected, presetBackups.get(videoPresets.get(selected).getPaneId()));
+            videoPresets.get(selected).getPane().prefWidthProperty().bind(listPresets.widthProperty());
             presetBackups.remove(videoPresets.get(selected).getPaneId());
         }
 

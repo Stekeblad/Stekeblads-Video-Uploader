@@ -31,7 +31,7 @@ public class VideoPreset extends VideoInformationBase {
     /**
      * @return returns the entire UI pane for placement on screen
      */
-    public GridPane getPresetPane() {
+    public GridPane getPane() {
         return presetPane;
     }
 
@@ -215,7 +215,7 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     /**
-     * Creates the UI Pane so it can be be retrieved by front end code with getPresetPane()
+     * Creates the UI Pane so it can be be retrieved by front end code with getPane()
      * @param name The preset name
      */
     protected void makePresetPane(String name) {

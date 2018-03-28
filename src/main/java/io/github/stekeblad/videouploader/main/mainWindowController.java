@@ -61,6 +61,7 @@ public class mainWindowController implements Initializable {
 
     private Translations transMainWin;
     private Translations transBasic;
+    private Translations transUpload;
 
     /**
      * Initialize things when the window is opened
@@ -90,6 +91,14 @@ public class mainWindowController implements Initializable {
             e.printStackTrace();
             AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
                     ", the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
+            System.exit(-1);
+        }
+        try {
+            transUpload = new Translations("presetsUploads");
+        } catch (Exception e) {
+            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for saved " +
+                    "presets/Uploads, the application will now close. Sorry!\n\nDetected language: "
+                    + Locale.getDefault()).showAndWait();
             System.exit(-1);
         }
 
@@ -149,6 +158,10 @@ public class mainWindowController implements Initializable {
                         loadedUpload.setButton1(editButton);
                         loadedUpload.setButton2(deleteButton);
                         loadedUpload.setButton3(startUploadButton);
+
+                        // Auto resize width and translation
+                        loadedUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+                        transUpload.autoTranslate(loadedUpload.getPane(), loadedUpload.getPaneId());
 
                         uploadQueueVideos.add(loadedUpload);
                     } catch (Exception e) {
@@ -238,10 +251,18 @@ public class mainWindowController implements Initializable {
 
                 // make the upload change its width together with the uploads list and the window
                 newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
-
+                // Translate the upload
+                transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
                 uploadQueueVideos.add(newUpload);
+
                 // Enables the upload to be edited because the lack of details.
                 onEdit(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + "_fakeButton");
+                // Change the cancel button to a delete button, the backed up state created by onEdit is not valid
+                Button deleteButton = new Button(transBasic.getString("delete"));
+                deleteButton.setId(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + BUTTON_DELETE);
+                deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
+                uploadQueueVideos.get(uploadQueueVideos.size() - 1).setButton1(deleteButton);
+
                 uploadPaneCounter++;
             }
         } else { // preset selected
@@ -295,6 +316,9 @@ public class mainWindowController implements Initializable {
                  VideoUpload newUpload = newUploadBuilder.build();
                 // make the upload change its width together with the uploads list and the window
                 newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+
+                // Translate the upload
+                transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
 
                 // Create the buttons
                 Button editButton = new Button(transBasic.getString("edit"));
@@ -452,7 +476,7 @@ public class mainWindowController implements Initializable {
     private void updateUploadList() {
         List<GridPane> uploadQueuePanes = new ArrayList<>();
         for(VideoUpload vid : uploadQueueVideos) {
-            uploadQueuePanes.add(vid.getUploadPane());
+            uploadQueuePanes.add(vid.getPane());
         }
         listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
     }
@@ -487,6 +511,7 @@ public class mainWindowController implements Initializable {
         }
         // Create a backup to be able to revert
         editBackups.put(uploadQueueVideos.get(selected).getPaneId(), uploadQueueVideos.get(selected).copy(null)); //null -> same id
+
         uploadQueueVideos.get(selected).setEditable(true);
         uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
             File pickedThumbnail = PickFile.pickThumbnail();
@@ -498,7 +523,6 @@ public class mainWindowController implements Initializable {
                 }
             }
         });
-
         uploadQueueVideos.get(selected).setOnPlaylistsClicked(event -> {
             if (playlistUtils.getPlaylistNames().size() == 0) {
                 AlertUtils.simpleClose(transMainWin.getString("diag_noPlaylists_short"),
@@ -598,16 +622,11 @@ public class mainWindowController implements Initializable {
         // Restore from backup and delete it if there is one
         if(editBackups.containsKey(uploadQueueVideos.get(selected).getPaneId())) {
             uploadQueueVideos.set(selected, editBackups.get(uploadQueueVideos.get(selected).getPaneId()));
+            uploadQueueVideos.get(selected).getPane().prefWidthProperty().bind(listView.widthProperty());
             editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         } else {
             AlertUtils.simpleClose(transMainWin.getString("diag_backupNoRestore_short"),
                     transMainWin.getString("diag_backupNoRestore_full")).show();
-        }
-        // Make sure the category selected is valid, in case it was newly added
-        if (uploadQueueVideos.get(selected).getCategory() == null) {
-            AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
-                    transBasic.getString("diag_invalidCategory_full")).show();
-            return;
         }
 
         // Change buttons
@@ -787,7 +806,6 @@ public class mainWindowController implements Initializable {
         uploadQueueVideos.get(index).setButton2(finishedUploadButton);
         updateUploadList();
     }
-
 
     /**
      * Called when the hide button that appears then a upload finishes is clicked.

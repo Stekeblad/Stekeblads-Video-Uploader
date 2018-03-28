@@ -12,7 +12,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 /**
  * A class for handling ResourceBundle translations. Works by loading the default translation and attempt to load a
@@ -122,19 +125,18 @@ public class Translations {
      * Automatically tries to translate all Nodes that are children or any level of grandchildren of window.
      * This is done by first generating a list of children of all levels and then iterating over all translation key and
      * comparing them to the node ids. On top of that, if a translation key
-     * ends with _tt it looks for a Node with that name (excluding the _tt) and if found sets the translation as the Node
-     * Tooltip. If a translation key ends with _pt it searches for a Node with that name (excluding _pt) and if found
-     * sets the translation as the Node PromptText.
+     * ends with _tt it looks for a Node with that id (excluding the _tt) and if found sets the translation as the Node
+     * Tooltip. If a translation key ends with _pt it searches for a Node with that id (excluding _pt) and if found
+     * sets the translation as the Node PromptText. The second parameter is for if all Nodes have a prefix that should
+     * be ignored when looking for a matching translation key.
      *
      * @param window A parent with children to translate (like an entire window pane)
+     * @param prefix the prefix of the Nodes that is not in the translation keys
      */
-    public void autoTranslate(Parent window) {
-        ArrayList<Node> children = childScanner(window);
-        HashMap<String, Node> hashMap = new HashMap<>();
-        for (Node child : children) {
-            if (child.getId() != null) {
-                hashMap.put(child.getId(), child);
-            }
+    public void autoTranslate(Parent window, String prefix) {
+        HashMap<String, Node> children = childScanner(window);
+        if (prefix == null) {
+            prefix = "";
         }
 
         for (String key : fallback.keySet()) {
@@ -142,21 +144,21 @@ public class Translations {
                 // All nodes that extends Labeled can have a Tooltip,
                 // But textFields do not and they can also have a Tooltip.
                 // Anything can have a tooltip this way.
-                Node aNode = hashMap.get(key.substring(0, key.length() - 3));
+                Node aNode = children.get(prefix + key.substring(0, key.length() - 3));
                 if (aNode != null) {
                     Tooltip tt = new Tooltip(getString(key));
                     Tooltip.install(aNode, tt);
                 }
             } else if (key.endsWith("_pt")) { // Test if it is a promptText translation
                 // All nodes that extend TextInputControl can have a prompt text
-                Node aNode = hashMap.get(key.substring(0, key.length() - 3));
+                Node aNode = children.get(prefix + key.substring(0, key.length() - 3));
                 if (aNode != null && aNode instanceof TextInputControl) {
                     ((TextInputControl) aNode).setPromptText(getString(key));
                 }
                 // Else it is a text translation
             } else {
                 // All nodes that can have text extends Labeled
-                Node aNode = hashMap.get(key);
+                Node aNode = children.get(prefix + key);
                 if (aNode != null && aNode instanceof Labeled) {
                     ((Labeled) aNode).setText(getString(key));
                 }
@@ -165,18 +167,32 @@ public class Translations {
     }
 
     /**
+     * Automatically tries to translate all Nodes that are children or any level of grandchildren of window.
+     * This is done by first generating a list of children of all levels and then iterating over all translation key and
+     * comparing them to the node ids. On top of that, if a translation key
+     * ends with _tt it looks for a Node with that id (excluding the _tt) and if found sets the translation as the Node
+     * Tooltip. If a translation key ends with _pt it searches for a Node with that id (excluding _pt) and if found
+     * sets the translation as the Node PromptText.
+     *
+     * @param window A parent with children to translate (like an entire window pane)
+     */
+    public void autoTranslate(Parent window) {
+        autoTranslate(window, "");
+    }
+
+    /**
      * Builds a list of all children of parent and if any child also is a parent there children are checked and added by recursion.
      *
      * @param parent a Node to start listing children from
      * @return An ArrayList&lt Node&gt with all children and any level of grand children of parent
      */
-    private ArrayList<Node> childScanner(Parent parent) {
-        ArrayList<Node> children = new ArrayList<>();
+    private HashMap<String, Node> childScanner(Parent parent) {
+        HashMap<String, Node> children = new HashMap<>();
         for (Node aNode : parent.getChildrenUnmodifiable()) {
             if (aNode instanceof Parent) {
-                children.addAll(childScanner((Parent) aNode));
+                children.putAll(childScanner((Parent) aNode));
             }
-            children.add(aNode);
+            children.put(aNode.getId(), aNode);
         }
         return children;
     }

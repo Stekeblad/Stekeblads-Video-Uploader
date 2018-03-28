@@ -38,7 +38,7 @@ public class VideoUpload extends VideoInformationBase{
     /**
      * @return returns the entire UI pane for placement on screen
      */
-    public GridPane getUploadPane() {
+    public GridPane getPane() {
         return this.uploadPane;
     }
 
@@ -275,7 +275,7 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     /**
-     * Creates the UI Pane so it can be be retrieved by front end code with getUploadPane()
+     * Creates the UI Pane so it can be be retrieved by front end code with getPane()
      */
     protected void makeUploadPane() {
         // The base class has already done most of the work

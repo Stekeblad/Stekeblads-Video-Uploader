@@ -2,11 +2,6 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- Creating localization support and moving all strings visible for the
-users there
-    - Finish translations for english and swedish, review translations
-and check for strings not yet added in translations
-    - Check if Uploader and the Video* Classes can have translation
 
 #### Higher priority things to do
 - Settings window for picking another language than the detected one or
@@ -22,7 +17,7 @@ default.
             AlertUtils.simpleClose("Category not valid", "The selected category does no longer exist")
         }
 
-- F1 takes you to the wiki page for the current window
+- F1 takes you to the wiki page for the current window (https://dzone.com/articles/handling-keyboard-sortcuts)
 - Save window sizes on exist, use the saved sizes when starting next time
 
 #### Thinking about
@@ -36,3 +31,7 @@ should the buttons in the upload pane swap place with the progressbar to
 make better use of the space to the left or should it be a empty space
 to the right of the thumbnail? How would it look like with the buttons to
 the left and the progressbar under an image?
+- Support for limiting upload speed? (Appears difficult to limit up but
+could probably limit how fast the video file to upload can be read... Not
+the solutions users may want, but a solution that could have the same effect
+as the one they want (Can not upload a file faster than it can be read.))
