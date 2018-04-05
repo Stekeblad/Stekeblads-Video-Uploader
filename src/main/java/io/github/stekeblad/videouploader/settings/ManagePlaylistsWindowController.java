@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.settings;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
@@ -11,15 +12,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
 
-import java.net.URL;
 import java.util.*;
 
-public class ManagePlaylistsWindowController implements Initializable {
+public class ManagePlaylistsWindowController {
     public Button btn_refreshPlaylists;
     public Button btn_addNewPlaylist;
     public TextField txt_newPlaylistName;
@@ -35,12 +35,9 @@ public class ManagePlaylistsWindowController implements Initializable {
     private Translations transBasic;
 
     /**
-     * Initialize a few things when the window is opened
-     * @param location provided by fxml
-     * @param resources provided by fxml
+     * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void myInit() {
         // Insert the stored playlists into the list
         updatePlaylistList();
 
@@ -75,6 +72,14 @@ public class ManagePlaylistsWindowController implements Initializable {
         }
         choice_privacyStatus.setItems(FXCollections.observableArrayList(visibilityStrings));
         choice_privacyStatus.getSelectionModel().select(VisibilityStatus.PUBLIC.getStatusName());
+
+        // Set so pressing F1 opens the wiki page for this window
+        window.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Manage-Playlists");
+                event.consume();
+            }
+        });
     }
 
     /**

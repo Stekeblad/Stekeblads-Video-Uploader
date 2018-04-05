@@ -8,20 +8,18 @@ import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.zip.DataFormatException;
 
-public class LocalizeCategoriesWindowController implements Initializable{
+public class LocalizeCategoriesWindowController {
     public AnchorPane window;
     public TextField txt_country;
     public TextField txt_lang;
@@ -39,12 +37,9 @@ public class LocalizeCategoriesWindowController implements Initializable{
     private Translations transBasic;
 
     /**
-     * Initialize things when the window is opened
-     * @param location provided by fxml
-     * @param resources provided by fxml
+     * Initialize things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void myInit() {
         // Filter what can be entered into the textFields
         txt_country.textProperty().addListener((observable, oldValue, newValue) -> {
             if(! newValue.matches("[A-Za-z]*") || newValue.length() > 2) {
@@ -87,6 +82,15 @@ public class LocalizeCategoriesWindowController implements Initializable{
         // Insert the current country and language code in their text fields
         txt_country.setText(configManager.getCategoryCountry());
         txt_lang.setText(configManager.getCategoryLanguage());
+
+        // Set so pressing F1 opens the wiki page for this window
+        window.getScene().setOnKeyPressed(event -> {
+            System.out.println("'ey, opening webby!");
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Localize-Categories");
+                event.consume();
+            }
+        });
     }
 
     /**
@@ -181,9 +185,9 @@ public class LocalizeCategoriesWindowController implements Initializable{
     public void onCodeListCountryClicked(ActionEvent actionEvent) {
         try {
             URI link = new URI("https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements");
-            new OpenInBrowser(link, (t, e) -> Platform.runLater(() -> {
+            OpenInBrowser.openInBrowser(link, (t, e) -> Platform.runLater(() -> {
                 String desc = String.format(transLocCatWin.getString("diag_cantOpenBrowser"), link);
-                AlertUtils.simpleClose("Sorry!", desc).showAndWait();
+                AlertUtils.simpleClose(transBasic.getString("sorry"), desc).showAndWait();
             }));
         } catch (URISyntaxException e) {
             System.err.println("URI Error for CountryList");
@@ -199,9 +203,9 @@ public class LocalizeCategoriesWindowController implements Initializable{
     public void onCodeListLangClicked(ActionEvent actionEvent) {
         try {
             URI link = new URI("https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes");
-            new OpenInBrowser(link, (t, e) -> Platform.runLater(() -> {
+            OpenInBrowser.openInBrowser(link, (t, e) -> Platform.runLater(() -> {
                 String desc = String.format(transLocCatWin.getString("diag_cantOpenBrowser"), link);
-                AlertUtils.simpleClose("Sorry!", desc).showAndWait();
+                AlertUtils.simpleClose(transBasic.getString("sorry"), desc).showAndWait();
             }));
         } catch (URISyntaxException e) {
             System.err.println("URI Error for LangList");

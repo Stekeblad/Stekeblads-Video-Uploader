@@ -27,6 +27,7 @@ public class Main extends Application {
                 event.consume();
             }
         });
+        controller.myInit();
         primaryStage.show();
     }
 

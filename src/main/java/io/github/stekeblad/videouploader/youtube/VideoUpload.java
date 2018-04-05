@@ -131,7 +131,7 @@ public class VideoUpload extends VideoInformationBase{
         uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)
                 .setOnMouseClicked(event -> {
                     try {
-                        new OpenInBrowser(new URI(url), (t, e) -> e.printStackTrace());
+                        OpenInBrowser.openInBrowser(new URI(url), (t, e) -> e.printStackTrace());
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                     }

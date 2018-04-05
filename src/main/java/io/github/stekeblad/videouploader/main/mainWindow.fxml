@@ -6,7 +6,8 @@
 <AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.videouploader.main.mainWindowController">
     <ToolBar fx:id="toolbar" prefHeight="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
              AnchorPane.topAnchor="0.0">
-      <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onSettingsClicked" text="Settings" />
+        <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onPresetsClicked"
+                text="Settings"/>
     </ToolBar>
     <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" AnchorPane.bottomAnchor="15.0"
               AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="200.0"/>

@@ -4,6 +4,7 @@ import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.PickFile;
 import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
@@ -11,9 +12,9 @@ import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -22,13 +23,15 @@ import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Optional;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 
 
-public class PresetsWindowController implements Initializable {
+public class PresetsWindowController {
 
     public AnchorPane settingsWindow;
     public ListView<GridPane> listPresets;
@@ -54,12 +57,9 @@ public class PresetsWindowController implements Initializable {
     private static final String PRESET_PANE_ID_PREFIX = "preset-";
 
     /**
-     * Initialize a few things when the window is opened
-     * @param location provided by fxml
-     * @param resources provided by fxml
+     * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void myInit() {
         configManager = ConfigManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
         categoryUtils = CategoryUtils.INSTANCE;
@@ -131,6 +131,14 @@ public class PresetsWindowController implements Initializable {
             }
         }
         updatePresetList();
+
+        // Set so pressing F1 opens the wiki page for this window
+        settingsWindow.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Preset-Window");
+                event.consume();
+            }
+        });
     }
 
     /**
@@ -222,6 +230,8 @@ public class PresetsWindowController implements Initializable {
             stage.setTitle(transBasic.getString("app_locCatWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
+            LocalizeCategoriesWindowController controller = fxmlLoader.getController();
+            controller.myInit();
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -247,6 +257,7 @@ public class PresetsWindowController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             ManagePlaylistsWindowController controller = fxmlLoader.getController();
             stage.setOnCloseRequest(controller::onWindowClose);
+            controller.myInit();
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();

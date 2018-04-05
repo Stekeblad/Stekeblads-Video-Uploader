@@ -5,6 +5,7 @@ import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.PickFile;
 import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
@@ -13,11 +14,10 @@ import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -25,13 +25,12 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
-public class mainWindowController implements Initializable {
+public class mainWindowController {
     public AnchorPane mainWindowPane;
     public ToolBar toolbar;
     public ListView<GridPane> listView;
@@ -64,12 +63,9 @@ public class mainWindowController implements Initializable {
     private Translations transUpload;
 
     /**
-     * Initialize things when the window is opened
-     * @param location provided by fxml
-     * @param resources provided by fxml
+     * Initialize things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
-    @FXML
-    public void initialize(URL location, ResourceBundle resources) {
+    public void myInit() {
 
         try {
             transMainWin = new Translations("mainWindow");
@@ -121,7 +117,7 @@ public class mainWindowController implements Initializable {
         configManager.configManager();
         if (configManager.getNoSettings()) {
             // If no settings was loaded, open settings window
-            onSettingsClicked(new ActionEvent());
+            onPresetsClicked(new ActionEvent());
             configManager.setNoSettings(false);
             configManager.saveSettings();
         }
@@ -171,7 +167,16 @@ public class mainWindowController implements Initializable {
             }
             updateUploadList();
         }
+        // Set so pressing F1 opens the wiki page for this window
+        Scene scene = mainWindowPane.getScene();
+        scene.setOnKeyPressed((event) -> {
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Main-Window");
+                event.consume();
+            }
+        });
     }
+
 
     /**
      * This method is called when this window's close button is clicked.
@@ -353,17 +358,18 @@ public class mainWindowController implements Initializable {
      * Opens the settings window.
      * @param actionEvent the click event
      */
-    public void onSettingsClicked(ActionEvent actionEvent) {
+    public void onPresetsClicked(ActionEvent actionEvent) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/PresetsWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 725, 700);
             Stage stage = new Stage();
-            stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
+            stage.setTitle(transBasic.getString("app_presetWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
             PresetsWindowController controller = fxmlLoader.getController();
             stage.setOnCloseRequest(controller::onWindowClose);
+            controller.myInit();
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();

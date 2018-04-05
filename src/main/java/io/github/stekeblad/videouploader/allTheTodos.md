@@ -2,6 +2,8 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
+- F1 takes you to the wiki page for the current window
+(does not work if a Node that supports text input is focused (enabled or not))
 
 #### Higher priority things to do
 - Settings window for picking another language than the detected one or
@@ -17,8 +19,8 @@ default.
             AlertUtils.simpleClose("Category not valid", "The selected category does no longer exist")
         }
 
-- F1 takes you to the wiki page for the current window (https://dzone.com/articles/handling-keyboard-sortcuts)
 - Save window sizes on exist, use the saved sizes when starting next time
+- Create a clone button for presets (set the clone to edit automatically)
 
 #### Thinking about
 - Keep even unstarted uploads on close?
