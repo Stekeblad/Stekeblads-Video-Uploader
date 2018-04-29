@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.settings;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
@@ -17,7 +18,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Optional;
 
 public class ManagePlaylistsWindowController {
     public Button btn_refreshPlaylists;
@@ -42,23 +46,10 @@ public class ManagePlaylistsWindowController {
         updatePlaylistList();
 
         // Load Translations
-        try {
-            transBasic = new Translations("baseStrings");
-        } catch (Exception e) {
-            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
-            return;
-        }
-        try {
-            transPlaylistWindow = new Translations("manPlayWindow");
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for main" +
-                    " window, the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault())
-                    .showAndWait();
-            return;
-        }
+        transBasic = TranslationsManager.getTranslation("baseStrings");
+        transPlaylistWindow = TranslationsManager.getTranslation("manPlayWindow");
         transPlaylistWindow.autoTranslate(window);
+
         // cant autoTranslate Nodes in Toolbar (bug)
         txt_newPlaylistName.setPromptText(transPlaylistWindow.getString("txt_newPlaylistName_pt"));
         choice_privacyStatus.setTooltip(new Tooltip(transPlaylistWindow.getString("choice_privacyStatus_tt")));

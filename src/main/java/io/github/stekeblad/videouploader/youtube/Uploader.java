@@ -9,6 +9,7 @@ import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
 import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
@@ -38,12 +40,13 @@ public class Uploader {
     private HashMap<String, Future> tasks;
     private CategoryUtils categoryUtils;
     private Consumer<String> uploadFinishedCallback = null;
+    private BiConsumer<VideoUpload, Throwable> uploadErroredCallback = null;
     private ExecutorService exec;
     private Translations translations;
 
 
-    public Uploader() throws Exception {
-        translations = new Translations("uploader");
+    public Uploader() {
+        translations = TranslationsManager.getTranslation("uploader");
         tasks = new HashMap<>();
         categoryUtils = CategoryUtils.INSTANCE;
         exec = Executors.newSingleThreadExecutor(Thread::new);
@@ -52,11 +55,22 @@ public class Uploader {
 
     /**
      * Sets a method to be called every time a upload finishes. The parameter given to the callback will be the cancelName
-     * that was given in the add() method.
+     * that was given in the add() method. Setting this callback is not required.
      * @param callback the callback to be called after every finished upload.
      */
     public void setUploadFinishedCallback(Consumer<String> callback) {
         this.uploadFinishedCallback = callback;
+    }
+
+    /**
+     * Sets a method to be called when a upload fails and it can not be handled by this class. The parmeters given to the
+     * callback will be the VideoUpload that errored and the exception that could not be handled.
+     * Setting this callback is not required.
+     *
+     * @param callback the callback to be called when an upload errors
+     */
+    public void setUploadErredCallback(BiConsumer<VideoUpload, Throwable> callback) {
+        this.uploadErroredCallback = callback;
     }
 
     /**
@@ -96,10 +110,10 @@ public class Uploader {
      */
     public void add(VideoUpload video, String cancelName) {
         // Create the task
-        Future upload = exec.submit(new Task<Void>() {
+        Task newTask = new Task<Void>() {
             @Override
             // Define what it does
-            public Void call() {
+            protected Void call() throws Exception {
                 try {
                     // Do the uploading
                     upload(video);
@@ -116,9 +130,15 @@ public class Uploader {
                 }
                 // Remove the task from the list
                 tasks.remove(cancelName);
-                return null ;
+                return null;
+            }
+        };
+        newTask.setOnFailed(event -> {
+            if (uploadErroredCallback != null) {
+                uploadErroredCallback.accept(video, newTask.getException());
             }
         });
+        Future upload = exec.submit(newTask);
         tasks.put(cancelName, upload); // save the future to be able to abort upload
     }
 

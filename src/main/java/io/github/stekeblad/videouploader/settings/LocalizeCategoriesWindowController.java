@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.settings;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import javafx.application.Platform;
@@ -15,7 +16,6 @@ import javafx.stage.Stage;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.zip.DataFormatException;
 
@@ -54,22 +54,8 @@ public class LocalizeCategoriesWindowController {
         });
 
         // Load Translations
-        try {
-            transLocCatWin = new Translations("locCatWindow");
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for localize " +
-                    " categories window, the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault())
-                    .showAndWait();
-            return;
-        }
-        try {
-            transBasic = new Translations("baseStrings");
-        } catch (Exception e) {
-            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
-            return;
-        }
+        transLocCatWin = TranslationsManager.getTranslation("locCatWindow");
+        transBasic = TranslationsManager.getTranslation("baseStrings");
         transLocCatWin.autoTranslate(window);
 
         // Add description text
@@ -85,7 +71,6 @@ public class LocalizeCategoriesWindowController {
 
         // Set so pressing F1 opens the wiki page for this window
         window.getScene().setOnKeyPressed(event -> {
-            System.out.println("'ey, opening webby!");
             if (event.getCode() == KeyCode.F1) {
                 OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Localize-Categories");
                 event.consume();

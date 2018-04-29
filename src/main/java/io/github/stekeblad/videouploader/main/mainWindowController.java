@@ -1,10 +1,7 @@
 package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.settings.PresetsWindowController;
-import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.PickFile;
-import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
@@ -25,6 +22,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
@@ -66,49 +64,17 @@ public class mainWindowController {
      * Initialize things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
     public void myInit() {
-
-        try {
-            transMainWin = new Translations("mainWindow");
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for main" +
-                    " window, the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault())
-                    .showAndWait();
-            System.exit(-1);
-        }
+        // Load Translations
+        transMainWin = TranslationsManager.getTranslation("mainWindow");
         transMainWin.autoTranslate(mainWindowPane);
         // Bugged:
         // System.out.println(toolbar.getChildrenUnmodifiable());
         btn_presets.setText(transMainWin.getString("btn_presets"));
 
-        try {
-            transBasic = new Translations("baseStrings");
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
-            System.exit(-1);
-        }
-        try {
-            transUpload = new Translations("presetsUploads");
-        } catch (Exception e) {
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for saved " +
-                    "presets/Uploads, the application will now close. Sorry!\n\nDetected language: "
-                    + Locale.getDefault()).showAndWait();
-            System.exit(-1);
-        }
+        transBasic = TranslationsManager.getTranslation("baseStrings");
+        transUpload = TranslationsManager.getTranslation("presetsUploads");
 
-        try {
-            uploader = new Uploader();
-        } catch (Exception e) {
-            System.err.println("Could not instantiate Uploader");
-            e.printStackTrace();
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for " +
-                    "Uploader, the application will now close. Sorry!\n\nDetected language: " + Locale.getDefault())
-                    .showAndWait();
-            System.exit(-1);
-        }
-
+        uploader = new Uploader();
 
         uploadPaneCounter = 0;
         uploadQueueVideos = new ArrayList<>();
@@ -134,6 +100,7 @@ public class mainWindowController {
             }
         });
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
+        uploader.setUploadErredCallback((videoUpload, throwable) -> Platform.runLater(() -> onUploadErred(videoUpload, throwable)));
 
         if(configManager.hasWaitingUploads()) {
             ArrayList<String> waitingUploads = configManager.getWaitingUploads();
@@ -363,6 +330,10 @@ public class mainWindowController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/PresetsWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 725, 700);
+            URL css_path = mainWindowController.class.getClassLoader().getResource("css/disabled.css");
+            if (css_path != null) {
+                scene.getStylesheets().add(css_path.toString());
+            }
             Stage stage = new Stage();
             stage.setTitle(transBasic.getString("app_presetWindowTitle"));
             stage.setScene(scene);
@@ -796,7 +767,7 @@ public class mainWindowController {
     }
 
     /**
-     * Called when a upload finishes.
+     * Called when an upload finishes.
      * Places the hide button
      * @param paneId the id of the upload
      */
@@ -811,6 +782,27 @@ public class mainWindowController {
         finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
         uploadQueueVideos.get(index).setButton2(finishedUploadButton);
         updateUploadList();
+    }
+
+    /**
+     * Called if an upload errors/fails
+     *
+     * @param video the video that failed uploading
+     * @param e     the exception that occurred
+     */
+    private void onUploadErred(VideoUpload video, Throwable e) {
+        String header = transBasic.getString("app_name") + " - Failed to upload video";
+        if (e == null) {
+            if (video == null) {
+                AlertUtils.simpleClose(header, "Failed uploading of a undefined video with an unknown error").show();
+            } else { // e == null && video != null
+                AlertUtils.simpleClose(header, "An unknown error occurred while trying to upload \"" + video.getVideoName() + "\"").show();
+            }
+        } else if (video == null) { // e != null
+            AlertUtils.exceptionDialog(header, "Failed uploading of a undefined video", e);
+        } else { // e != null && video != null
+            AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
+        }
     }
 
     /**

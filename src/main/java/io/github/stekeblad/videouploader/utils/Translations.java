@@ -51,14 +51,15 @@ public class Translations {
                 FileInputStream fis = new FileInputStream(new File(url.toURI()));
                 localized = new PropertyResourceBundle(fis);
             } else {
+                // Did not find translation for user locale. Try find a similar translation, like en_GB instead of en_US
                 try {
                     URL url2 = mainWindowController.class.getClassLoader().getResource("strings/" + bundleName);
                     if (url2 != null) {
                         File dir = new File(url2.toURI());
                         File[] files = dir.listFiles();
                         if (files != null) {
+                            String matchString = bundleName + "_" + locale.toString().substring(0, 2);
                             for (File aFile : files) {
-                                String matchString = bundleName + "_" + locale.toString().substring(0, 2);
                                 if (aFile.getName().contains(matchString)) {
                                     FileInputStream fis = new FileInputStream(new File(aFile.toURI()));
                                     localized = new PropertyResourceBundle(fis);
@@ -84,8 +85,6 @@ public class Translations {
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             localized = null;
-            // Try find a similar translation, like en_GB instead of en_US
-
         }
 
         // Load default locale as backup if translation is missing or partially added
@@ -184,7 +183,7 @@ public class Translations {
      * Builds a list of all children of parent and if any child also is a parent there children are checked and added by recursion.
      *
      * @param parent a Node to start listing children from
-     * @return An ArrayList&lt Node&gt with all children and any level of grand children of parent
+     * @return An HashMap&lt String, Node&gt with all children and any level of grand children of parent
      */
     private HashMap<String, Node> childScanner(Parent parent) {
         HashMap<String, Node> children = new HashMap<>();

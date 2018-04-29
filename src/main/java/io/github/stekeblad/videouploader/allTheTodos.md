@@ -27,7 +27,6 @@ default.
 - Change "Abort all and clear" button to not affect started uploads.
 users can currently not remove all not started at once and it would
 only be two extra click to first abort all before clearing.
-- Support for multiple Youtube accounts/channels?
 - As translations will make some strings longer or short than others,
 should the buttons in the upload pane swap place with the progressbar to
 make better use of the space to the left or should it be a empty space
@@ -37,3 +36,7 @@ the left and the progressbar under an image?
 could probably limit how fast the video file to upload can be read... Not
 the solutions users may want, but a solution that could have the same effect
 as the one they want (Can not upload a file faster than it can be read.))
+- Special system for like "Live on Twitch", delete video after a few hours
+or maybe even: if the user goes live on Twitch a short video is automatically
+uploaded saying "I am live on Twitch!" and automatically delete video when stream ends.
+(probably possible, fun to try, but would someone use it?)

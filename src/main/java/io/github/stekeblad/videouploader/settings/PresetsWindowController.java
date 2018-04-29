@@ -1,9 +1,6 @@
 package io.github.stekeblad.videouploader.settings;
 
-import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.PickFile;
-import io.github.stekeblad.videouploader.utils.Translations;
+import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
@@ -25,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Optional;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
@@ -68,31 +64,10 @@ public class PresetsWindowController {
         videoPresets = new ArrayList<>();
 
         // Load Translations
-        try {
-            transPresetWin = new Translations("presetWindow");
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for preset" +
-                    " window, the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault())
-                    .showAndWait();
-            return;
-        }
-        try {
-            transBasic = new Translations("baseStrings");
-        } catch (Exception e) {
-            AlertUtils.simpleClose("Error loading translations", "Failed loading basic translations" +
-                    ", the window can not be opened. Sorry!\n\nDetected language: " + Locale.getDefault()).showAndWait();
-            return;
-        }
+        transPresetWin = TranslationsManager.getTranslation("presetWindow");
+        transBasic = TranslationsManager.getTranslation("baseStrings");
         transPresetWin.autoTranslate(settingsWindow);
-        try {
-            transPreset = new Translations("presetsUploads");
-        } catch (Exception e) {
-            AlertUtils.simpleClose("Error loading translations", "Failed loading translations for saved " +
-                    "presets/Uploads, the window can not be opened. Sorry!\n\nDetected language: "
-                    + Locale.getDefault()).showAndWait();
-            return;
-        }
+        transPreset = TranslationsManager.getTranslation("presetsUploads");
 
         // Children of Toolbars can not be detected through code currently (probably a bug)
         btn_managePlaylists.setText(transPresetWin.getString("btn_managePlaylists"));
@@ -208,7 +183,7 @@ public class PresetsWindowController {
      * @param actionEvent the click event
      */
     public void onTipsClicked(ActionEvent actionEvent) {
-        AlertUtils.simpleClose("Tips", transPresetWin.getString("diag_tips")).showAndWait();
+        AlertUtils.simpleClose_longContent("Tips", transPresetWin.getString("diag_tips"));
         actionEvent.consume();
     }
 
