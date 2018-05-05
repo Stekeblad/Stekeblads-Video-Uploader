@@ -64,6 +64,18 @@ public class ManagePlaylistsWindowController {
         choice_privacyStatus.setItems(FXCollections.observableArrayList(visibilityStrings));
         choice_privacyStatus.getSelectionModel().select(VisibilityStatus.PUBLIC.getStatusName());
 
+        // Set so pressing enter in txt_newPlaylistName triggers onAddNewPlaylistClicked
+        txt_newPlaylistName.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                onAddNewPlaylistClicked(new ActionEvent());
+                event.consume();
+            } // On Java 8, function key events is not passed on by TextFields, lets add it because handler already exists (Bug fixed in Java 9)
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Manage-Playlists");
+                event.consume();
+            }
+        });
+
         // Set so pressing F1 opens the wiki page for this window
         window.getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {

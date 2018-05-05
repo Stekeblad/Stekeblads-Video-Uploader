@@ -74,6 +74,12 @@ public class mainWindowController {
         transBasic = TranslationsManager.getTranslation("baseStrings");
         transUpload = TranslationsManager.getTranslation("presetsUploads");
 
+        // Load custom CSS (for improved readability of disabled ChoiceBoxes)
+        URL css_path = mainWindowController.class.getClassLoader().getResource("css/disabled.css");
+        if (css_path != null) {
+            mainWindowPane.getScene().getStylesheets().add(css_path.toString());
+        }
+
         uploader = new Uploader();
 
         uploadPaneCounter = 0;

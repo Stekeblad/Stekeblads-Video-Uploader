@@ -107,6 +107,18 @@ public class PresetsWindowController {
         }
         updatePresetList();
 
+        // Set so pressing enter in txt_nameNewPreset triggers onPresetAddNewClicked
+        txt_nameNewPreset.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                onPresetAddNewClicked(new ActionEvent());
+                event.consume();
+            } // On Java 8, function key events is not passed on by TextFields, lets add it because handler already exists (Bug fixed in Java 9)
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Preset-Window");
+                event.consume();
+            }
+        });
+
         // Set so pressing F1 opens the wiki page for this window
         settingsWindow.getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {

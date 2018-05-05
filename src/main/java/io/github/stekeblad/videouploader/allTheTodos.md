@@ -40,3 +40,8 @@ as the one they want (Can not upload a file faster than it can be read.))
 or maybe even: if the user goes live on Twitch a short video is automatically
 uploaded saying "I am live on Twitch!" and automatically delete video when stream ends.
 (probably possible, fun to try, but would someone use it?)
+
+#### Things to change on wiki when releasing next update
+- Pressing enter in playlist/preset name box
+- Pressing F1 for wiki
+- Translations
