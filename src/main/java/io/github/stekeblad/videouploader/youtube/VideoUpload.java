@@ -116,6 +116,18 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     /**
+     * Changes the color of the progressBar bar
+     *
+     * @param color an acceptable CSS color name, a hex color code starting with # or null for default color
+     */
+    public void setProgressBarColor(String color) {
+        if (color == null) {
+            color = "#0096c9"; // default -fx-accent color in used style (Modena)
+        }
+        uploadPane.lookup("#" + getPaneId() + NODE_ID_PROGRESS).setStyle("-fx-accent: " + color);
+    }
+
+    /**
      * Sets the text to be displayed on the status label in the UI
      * @param text the text to show
      */
@@ -283,7 +295,7 @@ public class VideoUpload extends VideoInformationBase{
 
         ProgressBar progressBar = new ProgressBar();
         progressBar.setId(getPaneId() + NODE_ID_PROGRESS);
-        progressBar.setPrefWidth(200);
+        progressBar.setPrefWidth(160);
         progressBar.setVisible(false);
 
         Label uploadStatus = new Label("Upload not started");
@@ -299,9 +311,9 @@ public class VideoUpload extends VideoInformationBase{
         buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
 
         // Add the new Nodes on a new row at the bottom
-        uploadPane.add(progressBar, 0, 3);
+        uploadPane.add(progressBar, 2, 3);
         uploadPane.add(uploadStatus, 1, 3);
-        uploadPane.add(buttonsBox, 2, 3);
+        uploadPane.add(buttonsBox, 0, 3);
 
         // Update sizing
         RowConstraints newRow = new RowConstraints(30);

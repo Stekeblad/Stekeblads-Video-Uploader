@@ -2,12 +2,12 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- F1 takes you to the wiki page for the current window
-(does not work if a Node that supports text input is focused (enabled or not))
 
 #### Higher priority things to do
 - Settings window for picking another language than the detected one or
 default.
+- Better loading of playlist dropDown, clicking multiple times to get it
+to open is not ok!
 
 #### Lower priority things to do
 - handling of categories/playlists/image does no longer exist

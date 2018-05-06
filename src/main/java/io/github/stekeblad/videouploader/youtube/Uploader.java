@@ -121,7 +121,11 @@ public class Uploader {
                     // if not interrupted by the user, print the error
                     if (! e.getMessage().equals("INTERRUPTED")) {
                         e.printStackTrace();
+                        if (uploadErroredCallback != null) {
+                            Platform.runLater(() -> uploadErroredCallback.accept(video, e));
+                        }
                     }
+                    tasks.remove(cancelName);
                     return null; // do not use callback on upload that throws exception
                 }
                 // If upload finished without errors and callback is set, give the cancel name to the callback
@@ -135,7 +139,7 @@ public class Uploader {
         };
         newTask.setOnFailed(event -> {
             if (uploadErroredCallback != null) {
-                uploadErroredCallback.accept(video, newTask.getException());
+                Platform.runLater(() -> uploadErroredCallback.accept(video, newTask.getException()));
             }
         });
         Future upload = exec.submit(newTask);
@@ -149,6 +153,11 @@ public class Uploader {
      * or thumbnail file or there is a network error that could not be handled.
      */
     private void upload(VideoUpload video) throws IOException {
+
+        // debug thing to force error
+        if (video.getVideoName().equals("forceUploadFailure")) {
+            throw new RuntimeException("forced by filename");
+        }
 
         // Auth the user and create the Youtube object
         Credential creds = Auth.authUser();

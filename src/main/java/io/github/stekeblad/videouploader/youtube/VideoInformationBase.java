@@ -482,7 +482,7 @@ public class VideoInformationBase {
          description.setPromptText("Video description");
          description.setText(videoDescription);
          description.setEditable(false);
-         // Visually start a new line when the edge of TextArea is reached so the user to not need to scroll sideways to
+         // Visually start a new line when the edge of TextArea is reached so the user do not need to scroll sideways to
          // read what they just entered. This type of automatic enter is only visible in the UI and is not a part of the
          // string returned by description.getText()
          description.setWrapText(true);
@@ -574,7 +574,7 @@ public class VideoInformationBase {
          videoBasePane.add(visibilityChoiceBox, 2, 2);
 
          // Sizing
-         ColumnConstraints rightConstraint = new ColumnConstraints(260, 260, 260);
+         ColumnConstraints rightConstraint = new ColumnConstraints(170, 170, 170);
          ColumnConstraints defaultConstraint = new ColumnConstraints(100, USE_COMPUTED_SIZE, MAX_VALUE);
          videoBasePane.getColumnConstraints().setAll(defaultConstraint, defaultConstraint, rightConstraint);
 

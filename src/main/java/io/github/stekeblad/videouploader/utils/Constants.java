@@ -15,6 +15,7 @@ public class Constants {
     public static final String BUTTON_START_UPLOAD = "_buttonStartUpload";
     public static final String BUTTON_ABORT_UPLOAD = "_buttonUploadAbort";
     public static final String BUTTON_FINISHED_UPLOAD = "_buttonFinishedUpload";
+    public static final String BUTTON_RESET = "_buttonReset";
 
 
 }

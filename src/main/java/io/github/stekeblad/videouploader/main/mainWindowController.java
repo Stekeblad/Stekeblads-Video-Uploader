@@ -750,7 +750,7 @@ public class mainWindowController {
             uploadQueueVideos.get(selected).setProgressBarProgress(INDETERMINATE_PROGRESS); // reset progBar to be animated
             uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("aborted"));
         } else {
-            AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason");
+            AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason").show();
         }
 
         // Change buttons
@@ -770,6 +770,33 @@ public class mainWindowController {
 
         // Make sure visual change get to the UI
         updateUploadList();
+    }
+
+    private void onResetUpload(String callerId) {
+        String parentId = callerId.substring(0, callerId.indexOf('_'));
+        int selected = getUploadIndexByName(parentId);
+        if (selected == -1) {
+            System.err.println("reset upload button belongs to a invalid or non-existing parent");
+            return;
+        }
+        // Change back progressBar color, hide it and set the edit/delete/startUpload buttons
+        uploadQueueVideos.get(selected).setProgressBarColor(null);
+        uploadQueueVideos.get(selected).setProgressBarVisibility(false);
+        uploadQueueVideos.get(selected).setStatusLabelText(transUpload.getString("notStarted"));
+
+        Button editButton = new Button(transBasic.getString("edit"));
+        editButton.setId(parentId + BUTTON_EDIT);
+        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
+        Button deleteButton = new Button(transBasic.getString("delete"));
+        deleteButton.setId(parentId + BUTTON_DELETE);
+        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
+        Button startUploadButton = new Button(transBasic.getString("startUpload"));
+        startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
+        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
+
+        uploadQueueVideos.get(selected).setButton1(editButton);
+        uploadQueueVideos.get(selected).setButton2(deleteButton);
+        uploadQueueVideos.get(selected).setButton3(startUploadButton);
     }
 
     /**
@@ -808,6 +835,15 @@ public class mainWindowController {
             AlertUtils.exceptionDialog(header, "Failed uploading of a undefined video", e);
         } else { // e != null && video != null
             AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
+        }
+        //Switch to a reset upload button instead of abort
+        if (video != null) {
+            video.setProgressBarColor("red");
+            video.setStatusLabelText(transUpload.getString("failed"));
+            Button resetButton = new Button(transBasic.getString("reset"));
+            resetButton.setId(video.getPaneId() + BUTTON_RESET);
+            resetButton.setOnMouseClicked(event -> onResetUpload(resetButton.getId()));
+            video.setButton2(resetButton);
         }
     }
 
