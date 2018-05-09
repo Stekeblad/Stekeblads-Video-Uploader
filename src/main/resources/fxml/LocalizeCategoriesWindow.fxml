@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane fx:id="window" prefHeight="479.0" prefWidth="394.0" xmlns="http://javafx.com/javafx/8.0.111"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="io.github.stekeblad.videouploader.settings.LocalizeCategoriesWindowController">
+            fx:controller="io.github.stekeblad.videouploader.windowControllers.LocalizeCategoriesWindowController">
     <GridPane layoutX="14.0" layoutY="22.0" AnchorPane.bottomAnchor="39.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="22.0">
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="129.0" minWidth="10.0" prefWidth="129.0" />

@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.settings;
+package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
@@ -29,7 +29,7 @@ import static io.github.stekeblad.videouploader.utils.Constants.*;
 
 public class PresetsWindowController {
 
-    public AnchorPane settingsWindow;
+    public AnchorPane presetWindow;
     public ListView<GridPane> listPresets;
     public ToolBar toolbar;
     public Button btn_tips;
@@ -66,7 +66,7 @@ public class PresetsWindowController {
         // Load Translations
         transPresetWin = TranslationsManager.getTranslation("presetWindow");
         transBasic = TranslationsManager.getTranslation("baseStrings");
-        transPresetWin.autoTranslate(settingsWindow);
+        transPresetWin.autoTranslate(presetWindow);
         transPreset = TranslationsManager.getTranslation("presetsUploads");
 
         // Children of Toolbars can not be detected through code currently (probably a bug)
@@ -120,7 +120,7 @@ public class PresetsWindowController {
         });
 
         // Set so pressing F1 opens the wiki page for this window
-        settingsWindow.getScene().setOnKeyPressed(event -> {
+        presetWindow.getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {
                 OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Preset-Window");
                 event.consume();

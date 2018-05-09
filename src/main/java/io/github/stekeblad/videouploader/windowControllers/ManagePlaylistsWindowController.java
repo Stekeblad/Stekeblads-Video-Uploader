@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.settings;
+package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;

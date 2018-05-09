@@ -6,7 +6,7 @@
 <GridPane fx:id="window" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="315.0"
           prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111"
           xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="io.github.stekeblad.videouploader.settings.ManagePlaylistsWindowController">
+          fx:controller="io.github.stekeblad.videouploader.windowControllers.ManagePlaylistsWindowController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="115.0" prefWidth="150.0"/>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="278.0" />

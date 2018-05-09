@@ -1,8 +1,8 @@
 package io.github.stekeblad.videouploader.main;
 
-import io.github.stekeblad.videouploader.settings.PresetsWindowController;
 import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;

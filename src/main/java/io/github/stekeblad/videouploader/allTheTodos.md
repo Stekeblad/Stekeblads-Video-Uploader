@@ -2,10 +2,11 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
+- Testing with progressBar for uploads to the right and buttons to the left
+- Settings window for picking another language than the detected one or
+default, and other things.
 
 #### Higher priority things to do
-- Settings window for picking another language than the detected one or
-default.
 - Better loading of playlist dropDown, clicking multiple times to get it
 to open is not ok!
 
@@ -19,19 +20,19 @@ to open is not ok!
             AlertUtils.simpleClose("Category not valid", "The selected category does no longer exist")
         }
 
-- Save window sizes on exist, use the saved sizes when starting next time
+- Save window sizes/location on exit, use the saved data when starting next time
 - Create a clone button for presets (set the clone to edit automatically)
+- "Show Playlist" button in playlist manager window -> opens that playlist
+on youtube in the browser
+- When updating playlist, use ID instead of name when looking at old
+playlists and desiding if they should be visible or not (playlists can
+be renamed, name is different but ID the same.)
 
 #### Thinking about
 - Keep even unstarted uploads on close?
 - Change "Abort all and clear" button to not affect started uploads.
 users can currently not remove all not started at once and it would
 only be two extra click to first abort all before clearing.
-- As translations will make some strings longer or short than others,
-should the buttons in the upload pane swap place with the progressbar to
-make better use of the space to the left or should it be a empty space
-to the right of the thumbnail? How would it look like with the buttons to
-the left and the progressbar under an image?
 - Support for limiting upload speed? (Appears difficult to limit up but
 could probably limit how fast the video file to upload can be read... Not
 the solutions users may want, but a solution that could have the same effect
@@ -45,3 +46,4 @@ uploaded saying "I am live on Twitch!" and automatically delete video when strea
 - Pressing enter in playlist/preset name box
 - Pressing F1 for wiki
 - Translations
+- red progressBar and upload failed dialogs
