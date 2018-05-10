@@ -84,7 +84,7 @@ public enum CategoryUtils {
     /**
      * Returns the category Id that belongs to the category categoryName
      * @param categoryName the category that you want the Id for
-     * @return the Id of categoryName as a String
+     * @return the Id of categoryName as a String or "-1" if category does not exist
      */
     public String getCategoryId(String categoryName) {
         if (categories == null) {

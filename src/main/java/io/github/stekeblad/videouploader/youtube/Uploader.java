@@ -126,7 +126,7 @@ public class Uploader {
                         }
                     }
                     tasks.remove(cancelName);
-                    return null; // do not use callback on upload that throws exception
+                    return null;
                 }
                 // If upload finished without errors and callback is set, give the cancel name to the callback
                 if(uploadFinishedCallback != null) {

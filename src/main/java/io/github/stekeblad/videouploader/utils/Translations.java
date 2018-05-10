@@ -7,15 +7,10 @@ import javafx.scene.control.Labeled;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Tooltip;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * A class for handling ResourceBundle translations. Works by loading the default translation and attempt to load a
@@ -46,29 +41,25 @@ public class Translations {
 
         // Load translation for user locale
         try {
-            URL url = mainWindowController.class.getClassLoader().getResource(localizedPath);
-            if (url != null) {
-                FileInputStream fis = new FileInputStream(new File(url.toURI()));
-                localized = new PropertyResourceBundle(fis);
+            InputStream inputStream = mainWindowController.class.getClassLoader().getResourceAsStream(localizedPath);
+            if (inputStream != null) {
+                localized = new PropertyResourceBundle(inputStream);
             } else {
                 // Did not find translation for user locale. Try find a similar translation, like en_GB instead of en_US
                 try {
-                    URL url2 = mainWindowController.class.getClassLoader().getResource("strings/" + bundleName);
-                    if (url2 != null) {
-                        File dir = new File(url2.toURI());
-                        File[] files = dir.listFiles();
-                        if (files != null) {
-                            String matchString = bundleName + "_" + locale.toString().substring(0, 2);
-                            for (File aFile : files) {
-                                if (aFile.getName().contains(matchString)) {
-                                    FileInputStream fis = new FileInputStream(new File(aFile.toURI()));
-                                    localized = new PropertyResourceBundle(fis);
-                                    String[] localeStrings = aFile.getName().split("_");
-                                    String localeLang = localeStrings[1];
-                                    String localeCountry = localeStrings[2].substring(0, localeStrings[2].indexOf("."));
-                                    locale = new Locale(localeLang, localeCountry);
-                                    break;
-                                }
+                    List<String> availableTranslations = FileUtils.getContentOfResourceDir("strings/" + bundleName);
+                    if (availableTranslations != null) {
+                        String matchLocalePart = bundleName + "_" + locale.toString().substring(0, 2);
+                        for (String aTranslation : availableTranslations) {
+                            if (aTranslation.contains(matchLocalePart)) {
+                                InputStream inputStream2 = mainWindowController.class.getClassLoader()
+                                        .getResourceAsStream("strings/" + bundleName + "/" + aTranslation);
+                                localized = new PropertyResourceBundle(inputStream2);
+                                String[] localeStrings = aTranslation.split("_");
+                                String localeLang = localeStrings[1];
+                                String localeCountry = localeStrings[2].substring(0, localeStrings[2].indexOf("."));
+                                locale = new Locale(localeLang, localeCountry);
+                                break;
                             }
                         }
                     }
@@ -82,17 +73,16 @@ public class Translations {
                     e1.printStackTrace();
                 }
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             localized = null;
         }
 
         // Load default locale as backup if translation is missing or partially added
         try {
-            URL url = mainWindowController.class.getClassLoader().getResource(fallbackPath);
-            if (url != null) {
-                FileInputStream fis = new FileInputStream(new File(url.toURI()));
-                fallback = new PropertyResourceBundle(fis);
+            InputStream inputStream = mainWindowController.class.getClassLoader().getResourceAsStream(fallbackPath);
+            if (inputStream != null) {
+                fallback = new PropertyResourceBundle(inputStream);
             } else {
                 throw new Exception("Could not find default translation file for " + bundleName);
             }

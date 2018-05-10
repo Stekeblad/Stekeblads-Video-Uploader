@@ -10,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
@@ -166,7 +167,7 @@ public class VideoInformationBase {
      *
      * @param clickEvent a handler for the click event
      */
-    public void setOnThumbnailClicked(EventHandler clickEvent) {
+    public void setOnThumbnailClicked(EventHandler<MouseEvent> clickEvent) {
         videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL).setOnMouseClicked(clickEvent);
     }
 
@@ -189,7 +190,7 @@ public class VideoInformationBase {
      *
      * @param clickEvent a handler for the click event
      */
-    public void setOnPlaylistsClicked(EventHandler clickEvent) {
+    public void setOnPlaylistsClicked(EventHandler<MouseEvent> clickEvent) {
         videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setOnMouseClicked(clickEvent);
     }
 
@@ -212,7 +213,7 @@ public class VideoInformationBase {
      *
      * @param clickEvent a handler for the click event
      */
-    public void setOnCategoriesClicked(EventHandler clickEvent) {
+    public void setOnCategoriesClicked(EventHandler<MouseEvent> clickEvent) {
         videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY).setOnMouseClicked(clickEvent);
     }
 

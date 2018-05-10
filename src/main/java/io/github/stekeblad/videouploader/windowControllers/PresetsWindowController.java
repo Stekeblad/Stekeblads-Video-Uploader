@@ -298,7 +298,7 @@ public class PresetsWindowController {
 
         // Sets the thumbnail clickable for changing
         videoPresets.get(selected).setOnThumbnailClicked(event -> {
-            File pickedThumbnail = PickFile.pickThumbnail();
+            File pickedThumbnail = FileUtils.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
                     videoPresets.get(selected).setThumbNailFile(pickedThumbnail);
@@ -348,8 +348,10 @@ public class PresetsWindowController {
             System.err.println("Can't find witch preset to save");
             return;
         }
-        // Make sure the category selected is valid
-        if (videoPresets.get(selected).getCategory() == null) {
+        // Make sure a category is selected and the category name still match a stored category
+        // (will not match stored if categories have been re-localized)
+        if (videoPresets.get(selected).getCategory() == null &&
+                !categoryUtils.getCategoryId(videoPresets.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
                     transBasic.getString("diag_invalidCategory_full")).show();
             return;

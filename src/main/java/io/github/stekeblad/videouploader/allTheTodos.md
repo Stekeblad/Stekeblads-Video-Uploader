@@ -5,23 +5,21 @@
 - Testing with progressBar for uploads to the right and buttons to the left
 - Settings window for picking another language than the detected one or
 default, and other things.
+- Translations can not be loaded when running from jar, only works in IntelliJ
 
 #### Higher priority things to do
-- Better loading of playlist dropDown, clicking multiple times to get it
-to open is not ok!
+- Feature to change from:
+    - a preset to no preset (choiceBox in main window)
+    - a playlist to no playlist
+
+- Create a clone button for presets (set the clone to edit automatically)
 
 #### Lower priority things to do
 - handling of categories/playlists/image does no longer exist
+    - categories now checked on preset and upload save, not in apply preset!
 
-        // Note for self when implementing
-        try {
-            CategoryUtils.valueOf(uploadQueueVideos.get(selected).getCategory());
-        } catch (IllegalArgumentException e) {
-            AlertUtils.simpleClose("Category not valid", "The selected category does no longer exist")
-        }
 
 - Save window sizes/location on exit, use the saved data when starting next time
-- Create a clone button for presets (set the clone to edit automatically)
 - "Show Playlist" button in playlist manager window -> opens that playlist
 on youtube in the browser
 - When updating playlist, use ID instead of name when looking at old
@@ -41,6 +39,8 @@ as the one they want (Can not upload a file faster than it can be read.))
 or maybe even: if the user goes live on Twitch a short video is automatically
 uploaded saying "I am live on Twitch!" and automatically delete video when stream ends.
 (probably possible, fun to try, but would someone use it?)
+- Uploader should probably have some protection against concurrent modification
+of things.
 
 #### Things to change on wiki when releasing next update
 - Pressing enter in playlist/preset name box

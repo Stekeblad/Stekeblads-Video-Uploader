@@ -37,7 +37,7 @@
     </VBox>
     <ChoiceBox fx:id="choice_languages" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
     <Button fx:id="btn_translationDetails" mnemonicParsing="false" onAction="#onTranslationDetailsClicked"
-            text="Translation information" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+            text="About this translation" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
     <Label fx:id="label_resetSettings" text="Reset application settings" GridPane.columnIndex="1"
            GridPane.rowIndex="6"/>
     <Button fx:id="btn_fullDelete" mnemonicParsing="false" onAction="#onFullDeleteClicked"

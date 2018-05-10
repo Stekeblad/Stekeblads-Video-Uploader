@@ -87,12 +87,6 @@ public class mainWindowController {
         editBackups = new HashMap<>();
         configManager = ConfigManager.INSTANCE;
         configManager.configManager();
-        if (configManager.getNoSettings()) {
-            // If no settings was loaded, open settings window
-            onPresetsClicked(new ActionEvent());
-            configManager.setNoSettings(false);
-            configManager.saveSettings();
-        }
         playlistUtils = PlaylistUtils.INSTANCE;
         playlistUtils.loadCache();
         categoryUtils = CategoryUtils.INSTANCE;
@@ -108,6 +102,7 @@ public class mainWindowController {
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
         uploader.setUploadErredCallback((videoUpload, throwable) -> Platform.runLater(() -> onUploadErred(videoUpload, throwable)));
 
+        // If any uploads was saved when the program was closed last time
         if(configManager.hasWaitingUploads()) {
             ArrayList<String> waitingUploads = configManager.getWaitingUploads();
             if (waitingUploads != null) {
@@ -196,7 +191,7 @@ public class mainWindowController {
      * @param actionEvent the click event
      */
     public void onPickFileClicked(ActionEvent actionEvent) {
-        videosToAdd = PickFile.pickVideos();
+        videosToAdd = FileUtils.pickVideos();
         ArrayList<String> filenames = new ArrayList<>();
         if(videosToAdd != null) {
             for (File file : videosToAdd) {
@@ -497,7 +492,7 @@ public class mainWindowController {
 
         uploadQueueVideos.get(selected).setEditable(true);
         uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
-            File pickedThumbnail = PickFile.pickThumbnail();
+            File pickedThumbnail = FileUtils.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
                     uploadQueueVideos.get(selected).setThumbNailFile(pickedThumbnail);
@@ -556,13 +551,14 @@ public class mainWindowController {
                     transMainWin.getString("diag_noVidTitle_full")).show();
             return;
         }
-        // Make sure the category selected is valid
-        if (uploadQueueVideos.get(selected).getCategory() == null) {
+        // Make sure a category is selected and the category name still match a stored category
+        // (will not match stored if categories have been re-localized)
+        if (uploadQueueVideos.get(selected).getCategory() == null &&
+                !categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
                     transBasic.getString("diag_invalidCategory_full")).show();
             return;
         }
-        // Everything else is not required or given a default value that can not be set to a invalid value
 
         uploadQueueVideos.get(selected).setEditable(false);
         // Delete backup if there is one

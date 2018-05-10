@@ -1,10 +1,7 @@
 package io.github.stekeblad.videouploader.utils;
 
-import io.github.stekeblad.videouploader.main.mainWindowController;
-
-import java.io.File;
-import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * TranslationManager load and hold all translations so they do not need to be loaded more than once.
@@ -21,7 +18,7 @@ public class TranslationsManager {
      *
      * @param translationName name of the translations resource to get.
      * @return a Translations with the translation data
-     * @throws RuntimeException
+     * @throws RuntimeException if translation is not loaded
      */
     public static Translations getTranslation(String translationName) throws RuntimeException {
         if (loadedTranslations == null) {
@@ -56,19 +53,13 @@ public class TranslationsManager {
      * @throws Exception if no translations exist or the directory for translations does not exist
      */
     public static void loadAllTranslations() throws Exception {
-        URL url = mainWindowController.class.getClassLoader().getResource("strings/");
-        if (url != null) {
-            File stringsDir = new File(url.toURI());
-            String[] translationDirs = stringsDir.list();
-            if (translationDirs != null) {
-                for (String item : translationDirs) {
-                    loadTranslation(item);
-                }
-            } else {
-                throw new Exception("There is no translations in the translations directory");
+        List<String> resources = FileUtils.getContentOfResourceDir("strings/");
+        if (resources != null) {
+            for (String resource : resources) {
+                loadTranslation(resource);
             }
         } else {
-            throw new Exception("The translations directory does not exist");
+            throw new Exception("No Translations Found");
         }
     }
 }
