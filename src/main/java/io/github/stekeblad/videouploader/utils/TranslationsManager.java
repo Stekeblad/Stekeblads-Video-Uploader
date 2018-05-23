@@ -37,7 +37,7 @@ public class TranslationsManager {
      * @param translationName name of the translation resource to load
      * @throws Exception if translation could not be found
      */
-    public static void loadTranslation(String translationName) throws Exception {
+    private static void loadTranslation(String translationName) throws Exception {
         if (loadedTranslations == null) {
             loadedTranslations = new HashMap<>();
         }

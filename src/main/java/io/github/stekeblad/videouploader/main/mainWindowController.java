@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.main;
 import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
+import io.github.stekeblad.videouploader.windowControllers.SettingsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
@@ -36,6 +37,7 @@ public class mainWindowController {
     public ChoiceBox<String> choice_presets;
     public TextField txt_autoNum;
     public Button btn_presets;
+    public Button btn_settings;
     public Button btn_pickFile;
     public Button btn_applyPreset;
     public Button btn_removeFinished;
@@ -70,6 +72,7 @@ public class mainWindowController {
         // Bugged:
         // System.out.println(toolbar.getChildrenUnmodifiable());
         btn_presets.setText(transMainWin.getString("btn_presets"));
+        btn_settings.setText(transMainWin.getString("btn_settings"));
 
         transBasic = TranslationsManager.getTranslation("baseStrings");
         transUpload = TranslationsManager.getTranslation("presetsUploads");
@@ -322,8 +325,8 @@ public class mainWindowController {
     }
 
     /**
-     * Called when the settings button is clicked.
-     * Opens the settings window.
+     * Called when the preset button is clicked.
+     * Opens the preset window.
      * @param actionEvent the click event
      */
     public void onPresetsClicked(ActionEvent actionEvent) {
@@ -344,11 +347,36 @@ public class mainWindowController {
             controller.myInit();
             stage.showAndWait();
         } catch (IOException e) {
-            e.printStackTrace();
+            AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
         }
         actionEvent.consume();
         // Update presets choice box in case presets was added or remove
         choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
+    }
+
+    /**
+     * Called when the settings button is clicked.
+     * Opens the settings window.
+     *
+     * @param actionEvent the click event
+     */
+    public void onSettingsClicked(ActionEvent actionEvent) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 600, 450);
+            Stage stage = new Stage();
+            stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
+            SettingsWindowController controller = fxmlLoader.getController();
+            stage.setOnCloseRequest(controller::onWindowClose);
+            controller.myInit();
+            stage.show();
+        } catch (IOException e) {
+            AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
+        }
+        actionEvent.consume();
     }
 
     /**

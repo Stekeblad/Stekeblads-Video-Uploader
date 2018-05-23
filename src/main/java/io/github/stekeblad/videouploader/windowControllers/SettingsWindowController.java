@@ -1,15 +1,16 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
-import io.github.stekeblad.videouploader.utils.FileUtils;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.TranslationsMeta;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
-
-import java.util.ArrayList;
-import java.util.List;
+import javafx.stage.WindowEvent;
 
 public class SettingsWindowController {
     public GridPane settingsWindow;
@@ -22,48 +23,76 @@ public class SettingsWindowController {
     public ChoiceBox<String> choice_languages;
     public Button btn_translationDetails;
     public Label label_resetSettings;
-    public Button btn_fullDelete;
-    public Button btn_userDelete;
+    public Button btn_clearStoredData;
 
+    private TranslationsMeta translationsMeta;
+    private boolean hasDoneChanges = false;
+
+    /**
+     * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
+     */
     public void myInit() {
-        final int PROPERTIES_LEN = ".properties".length();
-        final int META_LEN = "meta_".length();
-        ArrayList<String> langList = new ArrayList<>();
-        List<String> filesInMeta = FileUtils.getContentOfResourceDir("strings/meta/");
-        if (filesInMeta != null) {
-            for (String fileName : filesInMeta) {
-                if (fileName.equals("meta.properties")) {
-                    langList.add("default english");
-                } else {
-                    // Only keep the local part of the file name "meta_sv_SE.properties" -> "sv_SE"
-                    fileName = fileName.substring(META_LEN, fileName.length() - PROPERTIES_LEN);
-                    langList.add(fileName);
-                }
+        translationsMeta = new TranslationsMeta();
+        choice_languages.setItems(FXCollections.observableList(translationsMeta.getAllTranslationLocales()));
+        System.out.println(translationsMeta.getAllTranslationLocales());
+
+
+        // translation file for this window
+        // -- tooltip for wiki button to tell user to press F1 to get to current window's wiki page
+
+        // F1 for wiki on this window
+        settingsWindow.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/------------------");
+                event.consume();
             }
-            choice_languages.setItems(FXCollections.observableArrayList(langList));
-        }
+        });
     }
 
-    public boolean onWindowClose() {
-        return false;
+    /**
+     * Executed when the user tries to close the window
+     *
+     * @param windowEvent the close window event
+     */
+    public void onWindowClose(WindowEvent windowEvent) {
+        if (hasDoneChanges) {
+            AlertUtils.yesNo("restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
+        }
+        // do not consume event, it will prevent the window from closing
     }
 
     public void onGotoMainPageClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader");
+        actionEvent.consume();
     }
 
     public void onGotoWikiClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki");
+        actionEvent.consume();
     }
 
     public void onGotoDownloadClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases");
+        actionEvent.consume();
     }
 
     public void onTranslationDetailsClicked(ActionEvent actionEvent) {
+        String selectedLanguage = choice_languages.getValue();
+        String translationDetails = "Language locale name: " +
+                translationsMeta.getMetaForLanguage(selectedLanguage, "locale") +
+                "\nLanguage name: " +
+                translationsMeta.getMetaForLanguage(selectedLanguage, "translationName") +
+                "\nTranslation made by: " +
+                translationsMeta.getMetaForLanguage(selectedLanguage, "authors") +
+                "\nLast updated for version: " +
+                translationsMeta.getMetaForLanguage(selectedLanguage, "lastUpdate");
+
+        AlertUtils.simpleClose_longContent("Translation Details", translationDetails);
+        actionEvent.consume();
     }
 
-    public void onFullDeleteClicked(ActionEvent actionEvent) {
-    }
-
-    public void onUserDeleteClicked(ActionEvent actionEvent) {
-
+    public void onClearStoredDataClicked(ActionEvent actionEvent) {
+        AlertUtils.simpleClose("Not yet implemented", "Sorry, you can currently only delete stored data manually!").show();
+        actionEvent.consume();
     }
 }

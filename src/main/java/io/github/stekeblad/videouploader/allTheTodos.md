@@ -5,7 +5,6 @@
 - Testing with progressBar for uploads to the right and buttons to the left
 - Settings window for picking another language than the detected one or
 default, and other things.
-- Translations can not be loaded when running from jar, only works in IntelliJ
 
 #### Higher priority things to do
 - Feature to change from:
@@ -13,6 +12,7 @@ default, and other things.
     - a playlist to no playlist
 
 - Create a clone button for presets (set the clone to edit automatically)
+- Switch from using getButtonID [1/2/3] to using states
 
 #### Lower priority things to do
 - handling of categories/playlists/image does no longer exist
@@ -41,9 +41,11 @@ uploaded saying "I am live on Twitch!" and automatically delete video when strea
 (probably possible, fun to try, but would someone use it?)
 - Uploader should probably have some protection against concurrent modification
 of things.
+- Toast notification when all uploads finished?
 
 #### Things to change on wiki when releasing next update
 - Pressing enter in playlist/preset name box
 - Pressing F1 for wiki
 - Translations
 - red progressBar and upload failed dialogs
+- Wikipage for settings window (add url to F1 click in settings window!)

@@ -82,26 +82,29 @@ public class PresetsWindowController {
         ArrayList<String> savedPresetNames = configManager.getPresetNames();
         if (savedPresetNames != null) {
             for (String presetName : savedPresetNames) {
+                VideoPreset videoPreset;
                 try {
-                    VideoPreset videoPreset = new VideoPreset(configManager.getPresetString(presetName), PRESET_PANE_ID_PREFIX + presetCounter);
-                    Button editButton = new Button(transBasic.getString("edit"));
-                    editButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_EDIT);
-                    editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-                    Button deleteButton = new Button(transBasic.getString("delete"));
-                    deleteButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_DELETE);
-                    deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
-                    videoPreset.setButton1(editButton);
-                    videoPreset.setButton2(deleteButton);
-                    videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty()); // Auto Resize width
-                    transPreset.autoTranslate(videoPreset.getPane(), videoPreset.getPaneId());
-                    videoPresets.add(videoPreset);
-                } catch (IOException e) {
+                    videoPreset = new VideoPreset(configManager.getPresetString(presetName), PRESET_PANE_ID_PREFIX + presetCounter);
+                } catch (Exception e) { // thumbnail file no longer available is handled as no thumbnail is selected and using default, change please?
                     e.printStackTrace();
-                    System.err.println("Trying to load a preset that does not exist or missing read permission: " + presetName);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println("Bad format of preset or is another type of preset then the one trying to be created: " + presetName);
+                    System.err.println("Failed loading preset: " + presetName);
+                    AlertUtils.exceptionDialog("Could not load preset", "An error occurred while trying to " +
+                            "load the preset " + presetName + ". This may be because it has been externally modified or " +
+                            "because the selected thumbnail file can not be found. More details below.", e);
+                    continue;
                 }
+                Button editButton = new Button(transBasic.getString("edit"));
+                editButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_EDIT);
+                editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
+                Button deleteButton = new Button(transBasic.getString("delete"));
+                deleteButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_DELETE);
+                deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
+                videoPreset.setButton1(editButton);
+                videoPreset.setButton2(deleteButton);
+                videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty()); // Auto Resize width
+                transPreset.autoTranslate(videoPreset.getPane(), videoPreset.getPaneId());
+                videoPresets.add(videoPreset);
+
                 presetCounter++;
             }
         }

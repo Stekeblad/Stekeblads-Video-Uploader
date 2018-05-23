@@ -40,8 +40,6 @@
             text="About this translation" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
     <Label fx:id="label_resetSettings" text="Reset application settings" GridPane.columnIndex="1"
            GridPane.rowIndex="6"/>
-    <Button fx:id="btn_fullDelete" mnemonicParsing="false" onAction="#onFullDeleteClicked"
-            text="del login, settings, presets, pl-cache" GridPane.columnIndex="2" GridPane.rowIndex="6"/>
-    <Button fx:id="btn_userDelete" mnemonicParsing="false" onAction="#onUserDeleteClicked"
-            text="del login info and playlists" GridPane.columnIndex="3" GridPane.rowIndex="6"/>
+    <Button fx:id="btn_clearStoredData" mnemonicParsing="false" onAction="#onClearStoredDataClicked"
+            text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2" GridPane.rowIndex="6"/>
 </GridPane>
