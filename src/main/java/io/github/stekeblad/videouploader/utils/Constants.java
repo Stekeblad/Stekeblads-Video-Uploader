@@ -17,5 +17,7 @@ public class Constants {
     public static final String BUTTON_FINISHED_UPLOAD = "_buttonFinishedUpload";
     public static final String BUTTON_RESET = "_buttonReset";
 
+    public static final String DEFAULT_LOCALE = "default (english)";
+
 
 }

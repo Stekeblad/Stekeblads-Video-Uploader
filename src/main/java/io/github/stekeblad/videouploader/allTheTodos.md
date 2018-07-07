@@ -23,11 +23,12 @@ default, and other things.
 - "Show Playlist" button in playlist manager window -> opens that playlist
 on youtube in the browser
 - When updating playlist, use ID instead of name when looking at old
-playlists and desiding if they should be visible or not (playlists can
+playlists and deciding if they should be visible or not (playlists can
 be renamed, name is different but ID the same.)
+- Update YouTube API version
 
 #### Thinking about
-- Keep even unstarted uploads on close?
+- Keep even not started uploads on close?
 - Change "Abort all and clear" button to not affect started uploads.
 users can currently not remove all not started at once and it would
 only be two extra click to first abort all before clearing.
@@ -41,7 +42,13 @@ uploaded saying "I am live on Twitch!" and automatically delete video when strea
 (probably possible, fun to try, but would someone use it?)
 - Uploader should probably have some protection against concurrent modification
 of things.
-- Toast notification when all uploads finished?
+- drag and drop thumbnails on thumbnail image box 
+and drop video files in the list of videos to add list?
+
+#### Java 11 (planned to be released at the end of september)
+- Toast notification when all uploads finished
+- Progress bar on taskbar icon
+- Bundle Java with the program
 
 #### Things to change on wiki when releasing next update
 - Pressing enter in playlist/preset name box

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.zip.DataFormatException;
 
@@ -97,6 +98,7 @@ public enum ConfigManager {
                 mainProp.setProperty("neverAuthed", "true");
                 mainProp.setProperty("category_country", "");
                 mainProp.setProperty("category_language", "");
+                mainProp.setProperty("ui_language", String.valueOf(Locale.getDefault()));
             }
         }
     }
@@ -126,14 +128,6 @@ public enum ConfigManager {
 
     // Properties (Set/Get)
 
-    public boolean getNoSettings() {
-        return mainProp.getProperty("noSettings").equals("true");
-    }
-
-    public void setNoSettings(boolean noSettings) {
-        mainProp.setProperty("noSettings", noSettings ? "true" : "false");
-    }
-
     public boolean getNeverAuthed() {
         return mainProp.getProperty("neverAuthed").equals("true");
     }
@@ -162,6 +156,14 @@ public enum ConfigManager {
             throw new DataFormatException("Invalid country code format");
         }
         mainProp.setProperty("category_language", twoCharCode.toLowerCase());
+    }
+
+    public String getSelectedLanguage() {
+        return mainProp.getProperty("ui_language");
+    }
+
+    public void setSelectedLanguage(String languageName) {
+        mainProp.setProperty("ui_language", languageName);
     }
 
     // Presets

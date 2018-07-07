@@ -31,12 +31,19 @@ public class Translations {
      * say a translation for en_US is not found it may be one for en_GB to use instead
      *
      * @param bundleName name of the ResourceBundle file family
+     * @param primaryLocale locale for primary language, DEFAULT_LOCALE will be used as fallback if any translation is missing
+     *                      if primayLocale is null, DEFAULT_LOCALE will be used as primary language
      * @throws Exception if the default translations file could not be found with the given bundleName
      */
-    public Translations(String bundleName) throws Exception {
-        locale = Locale.getDefault();
-        String localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locale.toString() + ".properties";
+    public Translations(String bundleName, Locale primaryLocale) throws Exception {
+        String localizedPath;
         String fallbackPath = "strings/" + bundleName + "/" + bundleName + ".properties";
+        if (primaryLocale == null) {
+            localizedPath = fallbackPath;
+        } else {
+            locale = primaryLocale;
+            localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locale.toString() + ".properties";
+        }
         translationFamily = bundleName;
 
         // Load translation for user locale

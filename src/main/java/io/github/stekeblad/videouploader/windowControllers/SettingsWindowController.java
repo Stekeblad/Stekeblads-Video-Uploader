@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.TranslationsMeta;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import javafx.collections.FXCollections;
@@ -26,14 +27,18 @@ public class SettingsWindowController {
     public Button btn_clearStoredData;
 
     private TranslationsMeta translationsMeta;
+    private ConfigManager configManager;
     private boolean hasDoneChanges = false;
 
     /**
      * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
     public void myInit() {
+        configManager = ConfigManager.INSTANCE;
         translationsMeta = new TranslationsMeta();
+
         choice_languages.setItems(FXCollections.observableList(translationsMeta.getAllTranslationLocales()));
+        choice_languages.getSelectionModel().select(translationsMeta.localeCodeToLangName(configManager.getSelectedLanguage()));
         System.out.println(translationsMeta.getAllTranslationLocales());
 
 
@@ -56,8 +61,10 @@ public class SettingsWindowController {
      */
     public void onWindowClose(WindowEvent windowEvent) {
         if (hasDoneChanges) {
-            AlertUtils.yesNo("restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
+            AlertUtils.simpleClose("restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
         }
+        configManager.setSelectedLanguage(translationsMeta.langNameToLocaleCode(choice_languages.getValue()));
+        configManager.saveSettings();
         // do not consume event, it will prevent the window from closing
     }
 
@@ -92,7 +99,8 @@ public class SettingsWindowController {
     }
 
     public void onClearStoredDataClicked(ActionEvent actionEvent) {
-        AlertUtils.simpleClose("Not yet implemented", "Sorry, you can currently only delete stored data manually!").show();
+        AlertUtils.simpleClose("Not yet implemented", "Sorry, you can currently only delete stored data manually!" +
+                "\n\nYou do this by closing the program and then deleting the \"uploader data\" folder located in the same folder as the program.").show();
         actionEvent.consume();
     }
 }

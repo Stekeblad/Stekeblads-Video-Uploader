@@ -89,7 +89,7 @@ public class mainWindowController {
         uploadQueueVideos = new ArrayList<>();
         editBackups = new HashMap<>();
         configManager = ConfigManager.INSTANCE;
-        configManager.configManager();
+        // configManager.configManager(); Done in Main.java
         playlistUtils = PlaylistUtils.INSTANCE;
         playlistUtils.loadCache();
         categoryUtils = CategoryUtils.INSTANCE;

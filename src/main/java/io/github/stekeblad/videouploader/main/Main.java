@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Translations;
 import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import javafx.application.Application;
@@ -21,7 +22,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
         Parent root = loader.load();
         loadTranslations();
-        Translations trans = new Translations("baseStrings");
+        Translations trans = TranslationsManager.getTranslation("baseStrings");
         primaryStage.setTitle(trans.getString("app_name"));
         primaryStage.setScene(new Scene(root, 900, 825));
         // Register MainWindowController.onWindowClose() to be called when the close button is clicked
@@ -38,7 +39,16 @@ public class Main extends Application {
 
     private void loadTranslations() {
         try {
-            TranslationsManager.loadAllTranslations();
+            ConfigManager configManager = ConfigManager.INSTANCE;
+            configManager.configManager();
+            String localeString = configManager.getSelectedLanguage();
+            Locale locale;
+            if (localeString != null && !localeString.isEmpty()) {
+                locale = new Locale(localeString);
+            } else {
+                locale = Locale.getDefault();
+            }
+            TranslationsManager.loadAllTranslations(locale);
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.exceptionDialog("ERROR",

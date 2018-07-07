@@ -27,3 +27,7 @@ dependencies {
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     compile 'com.google.apis:google-api-services-youtube:v3-rev189-1.23.0'
 }
+
+// https://developers.google.com/api-client-library/java/apis/youtube/v3
+// https://search.maven.org/#search%7Cgav%7C1%7Cg%3A"com.google.apis"%20AND%20a%3A"google-api-services-youtube"
+//

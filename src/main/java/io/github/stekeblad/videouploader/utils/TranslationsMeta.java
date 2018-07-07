@@ -20,15 +20,10 @@ public class TranslationsMeta {
         if (resources != null) {
             for (String resource : resources) {
                 InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings/meta/" + resource);
-                String locale;
-                if (resource.equals("meta.properties")) {
-                    locale = "default (English)";
-                } else {
-                    locale = resource.substring(5, 10);  // substring("meta_".length(), resource.length()-".properties".length())
-                }
                 if (inputStream != null) {
                     try {
-                        transMeta.put(locale, new PropertyResourceBundle(inputStream));
+                        PropertyResourceBundle bundle = new PropertyResourceBundle(inputStream);
+                        transMeta.put(bundle.getString("translationName"), bundle);
                     } catch (IOException e) {
                         System.err.println("Could not load meta translation file: \"" + resource + "\"");
                     }
@@ -71,5 +66,31 @@ public class TranslationsMeta {
         } catch (MissingResourceException e) {
             return "";
         }
+    }
+
+    /**
+     * returns the locale for the translation with the name languageName
+     *
+     * @param languageName the translation to get the locale for
+     * @return the locale name or throws an exception if not found
+     */
+    public String langNameToLocaleCode(String languageName) {
+        return transMeta.get(languageName).getString("locale");
+    }
+
+    /**
+     * Tries to find the name of a existing translation from a locale code
+     *
+     * @param localeCode the locale code those translation name
+     * @return the translation name or an empty string if not found
+     */
+    public String localeCodeToLangName(String localeCode) {
+        Optional<Map.Entry<String, ResourceBundle>> optionalMatch = transMeta.entrySet().stream().filter(stringResourceBundleEntry ->
+                stringResourceBundleEntry.getValue().getString("locale").equals(localeCode)).findFirst();
+        if (optionalMatch.isPresent() && optionalMatch.get().getKey() != null && !optionalMatch.get().getKey().isEmpty()) {
+            return optionalMatch.get().getKey();
+        }
+        return "";
+
     }
 }
