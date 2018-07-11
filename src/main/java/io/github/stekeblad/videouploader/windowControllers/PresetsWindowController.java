@@ -9,6 +9,7 @@ import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -93,6 +94,8 @@ public class PresetsWindowController {
                             "because the selected thumbnail file can not be found. More details below.", e);
                     continue;
                 }
+                videoPreset.setThumbnailCursorEventHandler(this::updateCursor);
+
                 Button editButton = new Button(transBasic.getString("edit"));
                 editButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_EDIT);
                 editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
@@ -183,6 +186,7 @@ public class PresetsWindowController {
         newPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty());
         transPreset.autoTranslate(newPreset.getPane(), newPreset.getPaneId());
 
+        newPreset.setThumbnailCursorEventHandler(this::updateCursor);
         videoPresets.add(newPreset);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
         listPresets.scrollTo(listPresets.getItems().size() -1);
@@ -280,6 +284,20 @@ public class PresetsWindowController {
             }
         }
         return presetIndex;
+    }
+
+    /**
+     * Set this method to trigger when the cursor enters or leaves a node to change how it looks.
+     *
+     * @param entered if true, sets the cursor to a pointing hand (usually on enter event).
+     *                if false, sets the cursor to default (usually on exit event).
+     */
+    private void updateCursor(boolean entered) {
+        if (entered) {
+            presetWindow.getScene().setCursor(Cursor.HAND);
+        } else {
+            presetWindow.getScene().setCursor(Cursor.DEFAULT);
+        }
     }
 
     /**

@@ -23,7 +23,6 @@ public class VideoUpload extends VideoInformationBase{
 
     private static final String NODE_ID_PROGRESS = "_progress";
     private static final String NODE_ID_UPLOADSTATUS = "_status";
-    private static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     private File videoFile;
     private GridPane uploadPane;
@@ -43,57 +42,12 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     /**
-     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton1Id() {
-        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
-    }
-
-    /**
-     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton2Id() {
-        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
-    }
-
-    /**
-     * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton3Id() {
-        return ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
-    }
-
-    /**
      * Enables / Disables editing of all fields of the pane
      * @param newEditStatus true to allow edit, false to not allow
      */
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
         // Does not extend with any editable fields
-    }
-
-    /**
-     * Place a button in the first button slot with your own text, click behavior etc.
-     * @param btn1 A fully configured button
-     */
-    public void setButton1(Button btn1) {
-        ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(0, btn1);
-    }
-
-    /**
-     * Place a button in the second button slot with your own text, click behavior etc.
-     * @param btn2 A fully configured button
-     */
-    public void setButton2(Button btn2) {
-        ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
-    }
-
-    /**
-     * Place a button in the third button slot with your own text, click behavior etc.
-     * @param btn3 A fully configured button
-     */
-    public void setButton3(Button btn3) {
-        ((HBox) uploadPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(2, btn3);
     }
 
     /**
@@ -136,7 +90,8 @@ public class VideoUpload extends VideoInformationBase{
     }
 
     /**
-     * Sets a URL to open when the status label is clicked
+     * Sets a URL to open when the status label is clicked, will also hook up with thumbnailCursorEventHandler (if set)
+     * to make the cursor change on enter/exit
      * @param url the url to open
      */
     public void setStatusLabelOnClickUrl(String url) {
@@ -148,6 +103,12 @@ public class VideoUpload extends VideoInformationBase{
                         e.printStackTrace();
                     }
                 });
+        if (thumbnailCursorEventHandler != null) {
+            uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)
+                    .setOnMouseEntered(event -> thumbnailCursorEventHandler.accept(true));
+            uploadPane.lookup("#" + getPaneId() + NODE_ID_UPLOADSTATUS)
+                    .setOnMouseExited(event -> thumbnailCursorEventHandler.accept(false));
+        }
     }
 
     /**

@@ -17,7 +17,6 @@ import java.util.List;
 public class VideoPreset extends VideoInformationBase {
 
     private static final String NODE_ID_PRESETNAME = "_presetName";
-    private static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     private GridPane presetPane;
 
@@ -36,42 +35,12 @@ public class VideoPreset extends VideoInformationBase {
     }
 
     /**
-     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton1Id() {
-        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
-    }
-
-    /**
-     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
-     */
-    public String getButton2Id() {
-        return ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
-    }
-
-    /**
      * Enables / Disables editing of all fields on the pane
      * @param newEditStatus true to allow edit, false to not allow
      */
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
         ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setEditable(newEditStatus);
-    }
-
-    /**
-     * Place a button in the first button slot with your own text, click behavior etc.
-     * @param btn1 A fully configured button
-     */
-    public void setButton1(Button btn1) {
-        ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(0, btn1);
-    }
-
-    /**
-     * Place a button in the second button slot with your own text, click behavior etc.
-     * @param btn2 A fully configured button
-     */
-    public void setButton2(Button btn2) {
-        ((HBox) presetPane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
     }
 
     /**

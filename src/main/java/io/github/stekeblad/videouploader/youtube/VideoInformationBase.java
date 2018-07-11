@@ -4,10 +4,7 @@ import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -19,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.lang.Integer.MAX_VALUE;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
@@ -40,14 +38,38 @@ public class VideoInformationBase {
     private static final String NODE_ID_TELLSUBS = "_tellSubs";
     private static final String NODE_ID_THUMBNAIL = "_thumbNail";
 
+    protected static final String NODE_ID_BUTTONSBOX = "_buttons";
+
     // Variables
     private GridPane videoBasePane;
     private String paneId;
     private File thumbNailFile;
     private boolean allowEdit;
     private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
+    protected Consumer<Boolean> thumbnailCursorEventHandler = null;
 
     // Getters
+
+    /**
+     * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton1Id() {
+        return ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+    }
+
+    /**
+     * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton2Id() {
+        return ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+    }
+
+    /**
+     * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
+     */
+    public String getButton3Id() {
+        return ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
+    }
 
     /**
      * @return the content of the video name TextField
@@ -130,6 +152,33 @@ public class VideoInformationBase {
     //Setters
 
     /**
+     * Place a button in the first button slot with your own text, click behavior etc.
+     *
+     * @param btn1 A fully configured button
+     */
+    public void setButton1(Button btn1) {
+        ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(0, btn1);
+    }
+
+    /**
+     * Place a button in the second button slot with your own text, click behavior etc.
+     *
+     * @param btn2 A fully configured button
+     */
+    public void setButton2(Button btn2) {
+        ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
+    }
+
+    /**
+     * Place a button in the third button slot with your own text, click behavior etc.
+     *
+     * @param btn3 A fully configured button
+     */
+    public void setButton3(Button btn3) {
+        ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(2, btn3);
+    }
+
+    /**
      * Enables / Disables editing of all the fields on the pane
      * @param newEditStatus true to allow edit, false to not allow
      */
@@ -169,6 +218,18 @@ public class VideoInformationBase {
      */
     public void setOnThumbnailClicked(EventHandler<MouseEvent> clickEvent) {
         videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL).setOnMouseClicked(clickEvent);
+    }
+
+    /**
+     * Set a method to be called when the cursor enters or exits the thumbnail.
+     * The method will only be called if allowEdit is true.
+     * The set method will receive the value true as a parameter on enter events and false on exit events
+     *
+     * @param handler a method accepting a boolean as only parameter that should be called when the
+     *                cursor enters and leaves the thumbnail
+     */
+    public void setThumbnailCursorEventHandler(Consumer<Boolean> handler) {
+        thumbnailCursorEventHandler = handler;
     }
 
     /**
@@ -561,6 +622,16 @@ public class VideoInformationBase {
          thumbNailFrame.setFitHeight(90);
          thumbNailFrame.setId(paneId + NODE_ID_THUMBNAIL);
          thumbNailFrame.setPreserveRatio(true);
+         thumbNailFrame.setOnMouseEntered(event -> {
+             if (thumbnailCursorEventHandler != null && allowEdit) {
+                 thumbnailCursorEventHandler.accept(true);
+             }
+         });
+         thumbNailFrame.setOnMouseExited(event -> {
+             if (thumbnailCursorEventHandler != null && allowEdit) {
+                 thumbnailCursorEventHandler.accept(false);
+             }
+         });
 
          // Place the different nodes on the pane
          videoBasePane.add(title, 0, 0);

@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -125,6 +126,7 @@ public class mainWindowController {
                         loadedUpload.setButton1(editButton);
                         loadedUpload.setButton2(deleteButton);
                         loadedUpload.setButton3(startUploadButton);
+                        loadedUpload.setThumbnailCursorEventHandler(this::updateCursor);
 
                         // Auto resize width and translation
                         loadedUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
@@ -225,6 +227,7 @@ public class mainWindowController {
                         null, null, null, false, null,
                         UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
 
+                newUpload.setThumbnailCursorEventHandler(this::updateCursor);
                 // make the upload change its width together with the uploads list and the window
                 newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
                 // Translate the upload
@@ -292,7 +295,7 @@ public class mainWindowController {
                  VideoUpload newUpload = newUploadBuilder.build();
                 // make the upload change its width together with the uploads list and the window
                 newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
-
+                newUpload.setThumbnailCursorEventHandler(this::updateCursor);
                 // Translate the upload
                 transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
 
@@ -488,6 +491,20 @@ public class mainWindowController {
     }
 
     /**
+     * Set this method to trigger when the cursor enters or leaves a node to change how it looks.
+     *
+     * @param entered if true, sets the cursor to a pointing hand (usually on enter event).
+     *                if false, sets the cursor to default (usually on exit event).
+     */
+    private void updateCursor(boolean entered) {
+        if (entered) {
+            mainWindowPane.getScene().setCursor(Cursor.HAND);
+        } else {
+            mainWindowPane.getScene().setCursor(Cursor.DEFAULT);
+        }
+    }
+
+    /**
      * Takes a node Id and checks if there is a upload with that id and if so returns its index inside uploadQueueVideos.
      * @param nameToTest a Node id
      * @return the index of a upload with that id inside uploadQueueVideos or -1 if it was not found in uploadQueueVideos.
@@ -590,9 +607,7 @@ public class mainWindowController {
 
         uploadQueueVideos.get(selected).setEditable(false);
         // Delete backup if there is one
-        if(editBackups.containsKey(uploadQueueVideos.get(selected).getPaneId())) {
-            editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-        }
+        editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
 
         // Change buttons
         Button editButton = new Button(transBasic.getString("edit"));

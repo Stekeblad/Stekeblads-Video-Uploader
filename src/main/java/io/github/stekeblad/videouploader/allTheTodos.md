@@ -2,6 +2,8 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
+- How to make it easier to control witch buttons is visible on presets/uploads
+instead of manually changing them on multiple places
 
 #### Higher priority things to do
 - Feature to change from:
@@ -9,12 +11,10 @@
     - a playlist to no playlist
 
 - Create a clone button for presets (set the clone to edit automatically)
-- Switch from using getButtonID [1/2/3] to using states
 
 #### Lower priority things to do
 - handling of categories/playlists/image does no longer exist
     - categories now checked on preset and upload save, not in apply preset!
-
 
 - Save window sizes/location on exit, use the saved data when starting next time
 - "Show Playlist" button in playlist manager window -> opens that playlist
