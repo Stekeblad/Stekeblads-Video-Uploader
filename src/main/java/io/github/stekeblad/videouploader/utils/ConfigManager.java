@@ -326,7 +326,7 @@ public enum ConfigManager {
      * @return a ArrayList with one row of the save file per element
      */
     public ArrayList<String> loadPlaylistCache() {
-        BufferedReader reader;
+        BufferedReader reader = null;
         ArrayList<String> playlistString = new ArrayList<>();
         try {
             if (!Files.exists(Paths.get(PLAYLIST_FILE))) {
@@ -344,6 +344,14 @@ public enum ConfigManager {
             System.err.println("Could not find playlist cache file");
         } catch (IOException e) {
             System.err.println("Could not create playlists cache file");
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return playlistString;
     }
@@ -471,7 +479,7 @@ public enum ConfigManager {
      * @return the content of the categories file with one line per element in the ArrayList
      */
     public ArrayList<String> loadLocalizedCategories() {
-        BufferedReader reader;
+        BufferedReader reader = null;
         ArrayList<String> playlistString = new ArrayList<>();
         try {
             if (!Files.exists(Paths.get(CATEGORIES_FILE))) {
@@ -489,6 +497,14 @@ public enum ConfigManager {
             System.err.println("Could not find categories file");
         } catch (IOException e) {
             System.err.println("Could not create categories file");
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return playlistString;
     }

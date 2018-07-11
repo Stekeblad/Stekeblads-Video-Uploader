@@ -1,21 +1,26 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
-import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.TranslationsMeta;
+import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Optional;
+
+import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
+
 public class SettingsWindowController {
     public GridPane settingsWindow;
-    public Label label_settingsWinDesc;
     public Label label_langSelect;
     public Label label_links;
     public Button btn_gotoMainPage;
@@ -27,6 +32,7 @@ public class SettingsWindowController {
     public Button btn_clearStoredData;
 
     private TranslationsMeta translationsMeta;
+    private Translations settingsTrans;
     private ConfigManager configManager;
     private boolean hasDoneChanges = false;
 
@@ -36,11 +42,13 @@ public class SettingsWindowController {
     public void myInit() {
         configManager = ConfigManager.INSTANCE;
         translationsMeta = new TranslationsMeta();
+        settingsTrans = TranslationsManager.getTranslation("settingsWindow");
+        settingsTrans.autoTranslate(settingsWindow);
 
         choice_languages.setItems(FXCollections.observableList(translationsMeta.getAllTranslationLocales()));
         choice_languages.getSelectionModel().select(translationsMeta.localeCodeToLangName(configManager.getSelectedLanguage()));
-        System.out.println(translationsMeta.getAllTranslationLocales());
 
+        choice_languages.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> hasDoneChanges = true);
 
         // translation file for this window
         // -- tooltip for wiki button to tell user to press F1 to get to current window's wiki page
@@ -99,8 +107,23 @@ public class SettingsWindowController {
     }
 
     public void onClearStoredDataClicked(ActionEvent actionEvent) {
-        AlertUtils.simpleClose("Not yet implemented", "Sorry, you can currently only delete stored data manually!" +
-                "\n\nYou do this by closing the program and then deleting the \"uploader data\" folder located in the same folder as the program.").show();
+        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(settingsTrans.getString("diag_clearStoredData_short"),
+                settingsTrans.getString("diag_clearStoredData_full")).showAndWait();
+        if (buttonChoice.isPresent()) {
+            if (buttonChoice.get() == ButtonType.YES) {
+                AlertUtils.simpleClose(settingsTrans.getString("diag_delAfterExit_short"),
+                        settingsTrans.getString("diag_delAfterExit_full")).show();
+            } else { // ButtonType.NO or Closed with [X] button
+                return;
+            }
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Files.walkFileTree(new File(DATA_DIR).toPath(), new RecursiveDirectoryDeleter());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
         actionEvent.consume();
     }
 }

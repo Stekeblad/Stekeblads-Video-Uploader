@@ -9,5 +9,6 @@
     <file url="file://$PROJECT_DIR$/src/main/resources/strings/manPlayWindow/manPlayWindow" separator="\u005f" />
     <file url="file://$PROJECT_DIR$/src/main/resources/strings/meta/meta" separator="\u005f" />
     <file url="file://$PROJECT_DIR$/src/main/resources/strings/presetWindow/presetWindow" separator="\u005f" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/strings/settingsWindow/settingsWindow" separator="\u005f" />
   </component>
 </project>

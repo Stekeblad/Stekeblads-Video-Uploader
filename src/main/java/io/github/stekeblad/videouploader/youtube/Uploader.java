@@ -40,7 +40,7 @@ public class Uploader {
     private HashMap<String, Future> tasks;
     private CategoryUtils categoryUtils;
     private Consumer<String> uploadFinishedCallback = null;
-    private BiConsumer<VideoUpload, Throwable> uploadErroredCallback = null;
+    private BiConsumer<VideoUpload, Throwable> uploadErredCallback = null;
     private ExecutorService exec;
     private Translations translations;
 
@@ -70,7 +70,7 @@ public class Uploader {
      * @param callback the callback to be called when an upload errors
      */
     public void setUploadErredCallback(BiConsumer<VideoUpload, Throwable> callback) {
-        this.uploadErroredCallback = callback;
+        this.uploadErredCallback = callback;
     }
 
     /**
@@ -121,8 +121,8 @@ public class Uploader {
                     // if not interrupted by the user, print the error
                     if (! e.getMessage().equals("INTERRUPTED")) {
                         e.printStackTrace();
-                        if (uploadErroredCallback != null) {
-                            Platform.runLater(() -> uploadErroredCallback.accept(video, e));
+                        if (uploadErredCallback != null) {
+                            Platform.runLater(() -> uploadErredCallback.accept(video, e));
                         }
                     }
                     tasks.remove(cancelName);
@@ -138,8 +138,8 @@ public class Uploader {
             }
         };
         newTask.setOnFailed(event -> {
-            if (uploadErroredCallback != null) {
-                Platform.runLater(() -> uploadErroredCallback.accept(video, newTask.getException()));
+            if (uploadErredCallback != null) {
+                Platform.runLater(() -> uploadErredCallback.accept(video, newTask.getException()));
             }
         });
         Future upload = exec.submit(newTask);

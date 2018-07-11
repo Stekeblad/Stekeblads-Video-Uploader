@@ -15,31 +15,25 @@
     </columnConstraints>
     <rowConstraints>
         <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="95.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="61.0" minHeight="0.0" prefHeight="34.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="128.0" minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="162.0" minHeight="10.0" prefHeight="71.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="131.0" minHeight="10.0" prefHeight="109.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="180.0" minHeight="0.0" prefHeight="180.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="131.0" minHeight="10.0" prefHeight="23.0" vgrow="SOMETIMES"/>
         <RowConstraints maxHeight="59.0" minHeight="10.0" prefHeight="47.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="48.0" minHeight="10.0" prefHeight="48.0" vgrow="SOMETIMES"/>
     </rowConstraints>
-    <Label fx:id="label_settingsWinDesc" text="This is the settings window..." wrapText="true" GridPane.columnIndex="1"
-           GridPane.columnSpan="2"/>
-    <Label fx:id="label_langSelect" text="Language settings" wrapText="true" GridPane.columnIndex="1"
-           GridPane.rowIndex="1"/>
-    <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-    <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="4">
+    <Label fx:id="label_langSelect" text="Language settings" wrapText="true" GridPane.columnIndex="1"/>
+    <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
         <Button fx:id="btn_gotoMainPage" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                onAction="#onGotoMainPageClicked" text="Main page"/>
+                onAction="#onGotoMainPageClicked" text="Home page"/>
         <Button fx:id="btn_gotoWiki" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                 onAction="#onGotoWikiClicked" text="Wiki"/>
         <Button fx:id="btn_gotoDownload" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                 onAction="#onGotoDownloadClicked" text="Download page"/>
     </VBox>
-    <ChoiceBox fx:id="choice_languages" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+    <ChoiceBox fx:id="choice_languages" prefWidth="150.0" GridPane.columnIndex="2"/>
     <Button fx:id="btn_translationDetails" mnemonicParsing="false" onAction="#onTranslationDetailsClicked"
-            text="About this translation" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+            text="About this translation" GridPane.columnIndex="3"/>
     <Label fx:id="label_resetSettings" text="Reset application settings" GridPane.columnIndex="1"
-           GridPane.rowIndex="6"/>
+           GridPane.rowIndex="2"/>
     <Button fx:id="btn_clearStoredData" mnemonicParsing="false" onAction="#onClearStoredDataClicked"
-            text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2" GridPane.rowIndex="6"/>
+            text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
 </GridPane>

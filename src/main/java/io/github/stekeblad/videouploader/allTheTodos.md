@@ -2,9 +2,6 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- Testing with progressBar for uploads to the right and buttons to the left
-- Settings window for picking another language than the detected one or
-default, and other things.
 
 #### Higher priority things to do
 - Feature to change from:
@@ -54,5 +51,5 @@ and drop video files in the list of videos to add list?
 - Pressing enter in playlist/preset name box
 - Pressing F1 for wiki
 - Translations
-- red progressBar and upload failed dialogs
+- Red progressBar and upload failed dialogs
 - Wikipage for settings window (add url to F1 click in settings window!)
