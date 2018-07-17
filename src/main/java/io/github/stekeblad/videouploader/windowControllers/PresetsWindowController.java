@@ -2,6 +2,8 @@ package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
+import io.github.stekeblad.videouploader.utils.state.VideoPresetState;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
@@ -46,11 +48,12 @@ public class PresetsWindowController {
     private CategoryUtils categoryUtils;
     private int presetCounter = 0;
     private HashMap<String, VideoPreset> presetBackups;
+    private VideoPresetState buttonStates;
 
     private Translations transPresetWin;
     private Translations transBasic;
     private Translations transPreset;
-    
+
     private static final String PRESET_PANE_ID_PREFIX = "preset-";
 
     /**
@@ -79,6 +82,9 @@ public class PresetsWindowController {
         btn_addNewPreset.setText(transPresetWin.getString("btn_addNewPreset"));
         txt_nameNewPreset.setPromptText(transPresetWin.getString("txt_nameNewPreset_pt"));
 
+        // Set up button sets for different preset states (locked, editing)
+        definePresetStates();
+
         // Load all saved presets
         ArrayList<String> savedPresetNames = configManager.getPresetNames();
         if (savedPresetNames != null) {
@@ -95,17 +101,9 @@ public class PresetsWindowController {
                     continue;
                 }
                 videoPreset.setThumbnailCursorEventHandler(this::updateCursor);
-
-                Button editButton = new Button(transBasic.getString("edit"));
-                editButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_EDIT);
-                editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-                Button deleteButton = new Button(transBasic.getString("delete"));
-                deleteButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_DELETE);
-                deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
-                videoPreset.setButton1(editButton);
-                videoPreset.setButton2(deleteButton);
                 videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty()); // Auto Resize width
                 transPreset.autoTranslate(videoPreset.getPane(), videoPreset.getPaneId());
+                buttonStates.setLocked(videoPreset);
                 videoPresets.add(videoPreset);
 
                 presetCounter++;
@@ -260,6 +258,29 @@ public class PresetsWindowController {
     }
 
     /**
+     * Defines the different states for buttonStates, this is made to make it much simpler to manage the butons
+     * for the different states a preset can be in. Previously buttons was created all over the place and set
+     * *  to call methods. Now there is sets of buttons defined here and this sets is then used when setting the
+     * *  buttons to show.
+     */
+    private void definePresetStates() {
+        buttonStates = new VideoPresetState();
+
+        // Define Locked from editing
+        buttonStates.defineLocked(new ButtonProperties[]{
+                new ButtonProperties(BUTTON_EDIT, transBasic.getString("edit"), this::onPresetEdit),
+                new ButtonProperties(BUTTON_DELETE, transBasic.getString("delete"), this::onPresetDelete),
+                new ButtonProperties(BUTTON_CLONE, transBasic.getString("clone"), this::onPresetClone)
+        });
+
+        buttonStates.defineEditing(new ButtonProperties[]{
+                new ButtonProperties(BUTTON_SAVE, transBasic.getString("save"), this::onPresetSave),
+                new ButtonProperties(BUTTON_CANCEL, transBasic.getString("cancel"), this::onPresetCancelEdit),
+                new ButtonProperties("_ghost", "", null)
+        });
+    }
+
+    /**
      * Re-adds all presets to the listPreset to make sure the UI is up-to-date
      */
     private void updatePresetList() {
@@ -344,16 +365,7 @@ public class PresetsWindowController {
                 videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames())
         );
 
-        // Change buttons from "edit" and "delete" to "save" and "cancel"
-        Button saveButton = new Button(transBasic.getString("save"));
-        saveButton.setId(parentId + BUTTON_SAVE);
-        saveButton.setOnMouseClicked(event-> onPresetSave(saveButton.getId()));
-        Button cancelButton = new Button(transBasic.getString("cancel"));
-        cancelButton.setId(parentId + BUTTON_CANCEL);
-        cancelButton.setOnMouseClicked(event-> onPresetCancelEdit(cancelButton.getId()));
-
-        videoPresets.get(selected).setButton1(cancelButton);
-        videoPresets.get(selected).setButton2(saveButton);
+        buttonStates.setEditing(videoPresets.get(selected));
     }
 
     /**
@@ -410,17 +422,7 @@ public class PresetsWindowController {
         }
         videoPresets.get(selected).setEditable(false);
         configManager.savePreset(videoPresets.get(selected).getPresetName(), videoPresets.get(selected).toString());
-
-        //change back buttons
-        Button editButton = new Button(transBasic.getString("edit"));
-        editButton.setId(parentId + BUTTON_EDIT);
-        editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-        Button deleteButton = new Button(transBasic.getString("delete"));
-        deleteButton.setId(parentId + BUTTON_DELETE);
-        deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
-
-        videoPresets.get(selected).setButton1(editButton);
-        videoPresets.get(selected).setButton2(deleteButton);
+        buttonStates.setLocked(videoPresets.get(selected));
     }
 
     /**
@@ -458,18 +460,8 @@ public class PresetsWindowController {
             updatePresetList();
             return;
         }
+        buttonStates.setLocked(videoPresets.get(selected));
         updatePresetList();
-
-        //change buttons
-        Button editButton = new Button(transBasic.getString("edit"));
-        editButton.setId(parentId + BUTTON_EDIT);
-        editButton.setOnMouseClicked(event -> onPresetEdit(editButton.getId()));
-        Button deleteButton = new Button(transBasic.getString("delete"));
-        deleteButton.setId(parentId + BUTTON_DELETE);
-        deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
-
-        videoPresets.get(selected).setButton1(editButton);
-        videoPresets.get(selected).setButton2(deleteButton);
     }
 
     /**
@@ -498,5 +490,33 @@ public class PresetsWindowController {
                 }
             } //else if ButtonType.NO or closed [X] do nothing
         }
+    }
+
+    /**
+     * Creates a copy of the preset this button belongs to
+     * @param callerId the preset id + button name
+     */
+    private void onPresetClone(String callerId) {
+        String parentId = callerId.substring(0, callerId.indexOf('_'));
+        int selected = getPresetIndexByPaneId(parentId);
+        if (selected == -1) {
+            System.err.println("Non-existing clone button was pressed!!!");
+            return;
+        }
+
+        VideoPreset orig = videoPresets.get(selected);
+        VideoPreset copy = orig.copy(PRESET_PANE_ID_PREFIX + presetCounter);
+        copy.setPresetName(transPresetWin.getString("copyOf") + orig.getPresetName());
+        copy.getPane().prefWidthProperty().bind(listPresets.widthProperty());
+        copy.setThumbnailCursorEventHandler(this::updateCursor);
+
+        transPreset.autoTranslate(copy.getPane(), copy.getPaneId());
+        buttonStates.setEditing(copy);
+        videoPresets.add(selected + 1, copy); // add right after original in list
+        listPresets.scrollTo(listPresets.getItems().size() - 1);
+        onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
+
+        presetCounter++;
+        updatePresetList();
     }
 }

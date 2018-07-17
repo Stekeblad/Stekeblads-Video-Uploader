@@ -20,6 +20,10 @@ public class VideoPreset extends VideoInformationBase {
 
     private GridPane presetPane;
 
+
+    public void setPresetName(String newName) {
+        ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setText(newName);
+    }
     /**
      * @return returns the name of this preset
      */
@@ -201,7 +205,9 @@ public class VideoPreset extends VideoInformationBase {
         ghostBtn1.setVisible(false);
         Button ghostBtn2 = new Button("");
         ghostBtn2.setVisible(false);
-        HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2);
+        Button ghostBtn3 = new Button("");
+        ghostBtn3.setVisible(false);
+        HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2, ghostBtn3);
         buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
 
         // Add new Nodes on new row at the bottom

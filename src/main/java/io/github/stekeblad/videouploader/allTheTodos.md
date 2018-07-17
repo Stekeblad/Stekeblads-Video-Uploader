@@ -2,15 +2,12 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- How to make it easier to control witch buttons is visible on presets/uploads
-instead of manually changing them on multiple places
 
 #### Higher priority things to do
 - Feature to change from:
     - a preset to no preset (choiceBox in main window)
     - a playlist to no playlist
 
-- Create a clone button for presets (set the clone to edit automatically)
 
 #### Lower priority things to do
 - handling of categories/playlists/image does no longer exist
@@ -23,6 +20,7 @@ on youtube in the browser
 playlists and deciding if they should be visible or not (playlists can
 be renamed, name is different but ID the same.)
 - Update YouTube API version
+- upload/preset list have a horizontal scroll bar, remove it
 
 #### Thinking about
 - Keep even not started uploads on close?
@@ -53,3 +51,4 @@ and drop video files in the list of videos to add list?
 - Translations
 - Red progressBar and upload failed dialogs
 - Wikipage for settings window (add url to F1 click in settings window!)
+- Clone preset button

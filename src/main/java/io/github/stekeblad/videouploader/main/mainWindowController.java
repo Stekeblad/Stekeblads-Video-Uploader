@@ -2,6 +2,8 @@ package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
+import io.github.stekeblad.videouploader.utils.state.VideoUploadState;
 import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
 import io.github.stekeblad.videouploader.windowControllers.SettingsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
@@ -58,6 +60,7 @@ public class mainWindowController {
     private Uploader uploader;
     private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
     private boolean bypassAbortWarning = false;
+    private VideoUploadState buttonStates;
 
     private Translations transMainWin;
     private Translations transBasic;
@@ -106,6 +109,9 @@ public class mainWindowController {
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
         uploader.setUploadErredCallback((videoUpload, throwable) -> Platform.runLater(() -> onUploadErred(videoUpload, throwable)));
 
+        // Set up button sets for the different states a upload can be in: editing, locked, uploading, failed/erred
+        defineUploadStates();
+
         // If any uploads was saved when the program was closed last time
         if(configManager.hasWaitingUploads()) {
             ArrayList<String> waitingUploads = configManager.getWaitingUploads();
@@ -113,20 +119,8 @@ public class mainWindowController {
                 for(String waitingUpload : waitingUploads) {
                     try {
                         VideoUpload loadedUpload = new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++));
-                        Button editButton = new Button(transBasic.getString("edit"));
-                        editButton.setId(loadedUpload.getPaneId() + BUTTON_EDIT);
-                        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-                        Button deleteButton = new Button(transBasic.getString("delete"));
-                        deleteButton.setId(loadedUpload.getPaneId() + BUTTON_DELETE);
-                        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-                        Button startUploadButton = new Button(transBasic.getString("startUpload"));
-                        startUploadButton.setId(loadedUpload.getPaneId() + BUTTON_START_UPLOAD);
-                        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
-
-                        loadedUpload.setButton1(editButton);
-                        loadedUpload.setButton2(deleteButton);
-                        loadedUpload.setButton3(startUploadButton);
                         loadedUpload.setThumbnailCursorEventHandler(this::updateCursor);
+                        buttonStates.setLocked(loadedUpload);
 
                         // Auto resize width and translation
                         loadedUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
@@ -149,7 +143,6 @@ public class mainWindowController {
             }
         });
     }
-
 
     /**
      * This method is called when this window's close button is clicked.
@@ -296,24 +289,9 @@ public class mainWindowController {
                 // make the upload change its width together with the uploads list and the window
                 newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
                 newUpload.setThumbnailCursorEventHandler(this::updateCursor);
-                // Translate the upload
+
                 transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
-
-                // Create the buttons
-                Button editButton = new Button(transBasic.getString("edit"));
-                editButton.setId(newUpload.getPaneId() + BUTTON_EDIT);
-                editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-                Button deleteButton = new Button(transBasic.getString("delete"));
-                deleteButton.setId(newUpload.getPaneId() + BUTTON_DELETE);
-                deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-                Button startUploadButton = new Button(transBasic.getString("startUpload"));
-                startUploadButton.setId(newUpload.getPaneId() + BUTTON_START_UPLOAD);
-                startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
-
-                newUpload.setButton1(editButton);
-                newUpload.setButton2(deleteButton);
-                newUpload.setButton3(startUploadButton);
-
+                buttonStates.setLocked(newUpload);
                 uploadQueueVideos.add(newUpload);
                 uploadPaneCounter++;
             }
@@ -480,6 +458,45 @@ public class mainWindowController {
     }
 
     /**
+     * Defines the different states for buttonStates, this is made to make it much simpler to manage the buttons
+     * for the different states a upload can be in. Previously buttons was created all over the place and set
+     * to call methods. Now there is sets of buttons defined here and this sets is then used when setting the
+     * buttons to show. Each old button setting could be towards 15 lines long, now its 1 line and easier to manage.
+     */
+    private void defineUploadStates() {
+        buttonStates = new VideoUploadState();
+
+        // Define Locked from editing
+        buttonStates.defineLocked(new ButtonProperties[]{
+                new ButtonProperties(BUTTON_EDIT, transBasic.getString("edit"), this::onEdit),
+                new ButtonProperties(BUTTON_DELETE, transBasic.getString("delete"), this::onDelete),
+                new ButtonProperties(BUTTON_START_UPLOAD, transBasic.getString("startUpload"), this::onStartUpload)
+        });
+
+        // Define Editing
+        buttonStates.defineEditing(new ButtonProperties[]{
+                new ButtonProperties(BUTTON_SAVE, transBasic.getString("save"), this::onSave),
+                new ButtonProperties(BUTTON_CANCEL, transBasic.getString("cancel"), this::onCancel),
+                new ButtonProperties("_ghost", "", null)
+        });
+
+        // Define Uploading
+        buttonStates.defineUploading(new ButtonProperties[]{
+                new ButtonProperties("_ghost1", "Just to give it width", null),
+                new ButtonProperties(BUTTON_ABORT_UPLOAD, transBasic.getString("abort"), this::onAbort),
+                new ButtonProperties("_ghost", "", null)
+        });
+
+
+        // Define Failed/Erred
+        buttonStates.defineFailed(new ButtonProperties[]{
+                new ButtonProperties("_ghost1", "Just to give it width", null),
+                new ButtonProperties(BUTTON_RESET, transBasic.getString("reset"), this::onResetUpload),
+                new ButtonProperties("_ghost", "", null)
+        });
+    }
+
+    /**
      * Re-adds all elements to the uploadQueuePanes so the UI is up-to-date
      */
     private void updateUploadList() {
@@ -557,23 +574,7 @@ public class mainWindowController {
         uploadQueueVideos.get(selected).setOnCategoriesClicked(event ->
                 uploadQueueVideos.get(selected).setCategories(categoryUtils.getCategoryNames())
         );
-
-
-        // Set buttons
-        Button saveButton = new Button(transBasic.getString("save"));
-        saveButton.setId(parentId + BUTTON_SAVE);
-        saveButton.setOnMouseClicked(event -> onSave(saveButton.getId()));
-        Button cancelButton = new Button(transBasic.getString("cancel"));
-        cancelButton.setId(parentId + BUTTON_CANCEL);
-        cancelButton.setOnMouseClicked(event -> onCancel(cancelButton.getId()));
-        //Button three is not used and I do not want the previous one to be visible
-        Button ghostButton = new Button("");
-        ghostButton.setVisible(false);
-
-        uploadQueueVideos.get(selected).setButton1(cancelButton);
-        uploadQueueVideos.get(selected).setButton2(saveButton);
-        uploadQueueVideos.get(selected).setButton3(ghostButton);
-
+        buttonStates.setEditing(uploadQueueVideos.get(selected));
         // Make sure visual change get to the UI
         updateUploadList();
     }
@@ -606,24 +607,9 @@ public class mainWindowController {
         }
 
         uploadQueueVideos.get(selected).setEditable(false);
+        buttonStates.setLocked(uploadQueueVideos.get(selected));
         // Delete backup if there is one
         editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-
-        // Change buttons
-        Button editButton = new Button(transBasic.getString("edit"));
-        editButton.setId(parentId + BUTTON_EDIT);
-        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button(transBasic.getString("delete"));
-        deleteButton.setId(parentId + BUTTON_DELETE);
-        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button(transBasic.getString("startUpload"));
-        startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
-        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
-
-        uploadQueueVideos.get(selected).setButton1(editButton);
-        uploadQueueVideos.get(selected).setButton2(deleteButton);
-        uploadQueueVideos.get(selected).setButton3(startUploadButton);
-
         // Make sure visual change get to the UI
         updateUploadList();
     }
@@ -651,21 +637,7 @@ public class mainWindowController {
                     transMainWin.getString("diag_backupNoRestore_full")).show();
         }
 
-        // Change buttons
-        Button editButton = new Button(transBasic.getString("edit"));
-        editButton.setId(parentId + BUTTON_EDIT);
-        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button(transBasic.getString("delete"));
-        deleteButton.setId(parentId + BUTTON_DELETE);
-        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button(transBasic.getString("startUpload"));
-        startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
-        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
-
-        uploadQueueVideos.get(selected).setButton1(editButton);
-        uploadQueueVideos.get(selected).setButton2(deleteButton);
-        uploadQueueVideos.get(selected).setButton3(startUploadButton);
-
+        buttonStates.setLocked(uploadQueueVideos.get(selected));
         // Make sure visual change get to the UI
         updateUploadList();
     }
@@ -735,20 +707,9 @@ public class mainWindowController {
 
         // Queue upload
         uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());
-        // Change Buttons and text
-        Button ghostButton1 = new Button("just to give it width");
-        ghostButton1.setVisible(false);
-        Button abortButton = new Button(transBasic.getString("abort"));
-        abortButton.setId(parentId + BUTTON_ABORT_UPLOAD);
-        abortButton.setOnMouseClicked(event -> onAbort(abortButton.getId()));
-        Button ghostButton2 = new Button("");
-        ghostButton2.setVisible(false);
 
-        uploadQueueVideos.get(selected).setButton1(ghostButton1);
-        uploadQueueVideos.get(selected).setButton2(abortButton);
-        uploadQueueVideos.get(selected).setButton3(ghostButton2);
-
-        // make progressbar visible and set text to show it is waiting to be uploaded.
+        // Change buttons, make progressbar visible and set text to show it is waiting to be uploaded.
+        buttonStates.setUploading(uploadQueueVideos.get(selected));
         uploadQueueVideos.get(selected).setProgressBarVisibility(true);
         uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("waiting"));
 
@@ -792,25 +753,16 @@ public class mainWindowController {
             AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason").show();
         }
 
-        // Change buttons
-        Button editButton = new Button(transBasic.getString("edit"));
-        editButton.setId(parentId + BUTTON_EDIT);
-        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button(transBasic.getString("delete"));
-        deleteButton.setId(parentId + BUTTON_DELETE);
-        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button(transBasic.getString("startUpload"));
-        startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
-        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
-
-        uploadQueueVideos.get(selected).setButton1(editButton);
-        uploadQueueVideos.get(selected).setButton2(deleteButton);
-        uploadQueueVideos.get(selected).setButton3(startUploadButton);
-
+        buttonStates.setLocked(uploadQueueVideos.get(selected));
         // Make sure visual change get to the UI
         updateUploadList();
     }
 
+    /**
+     * Called when Reset upload button is clicked (appear when an upload failed)
+     *
+     * @param callerId the id of the upload + button name
+     */
     private void onResetUpload(String callerId) {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
@@ -818,24 +770,14 @@ public class mainWindowController {
             System.err.println("reset upload button belongs to a invalid or non-existing parent");
             return;
         }
-        // Change back progressBar color, hide it and set the edit/delete/startUpload buttons
+        // Change back progressBar color, hide it and set the locked state buttons
         uploadQueueVideos.get(selected).setProgressBarColor(null);
         uploadQueueVideos.get(selected).setProgressBarVisibility(false);
         uploadQueueVideos.get(selected).setStatusLabelText(transUpload.getString("notStarted"));
+        buttonStates.setLocked(uploadQueueVideos.get(selected));
 
-        Button editButton = new Button(transBasic.getString("edit"));
-        editButton.setId(parentId + BUTTON_EDIT);
-        editButton.setOnMouseClicked(event -> onEdit(editButton.getId()));
-        Button deleteButton = new Button(transBasic.getString("delete"));
-        deleteButton.setId(parentId + BUTTON_DELETE);
-        deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-        Button startUploadButton = new Button(transBasic.getString("startUpload"));
-        startUploadButton.setId(parentId + BUTTON_START_UPLOAD);
-        startUploadButton.setOnMouseClicked(event -> onStartUpload(startUploadButton.getId()));
-
-        uploadQueueVideos.get(selected).setButton1(editButton);
-        uploadQueueVideos.get(selected).setButton2(deleteButton);
-        uploadQueueVideos.get(selected).setButton3(startUploadButton);
+        // Make sure visual change get to the UI
+        updateUploadList();
     }
 
     /**
@@ -879,10 +821,7 @@ public class mainWindowController {
         if (video != null) {
             video.setProgressBarColor("red");
             video.setStatusLabelText(transUpload.getString("failed"));
-            Button resetButton = new Button(transBasic.getString("reset"));
-            resetButton.setId(video.getPaneId() + BUTTON_RESET);
-            resetButton.setOnMouseClicked(event -> onResetUpload(resetButton.getId()));
-            video.setButton2(resetButton);
+            buttonStates.setFailed(video);
         }
     }
 
@@ -895,7 +834,7 @@ public class mainWindowController {
         String parentId = callerId.substring(0, callerId.indexOf('_'));
         int selected = getUploadIndexByName(parentId);
         if (selected == -1) {
-            System.err.println("remove finished upload button belongs to a invalid or non-existing parent");
+            System.err.println("remove finished upload, button belongs to a invalid or non-existing parent");
             return;
         }
         uploadQueueVideos.remove(selected);
