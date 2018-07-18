@@ -15,10 +15,7 @@ import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -39,16 +36,21 @@ import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_F
 public class Uploader {
     private HashMap<String, Future> tasks;
     private CategoryUtils categoryUtils;
+    private
+    PlaylistUtils playlistUtils;
     private Consumer<String> uploadFinishedCallback = null;
     private BiConsumer<VideoUpload, Throwable> uploadErredCallback = null;
     private ExecutorService exec;
-    private Translations translations;
+    private Translations translationsUpload;
+    private Translations translationsBasic;
 
 
     public Uploader() {
-        translations = TranslationsManager.getTranslation("uploader");
+        translationsUpload = TranslationsManager.getTranslation("uploader");
+        translationsBasic = TranslationsManager.getTranslation("baseStrings");
         tasks = new HashMap<>();
         categoryUtils = CategoryUtils.INSTANCE;
+        playlistUtils = PlaylistUtils.INSTANCE;
         exec = Executors.newSingleThreadExecutor(Thread::new);
 
     }
@@ -179,9 +181,15 @@ public class Uploader {
         videoMetaData.setCategoryId(categoryUtils.getCategoryId(video.getCategory()));
 
         videoObject.setSnippet(videoMetaData);
+        InputStreamContent videoFileStream;
+        try {
+            videoFileStream = new InputStreamContent(VIDEO_FILE_FORMAT,
+                    new BufferedInputStream(new FileInputStream(video.getVideoFile())));
 
-        InputStreamContent videoFileStream = new InputStreamContent(VIDEO_FILE_FORMAT,
-                new BufferedInputStream(new FileInputStream(video.getVideoFile())));
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("Could not find the video file \"" + video.getVideoFile().getAbsolutePath() +
+                    "\". It may have been deleted, moved or renamed since the upload was queued");
+        }
 
         YouTube.Videos.Insert videoInsert = myTube.videos()
                 .insert("snippet,statistics,status", videoObject, videoFileStream);
@@ -194,31 +202,31 @@ public class Uploader {
         MediaHttpUploaderProgressListener progressListener = uploader1 -> {
             // If user has aborted this upload while it is uploading
             if(Thread.interrupted()) {
-                // Throw a exception (Only IOException allowed)
+                // Throw an exception (Only IOException allowed)
                 throw new IOException("INTERRUPTED");
             }
             switch (uploader1.getUploadState()) {
                 case INITIATION_STARTED:
-                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("preparing")));
+                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("preparing")));
                     break;
                 case INITIATION_COMPLETE:
                     Platform.runLater(() -> video.setProgressBarProgress(0));
-                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("starting")));
+                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("starting")));
                     break;
                 case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
                     // the upload is slightly larger than the video file, but for longer videos it will be close enough
                     double progress = ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length());
                     Platform.runLater(() -> video.setProgressBarProgress(progress));
                     String newStatusText = String.format(
-                            translations.getString("uploadWithProgress"), Math.floor(progress * 100));
+                            translationsUpload.getString("uploadWithProgress"), Math.floor(progress * 100));
                     Platform.runLater(() -> video.setStatusLabelText(newStatusText));
                     break;
                 case MEDIA_COMPLETE:
                     Platform.runLater(() -> video.setProgressBarProgress(1)); // 100% full
-                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("finished")));
+                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("finished")));
                     break;
                 case NOT_STARTED:
-                    Platform.runLater(() -> video.setStatusLabelText(translations.getString("notStarted")));
+                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("notStarted")));
                     break;
             }
         };
@@ -229,26 +237,32 @@ public class Uploader {
 
         // Set thumbnail if selected
         if (video.getThumbNail() != null) {
-            Platform.runLater(() -> video.setStatusLabelText(translations.getString("thumbnail")));
+            Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("thumbnail")));
             File thumbFile = video.getThumbNail();
             String contentType = Files.probeContentType(Paths.get(thumbFile.toURI()));
 
-            InputStreamContent thumbnailFileContent = new InputStreamContent(
-                    contentType, new BufferedInputStream(new FileInputStream(thumbFile)));
-            thumbnailFileContent.setLength(thumbFile.length());
+            InputStreamContent thumbnailFileContent;
+            try {
+                thumbnailFileContent = new InputStreamContent(
+                        contentType, new BufferedInputStream(new FileInputStream(thumbFile)));
+                thumbnailFileContent.setLength(thumbFile.length());
+            } catch (FileNotFoundException e) {
+                throw new FileNotFoundException("Could not find the thumbnail file \"" + thumbFile.getAbsolutePath() +
+                        "\". It may have been deleted, moved or renamed since the upload was queued");
+            }
             YouTube.Thumbnails.Set thumbnailSet = myTube.thumbnails().set(uploadedVideo.getId(), thumbnailFileContent);
             thumbnailSet.execute();
         }
-        // Add to playlist if selected
+        // Add to playlist if it is not null, empty or the "no selected" default value
         String playlistString = video.getPlaylist();
-        if (playlistString != null && !playlistString.equals("null") && !playlistString.equals("")) {
-            String newStatusText = String.format(translations.getString("playlist"), video.getPlaylist());
+        if (playlistString != null && !playlistString.equals("null") && !playlistString.equals("") &&
+                !playlistString.equals(translationsBasic.getString("noSelected"))) {
+            String newStatusText = String.format(translationsUpload.getString("playlist"), video.getPlaylist());
             Platform.runLater(() -> video.setStatusLabelText(newStatusText));
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
             resourceId.setVideoId(uploadedVideo.getId());
 
-            PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
             PlaylistItemSnippet playlistSnippet = new PlaylistItemSnippet();
             playlistSnippet.setPlaylistId(playlistUtils.getPlaylistId(video.getPlaylist()));
             playlistSnippet.setResourceId(resourceId);
@@ -259,7 +273,7 @@ public class Uploader {
             playlistInsert.execute();
         }
         String link = "https://youtu.be/" + uploadedVideo.getId();
-        String newStatusText = String.format(translations.getString("doneWithLink"), link);
+        String newStatusText = String.format(translationsUpload.getString("doneWithLink"), link);
         Platform.runLater(() -> video.setStatusLabelText(newStatusText));
         Platform.runLater(() -> video.setStatusLabelOnClickUrl(link));
     }

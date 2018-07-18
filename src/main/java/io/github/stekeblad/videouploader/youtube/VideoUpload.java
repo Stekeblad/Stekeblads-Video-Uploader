@@ -41,10 +41,7 @@ public class VideoUpload extends VideoInformationBase{
         return this.uploadPane;
     }
 
-    /**
-     * Enables / Disables editing of all fields of the pane
-     * @param newEditStatus true to allow edit, false to not allow
-     */
+    // Inherit parent doc
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
         // Does not extend with any editable fields

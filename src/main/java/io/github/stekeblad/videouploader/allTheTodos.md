@@ -4,18 +4,10 @@
 - Bugs and small things (there is always bugs and small things...)
 
 #### Higher priority things to do
-- Feature to change from:
-    - a preset to no preset (choiceBox in main window)
-    - a playlist to no playlist
 
 
 #### Lower priority things to do
-- handling of categories/playlists/image does no longer exist
-    - categories now checked on preset and upload save, not in apply preset!
-
 - Save window sizes/location on exit, use the saved data when starting next time
-- "Show Playlist" button in playlist manager window -> opens that playlist
-on youtube in the browser
 - When updating playlist, use ID instead of name when looking at old
 playlists and deciding if they should be visible or not (playlists can
 be renamed, name is different but ID the same.)
@@ -50,5 +42,12 @@ and drop video files in the list of videos to add list?
 - Pressing F1 for wiki
 - Translations
 - Red progressBar and upload failed dialogs
+    - Checking existence of category, thumbnail, video, playlist
+        - categories now checked on preset and upload save plus onStartUpload
+        - Existence of video file and thumbnail file is checked in uploader
+        - If playlist has been deleted from YouTube is NOT CHECKED!
 - Wikipage for settings window (add url to F1 click in settings window!)
 - Clone preset button
+- R-click to
+    - reset thumbnail
+    - show playlist on YouTube

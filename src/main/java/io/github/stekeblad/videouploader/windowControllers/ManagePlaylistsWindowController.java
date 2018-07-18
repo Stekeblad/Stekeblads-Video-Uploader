@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
@@ -42,13 +43,13 @@ public class ManagePlaylistsWindowController {
      * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
     public void myInit() {
-        // Insert the stored playlists into the list
-        updatePlaylistList();
-
         // Load Translations
         transBasic = TranslationsManager.getTranslation("baseStrings");
         transPlaylistWindow = TranslationsManager.getTranslation("manPlayWindow");
         transPlaylistWindow.autoTranslate(window);
+
+        // Insert the stored playlists into the list
+        updatePlaylistList();
 
         // cant autoTranslate Nodes in Toolbar (bug)
         txt_newPlaylistName.setPromptText(transPlaylistWindow.getString("txt_newPlaylistName_pt"));
@@ -220,6 +221,16 @@ public class ManagePlaylistsWindowController {
             for (LocalPlaylist playlist : playlists) {
                 CheckBox cb = new CheckBox(playlist.getName());
                 cb.setSelected(playlist.isVisible());
+
+                // Add right click feature to view playlist on YouTube
+                ContextMenu playlistContext = new ContextMenu();
+                MenuItem item1 = new MenuItem(transPlaylistWindow.getString("viewOnYouTube"));
+                item1.setOnAction(event ->
+                        OpenInBrowser.openInBrowser("https://www.youtube.com/playlist?list=" + playlist.getId()));
+                playlistContext.getItems().add(item1);
+                cb.setOnContextMenuRequested(event -> playlistContext.show(cb, Side.LEFT, 50, 0));
+
+                // Add to list
                 playlistCheckBoxes.add(cb);
             }
             // Sorts the playlists lexicographically

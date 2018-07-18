@@ -19,6 +19,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -98,7 +99,17 @@ public class mainWindowController {
         playlistUtils.loadCache();
         categoryUtils = CategoryUtils.INSTANCE;
         categoryUtils.loadCategories();
-        choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
+
+        // Populate presets dropdown/choice box
+        ArrayList<String> presetNames = configManager.getPresetNames();
+        if (presetNames == null) {
+            presetNames = new ArrayList<>();
+            presetNames.add(transBasic.getString("noSelected"));
+        } else {
+            presetNames.add(0, transBasic.getString("noSelected"));
+        }
+        choice_presets.setItems(FXCollections.observableArrayList(presetNames));
+        choice_presets.getSelectionModel().select(0);
 
         // Only allow numbers in autoNum textField
         txt_autoNum.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -213,7 +224,7 @@ public class mainWindowController {
             return;
         }
         // Check what preset / if a preset is selected
-        if(choice_presets.getSelectionModel().getSelectedIndex() == -1) {
+        if (choice_presets.getSelectionModel().getSelectedIndex() < 1) {
             // No preset, add videos to upload list with file name as title and blank/default values on the rest
             for(File videoFile : videosToAdd) {
                 VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
@@ -332,7 +343,15 @@ public class mainWindowController {
         }
         actionEvent.consume();
         // Update presets choice box in case presets was added or remove
-        choice_presets.setItems(FXCollections.observableArrayList(configManager.getPresetNames()));
+        ArrayList<String> presetNames = configManager.getPresetNames();
+        if (presetNames == null) {
+            presetNames = new ArrayList<>();
+            presetNames.add(transBasic.getString("noSelected"));
+        } else {
+            presetNames.add(0, transBasic.getString("noSelected"));
+        }
+        choice_presets.setItems(FXCollections.observableArrayList(presetNames));
+        choice_presets.getSelectionModel().select(0);
     }
 
     /**
@@ -552,8 +571,10 @@ public class mainWindowController {
         // Create a backup to be able to revert
         editBackups.put(uploadQueueVideos.get(selected).getPaneId(), uploadQueueVideos.get(selected).copy(null)); //null -> same id
 
+        // Set on thumbnail clicked
         uploadQueueVideos.get(selected).setEditable(true);
         uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
+            if (event.getButton() == MouseButton.SECONDARY) return; // Conflicting with context menu
             File pickedThumbnail = FileUtils.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
@@ -563,12 +584,31 @@ public class mainWindowController {
                 }
             }
         });
+        // Sets the thumbnail right click context menu
+        ContextMenu thumbnailRClickMenu = new ContextMenu();
+        MenuItem item1 = new MenuItem(transBasic.getString("resetToDefault"));
+        item1.setOnAction(actionEvent -> {
+            try {
+                uploadQueueVideos.get(selected).setThumbNailFile(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            actionEvent.consume();
+        });
+        thumbnailRClickMenu.getItems().add(item1);
+        uploadQueueVideos.get(selected).setThumbnailContextMenu(thumbnailRClickMenu);
+
+        // Playlist drop down clicked
         uploadQueueVideos.get(selected).setOnPlaylistsClicked(event -> {
             if (playlistUtils.getPlaylistNames().size() == 0) {
                 AlertUtils.simpleClose(transMainWin.getString("diag_noPlaylists_short"),
                         transMainWin.getString("diag_noPlaylists_full")).show();
             } else {
-                uploadQueueVideos.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
+                ArrayList<String> playlistNames = new ArrayList<>();
+                // Include a "no selected" item
+                playlistNames.add(transBasic.getString("noSelected"));
+                playlistNames.addAll(playlistUtils.getVisiblePlaylistNames());
+                uploadQueueVideos.get(selected).setPlaylists(playlistNames);
             }
         });
         uploadQueueVideos.get(selected).setOnCategoriesClicked(event ->
@@ -599,8 +639,8 @@ public class mainWindowController {
         }
         // Make sure a category is selected and the category name still match a stored category
         // (will not match stored if categories have been re-localized)
-        if (uploadQueueVideos.get(selected).getCategory() == null &&
-                !categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
+        if (uploadQueueVideos.get(selected).getCategory() == null ||
+                categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
                     transBasic.getString("diag_invalidCategory_full")).show();
             return;
@@ -806,15 +846,9 @@ public class mainWindowController {
      */
     private void onUploadErred(VideoUpload video, Throwable e) {
         String header = transBasic.getString("app_name") + " - Failed to upload video";
-        if (e == null) {
-            if (video == null) {
-                AlertUtils.simpleClose(header, "Failed uploading of a undefined video with an unknown error").show();
-            } else { // e == null && video != null
-                AlertUtils.simpleClose(header, "An unknown error occurred while trying to upload \"" + video.getVideoName() + "\"").show();
-            }
-        } else if (video == null) { // e != null
-            AlertUtils.exceptionDialog(header, "Failed uploading of a undefined video", e);
-        } else { // e != null && video != null
+        if (e == null || video == null) {
+            AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
+        } else {
             AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
         }
         //Switch to a reset upload button instead of abort

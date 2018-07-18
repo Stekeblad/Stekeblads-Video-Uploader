@@ -15,6 +15,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -274,8 +275,8 @@ public class PresetsWindowController {
         });
 
         buttonStates.defineEditing(new ButtonProperties[]{
-                new ButtonProperties(BUTTON_SAVE, transBasic.getString("save"), this::onPresetSave),
                 new ButtonProperties(BUTTON_CANCEL, transBasic.getString("cancel"), this::onPresetCancelEdit),
+                new ButtonProperties(BUTTON_SAVE, transBasic.getString("save"), this::onPresetSave),
                 new ButtonProperties("_ghost", "", null)
         });
     }
@@ -340,6 +341,7 @@ public class PresetsWindowController {
 
         // Sets the thumbnail clickable for changing
         videoPresets.get(selected).setOnThumbnailClicked(event -> {
+            if (event.getButton() == MouseButton.SECONDARY) return; // Conflicting with context menu
             File pickedThumbnail = FileUtils.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
@@ -349,6 +351,19 @@ public class PresetsWindowController {
                 }
             }
         });
+        // Sets the thumbnail right click context menu
+        ContextMenu thumbnailRClickMenu = new ContextMenu();
+        MenuItem item1 = new MenuItem(transBasic.getString("resetToDefault"));
+        item1.setOnAction(actionEvent -> {
+            try {
+                videoPresets.get(selected).setThumbNailFile(null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            actionEvent.consume();
+        });
+        thumbnailRClickMenu.getItems().add(item1);
+        videoPresets.get(selected).setThumbnailContextMenu(thumbnailRClickMenu);
 
         // set the playlists list
         videoPresets.get(selected).setOnPlaylistsClicked(event -> {
@@ -356,12 +371,17 @@ public class PresetsWindowController {
                 onManagePlaylistsClicked(new ActionEvent());
             }
             if (!configManager.getNeverAuthed()) {
-                videoPresets.get(selected).setPlaylists(playlistUtils.getVisiblePlaylistnames());
+                ArrayList<String> playlistNames = new ArrayList<>();
+                // Include a "no selected" item
+                playlistNames.add(transBasic.getString("noSelected"));
+                playlistNames.addAll(playlistUtils.getVisiblePlaylistNames());
+                videoPresets.get(selected).setPlaylists(playlistNames);
             }
         });
 
         //set categories
         videoPresets.get(selected).setOnCategoriesClicked(event ->
+                // No default here, category is mandatory
                 videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames())
         );
 
@@ -383,8 +403,8 @@ public class PresetsWindowController {
         }
         // Make sure a category is selected and the category name still match a stored category
         // (will not match stored if categories have been re-localized)
-        if (videoPresets.get(selected).getCategory() == null &&
-                !categoryUtils.getCategoryId(videoPresets.get(selected).getCategory()).equals("-1")) {
+        if (videoPresets.get(selected).getCategory() == null ||
+                categoryUtils.getCategoryId(videoPresets.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
                     transBasic.getString("diag_invalidCategory_full")).show();
             return;

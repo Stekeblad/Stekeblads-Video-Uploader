@@ -38,10 +38,7 @@ public class VideoPreset extends VideoInformationBase {
         return presetPane;
     }
 
-    /**
-     * Enables / Disables editing of all fields on the pane
-     * @param newEditStatus true to allow edit, false to not allow
-     */
+    // Inherit parent doc
     public void setEditable(boolean newEditStatus) {
         super.setEditable(newEditStatus);
         ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setEditable(newEditStatus);

@@ -104,7 +104,7 @@ public enum PlaylistUtils {
      * to be visible compared to getPlaylistNames that returns all playlists
      * @return a list with the names of all playlists that is set to be visible
      */
-    public ArrayList<String> getVisiblePlaylistnames() {
+    public ArrayList<String> getVisiblePlaylistNames() {
         ArrayList<String> visiblePlaylists = new ArrayList<>();
         playlistCache.forEach((k, v) -> {
             if(v.isVisible()) {

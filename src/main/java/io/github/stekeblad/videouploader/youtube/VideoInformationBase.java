@@ -4,6 +4,7 @@ import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -128,7 +129,7 @@ public class VideoInformationBase {
      * @return returns the selected thumbnail file or null if no custom thumbnail is selected
      */
     public File getThumbNail() {
-        if(thumbNailFile == null || thumbNailFile.toURI().toString().endsWith("_")) {
+        if (thumbNailFile == null || thumbNailFile.getName().equals("_")) {
             return null;
         } else {
             return thumbNailFile;
@@ -179,7 +180,8 @@ public class VideoInformationBase {
     }
 
     /**
-     * Enables / Disables editing of all the fields on the pane
+     * Enables / Disables editing of all the fields on the pane.
+     * Also disables left and right click functions if parameter is false, will not re-enable later if parameter true!
      * @param newEditStatus true to allow edit, false to not allow
      */
     public void setEditable(boolean newEditStatus) {
@@ -191,6 +193,11 @@ public class VideoInformationBase {
         videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
+        if (!newEditStatus) {
+            // Disable thumbnail click
+            setOnThumbnailClicked(null);
+            setThumbnailContextMenu(null);
+        }
     }
 
     /**
@@ -202,9 +209,16 @@ public class VideoInformationBase {
         if (!allowEdit) {
             throw new Exception("Edit not allowed");
         } else {
-            ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
-                    new Image(new FileInputStream(thumbnail)));
-            thumbNailFile = thumbnail;
+            if (thumbnail == null) {
+                //reset to default
+                thumbNailFile = null;
+                ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
+                        new Image(this.getClass().getResourceAsStream("/images/no_image.png")));
+            } else {
+                ((ImageView) videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL)).setImage(
+                        new Image(new FileInputStream(thumbnail)));
+                thumbNailFile = thumbnail;
+            }
         }
     }
 
@@ -218,6 +232,16 @@ public class VideoInformationBase {
      */
     public void setOnThumbnailClicked(EventHandler<MouseEvent> clickEvent) {
         videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL).setOnMouseClicked(clickEvent);
+    }
+
+    public void setThumbnailContextMenu(ContextMenu menu) {
+        videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL).setOnContextMenuRequested(event -> {
+            event.consume();
+            if (menu == null) {
+                return;
+            }
+            menu.show(videoBasePane.lookup("#" + paneId + NODE_ID_THUMBNAIL), Side.BOTTOM, 0, -50);
+        });
     }
 
     /**
