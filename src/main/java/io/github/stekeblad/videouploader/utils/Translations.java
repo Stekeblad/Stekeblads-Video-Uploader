@@ -36,55 +36,68 @@ public class Translations {
      * @throws Exception if the default translations file could not be found with the given bundleName
      */
     public Translations(String bundleName, Locale primaryLocale) throws Exception {
-        String localizedPath;
+        String localizedPath = "";
         String fallbackPath = "strings/" + bundleName + "/" + bundleName + ".properties";
+        translationFamily = bundleName;
+        boolean existsLocalLocale = true;
         if (primaryLocale == null) {
             localizedPath = fallbackPath;
         } else {
-            locale = primaryLocale;
-            localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locale.toString() + ".properties";
+            // For some reason does locale.toString() and locale.toLanguageTag() return all in lowercase... FIX
+            String locStr = primaryLocale.toString();
+            int separatorIndex = locStr.indexOf("_");
+            try {
+                locStr = locStr.substring(0, separatorIndex).toLowerCase() + "_" + locStr.substring(separatorIndex + 1).toUpperCase();
+                locale = new Locale(locStr);
+                //localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locale.toString() + ".properties";
+                localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locStr + ".properties";
+            } catch (IndexOutOfBoundsException e) {
+                // Could not properly detect locale or language set to default english
+                existsLocalLocale = false;
+                localized = null;
+            }
         }
-        translationFamily = bundleName;
 
         // Load translation for user locale
-        try {
-            InputStream inputStream = mainWindowController.class.getClassLoader().getResourceAsStream(localizedPath);
-            if (inputStream != null) {
-                localized = new PropertyResourceBundle(inputStream);
-            } else {
-                // Did not find translation for user locale. Try find a similar translation, like en_GB instead of en_US
-                try {
-                    List<String> availableTranslations = FileUtils.getContentOfResourceDir("strings/" + bundleName);
-                    if (availableTranslations != null) {
-                        String matchLocalePart = bundleName + "_" + locale.toString().substring(0, 2);
-                        for (String aTranslation : availableTranslations) {
-                            if (aTranslation.contains(matchLocalePart)) {
-                                InputStream inputStream2 = mainWindowController.class.getClassLoader()
-                                        .getResourceAsStream("strings/" + bundleName + "/" + aTranslation);
-                                localized = new PropertyResourceBundle(inputStream2);
-                                String[] localeStrings = aTranslation.split("_");
-                                String localeLang = localeStrings[1];
-                                String localeCountry = localeStrings[2].substring(0, localeStrings[2].indexOf("."));
-                                locale = new Locale(localeLang, localeCountry);
-                                break;
+        if (existsLocalLocale) {
+            try {
+                InputStream inputStream = mainWindowController.class.getClassLoader().getResourceAsStream(localizedPath);
+                if (inputStream != null) {
+                    localized = new PropertyResourceBundle(inputStream);
+                } else {
+                    // Did not find translation for user locale. Try find a similar translation, like en_GB instead of en_US
+                    try {
+                        List<String> availableTranslations = FileUtils.getContentOfResourceDir("strings/" + bundleName);
+                        if (availableTranslations != null) {
+                            String matchLocalePart = bundleName + "_" + locale.toString().substring(0, 2);
+                            for (String aTranslation : availableTranslations) {
+                                if (aTranslation.contains(matchLocalePart)) {
+                                    InputStream inputStream2 = mainWindowController.class.getClassLoader()
+                                            .getResourceAsStream("strings/" + bundleName + "/" + aTranslation);
+                                    localized = new PropertyResourceBundle(inputStream2);
+                                    String[] localeStrings = aTranslation.split("_");
+                                    String localeLang = localeStrings[1];
+                                    String localeCountry = localeStrings[2].substring(0, localeStrings[2].indexOf("."));
+                                    locale = new Locale(localeLang, localeCountry);
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if (localized == null) {
-                        System.out.println("Could not find a matching or partially matching translation for " + bundleName + " and " + locale);
-                    }
+                        if (localized == null) {
+                            System.out.println("Could not find a matching or partially matching translation for " + bundleName + " and " + locale);
+                        }
 
-                } catch (NullPointerException e1) {
-                    System.err.println("exception occurred while looking for similar translations");
-                    System.err.println(bundleName + " : " + locale);
-                    e1.printStackTrace();
+                    } catch (NullPointerException e1) {
+                        System.err.println("exception occurred while looking for similar translations");
+                        System.err.println(bundleName + " : " + locale);
+                        e1.printStackTrace();
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+                localized = null;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            localized = null;
         }
-
         // Load default locale as backup if translation is missing or partially added
         try {
             InputStream inputStream = mainWindowController.class.getClassLoader().getResourceAsStream(fallbackPath);

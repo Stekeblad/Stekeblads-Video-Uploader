@@ -228,7 +228,7 @@ public class ManagePlaylistsWindowController {
                 item1.setOnAction(event ->
                         OpenInBrowser.openInBrowser("https://www.youtube.com/playlist?list=" + playlist.getId()));
                 playlistContext.getItems().add(item1);
-                cb.setOnContextMenuRequested(event -> playlistContext.show(cb, Side.LEFT, 50, 0));
+                cb.setOnContextMenuRequested(event -> playlistContext.show(cb, Side.LEFT, 250, 0));
 
                 // Add to list
                 playlistCheckBoxes.add(cb);

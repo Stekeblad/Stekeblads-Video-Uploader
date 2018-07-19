@@ -17,7 +17,7 @@ public class TranslationsMeta {
     public TranslationsMeta() {
         transMeta = new HashMap<>();
         List<String> resources = FileUtils.getContentOfResourceDir("strings/meta");
-        if (resources != null) {
+        if (resources != null && !resources.isEmpty()) {
             for (String resource : resources) {
                 InputStream inputStream = getClass().getClassLoader().getResourceAsStream("strings/meta/" + resource);
                 if (inputStream != null) {

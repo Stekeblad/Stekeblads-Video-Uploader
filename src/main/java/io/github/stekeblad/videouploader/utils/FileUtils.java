@@ -111,12 +111,13 @@ public class FileUtils {
                     try {
                         // matches path and after that does not have a / before the last character,
                         // that is, list only children and not grandchildren
-                        if (testEntry.getName().startsWith(path)
-                                && !testEntry.getName().substring(path.length(), testEntry.getName().length() - 2).contains("/")) {
-
-                            String entryName = testEntry.getName().substring(path.length());
-                            entryName = entryName.replace("/", "");
-                            matches.add(entryName);
+                        if (testEntry.getName().startsWith(path)) {
+                            String partialFilename = testEntry.getName().substring(path.length() + 1, testEntry.getName().length() - 2);
+                            if (!partialFilename.contains("/")) {
+                                String entryName = testEntry.getName().substring(path.length());
+                                entryName = entryName.replace("/", "");
+                                matches.add(entryName);
+                            }
                         }
                     } catch (StringIndexOutOfBoundsException e) {
                         // The entry that exactly matches path will throw a StringOutOfBoundsException
