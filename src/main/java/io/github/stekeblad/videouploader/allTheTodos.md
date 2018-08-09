@@ -2,9 +2,12 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
+- Does the program freeze shortly when adding a lot of videos with apply preset button? 
+Maybe do most of the work in a background thread, add a loading indicator and do only some 
+preparations and finishing in main thread?
+- find a way to prevent user to select null in choiceBoxes
 
 #### Higher priority things to do
-
 
 #### Lower priority things to do
 - Save window sizes/location on exit, use the saved data when starting next time

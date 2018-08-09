@@ -244,7 +244,7 @@ public class mainWindowController {
                 Button deleteButton = new Button(transBasic.getString("delete"));
                 deleteButton.setId(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + BUTTON_DELETE);
                 deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-                uploadQueueVideos.get(uploadQueueVideos.size() - 1).setButton1(deleteButton);
+                uploadQueueVideos.get(uploadQueueVideos.size() - 1).setButton2(deleteButton);
 
                 uploadPaneCounter++;
             }
@@ -701,6 +701,8 @@ public class mainWindowController {
         if (buttonChoice.isPresent()) {
             if(buttonChoice.get() == ButtonType.YES) {
                 uploadQueueVideos.remove(selected);
+                // delete backup (may exist if upload was created with no preset and directly deleted
+                editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
                 updateUploadList();
             } // else if ButtonType.NO or closed [X] do nothing
         }
@@ -872,6 +874,7 @@ public class mainWindowController {
             return;
         }
         uploadQueueVideos.remove(selected);
+        editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         updateUploadList();
     }
 }
