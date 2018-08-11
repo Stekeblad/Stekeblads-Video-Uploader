@@ -2,10 +2,7 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- Does the program freeze shortly when adding a lot of videos with apply preset button? 
-Maybe do most of the work in a background thread, add a loading indicator and do only some 
-preparations and finishing in main thread?
-- find a way to prevent user to select null in choiceBoxes
+- Translation package enumeration
 
 #### Higher priority things to do
 
@@ -16,6 +13,9 @@ playlists and deciding if they should be visible or not (playlists can
 be renamed, name is different but ID the same.)
 - Update YouTube API version
 - upload/preset list have a horizontal scroll bar, remove it
+- Does the program freeze shortly when adding a lot of videos with apply preset button?
+Maybe do most of the work in a background thread, add a loading indicator and do only some
+preparations and finishing in main thread?
 
 #### Thinking about
 - Keep even not started uploads on close?
@@ -54,3 +54,5 @@ and drop video files in the list of videos to add list?
 - R-click to
     - reset thumbnail
     - show playlist on YouTube
+- Wiki page for developers, pointing out things that i am proud of and
+that may be useful to others.

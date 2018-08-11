@@ -7,6 +7,7 @@ import com.google.api.services.youtube.model.PlaylistListResponse;
 import com.google.api.services.youtube.model.PlaylistSnippet;
 import com.google.api.services.youtube.model.PlaylistStatus;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.Auth;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 
@@ -23,7 +24,7 @@ public enum PlaylistUtils {
     INSTANCE;
 
     private ConfigManager configManager = ConfigManager.INSTANCE;
-
+    private String noPlaylistName = "";
     private HashMap<String, LocalPlaylist> playlistCache = null;
 
     /**
@@ -71,13 +72,6 @@ public enum PlaylistUtils {
         }
     }
 
-    public ArrayList<LocalPlaylist> getAllPlaylists() {
-        if (playlistCache == null) {
-            return null;
-        }
-        return new ArrayList<>(playlistCache.values());
-    }
-
     /**
      * First attempts to load local playlists from disc, if no playlists is found then attempt to get playlists from youtube
      */
@@ -86,6 +80,16 @@ public enum PlaylistUtils {
         if (playlistCache.isEmpty()) {
             refreshPlaylist();
         }
+    }
+
+    /**
+     * @return a list of all playlists (name, id, visible)
+     */
+    public ArrayList<LocalPlaylist> getAllPlaylists() {
+        if (playlistCache == null) {
+            return null;
+        }
+        return new ArrayList<>(playlistCache.values());
     }
 
     /**
@@ -100,14 +104,17 @@ public enum PlaylistUtils {
     }
 
     /**
-     * Users can configure what playlists to be shown and hidden, this method only returns playlists that is set
-     * to be visible compared to getPlaylistNames that returns all playlists
-     * @return a list with the names of all playlists that is set to be visible
+     * This method returns all playlists that is set to be visible plus a "No playlist selected" item at index 0
+     * @return a ArrayList with playlist names
      */
     public ArrayList<String> getVisiblePlaylistNames() {
         ArrayList<String> visiblePlaylists = new ArrayList<>();
+        if (noPlaylistName.equals("")) {
+            noPlaylistName = TranslationsManager.getTranslation("baseStrings").getString("noSelected");
+        }
+        visiblePlaylists.add(noPlaylistName);
         playlistCache.forEach((k, v) -> {
-            if(v.isVisible()) {
+            if (v.isVisible()) {
                 visiblePlaylists.add(k);
             }
         });
@@ -208,6 +215,7 @@ public enum PlaylistUtils {
      */
     public void loadCache() {
         playlistCache = new HashMap<>();
+        // Add default "no playlist" item
         ArrayList<String> loadedPlaylists = configManager.loadPlaylistCache();
         // If no playlists could be loaded
         if(loadedPlaylists == null || loadedPlaylists.size() == 0) {

@@ -18,7 +18,9 @@ import javafx.concurrent.Task;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,13 +33,14 @@ import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_F
 /**
  * Uploader handles the actual uploading to Youtube and contains a queue for all uploads. New uploads can be added,
  * existing once can be aborted all at the same time or just a specific. It is possible to get if their is a upload
- * in progress and set a method to be called for all finished uploads with the Id of the upload as the only parameter
+ * in progress and set a method to be called for all finished uploads with the Id of the upload as the only parameter.
+ * The uploading is performed in a separate thread and the class is partly threadsafe, check the methods documentation 
+ * to see if the particular method is threadsafe
  */
 public class Uploader {
-    private HashMap<String, Future> tasks;
+    private Map<String, Future> tasks;
     private CategoryUtils categoryUtils;
-    private
-    PlaylistUtils playlistUtils;
+    private PlaylistUtils playlistUtils;
     private Consumer<String> uploadFinishedCallback = null;
     private BiConsumer<VideoUpload, Throwable> uploadErredCallback = null;
     private ExecutorService exec;
@@ -48,7 +51,7 @@ public class Uploader {
     public Uploader() {
         translationsUpload = TranslationsManager.getTranslation("uploader");
         translationsBasic = TranslationsManager.getTranslation("baseStrings");
-        tasks = new HashMap<>();
+        tasks = Collections.synchronizedMap(new HashMap<>());
         categoryUtils = CategoryUtils.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
         exec = Executors.newSingleThreadExecutor(Thread::new);
@@ -57,7 +60,8 @@ public class Uploader {
 
     /**
      * Sets a method to be called every time a upload finishes. The parameter given to the callback will be the cancelName
-     * that was given in the add() method. Setting this callback is not required.
+     * that was given in the add() method. Setting this callback is not required. This method is not threadsafe. It is 
+     * recommended to call this method shortly after an instance of the class is created and before any uploads are added.
      * @param callback the callback to be called after every finished upload.
      */
     public void setUploadFinishedCallback(Consumer<String> callback) {
@@ -65,10 +69,10 @@ public class Uploader {
     }
 
     /**
-     * Sets a method to be called when a upload fails and it can not be handled by this class. The parmeters given to the
-     * callback will be the VideoUpload that errored and the exception that could not be handled.
-     * Setting this callback is not required.
-     *
+     * Sets a method to be called when a upload fails and it can not be handled by this class. The parameters given to the
+     * callback will be the VideoUpload that erred and the exception that could not be handled.
+     * Setting this callback is not required. This method is not threadsafe. It is 
+     * recommended to call this method shortly after an instance of the class is created and before any uploads are added.
      * @param callback the callback to be called when an upload errors
      */
     public void setUploadErredCallback(BiConsumer<VideoUpload, Throwable> callback) {
@@ -76,12 +80,13 @@ public class Uploader {
     }
 
     /**
-     * Aborts a single upload, scheduled or active
+     * Aborts a single upload, scheduled or active. This method is threadsafe.
      * @param cancelName the cancelName that was given when the add() method was called
      * @return true if the upload was aborted, false if it for some reason is not possible to abort it.
      */
     public boolean abortUpload(String cancelName) {
-        boolean success = tasks.get(cancelName).cancel(true);
+        boolean success;
+        success = tasks.get(cancelName).cancel(true);
         if (success) {
             tasks.remove(cancelName);
         }
@@ -89,7 +94,7 @@ public class Uploader {
     }
 
     /**
-     *
+     * This method is threadsafe.
      * @return true if a upload is in progress, false if not.
      */
     public boolean getIsActive() {
@@ -97,8 +102,9 @@ public class Uploader {
     }
 
     /**
-     * Aborts all uploads
-     * @return a Set with the cancelName of all unfinished uploads
+     * Aborts all uploads. This method is intended to be used when the program is about to shut down and the safety for
+     * any following calls to the same instance of this class is untested.
+     * @return a Set with the cancelName of all unfinished uploads.
      */
     public Set<String> kill() {
         exec.shutdownNow();
@@ -106,7 +112,7 @@ public class Uploader {
     }
 
     /**
-     * Adds video to the upload list
+     * Adds video to the upload list. This method is threadsafe.
      * @param video video to upload
      * @param cancelName String to use for aborting the upload (and used to report that its finished if a callback is set)
      */
@@ -115,12 +121,12 @@ public class Uploader {
         Task newTask = new Task<Void>() {
             @Override
             // Define what it does
-            protected Void call() throws Exception {
+            protected Void call() {
                 try {
                     // Do the uploading
                     upload(video);
                 } catch (Exception e) {
-                    // if not interrupted by the user, print the error
+                    // if not interrupted by the user, print the error and call error handler if it is set
                     if (! e.getMessage().equals("INTERRUPTED")) {
                         e.printStackTrace();
                         if (uploadErredCallback != null) {
@@ -149,7 +155,7 @@ public class Uploader {
     }
 
     /**
-     * Does the uploading
+     * Does the uploading.
      * @param video a VideoUpload with all the details needed for uploading
      * @throws IOException if the user aborts the upload while it is uploading, there is a exception while reading the video
      * or thumbnail file or there is a network error that could not be handled.
@@ -200,7 +206,7 @@ public class Uploader {
         uploader.setDirectUploadEnabled(false); // makes the upload resumable?
 
         MediaHttpUploaderProgressListener progressListener = uploader1 -> {
-            // If user has aborted this upload while it is uploading
+            // If abortUpload() has been called for this upload while it is uploading
             if(Thread.interrupted()) {
                 // Throw an exception (Only IOException allowed)
                 throw new IOException("INTERRUPTED");
@@ -254,17 +260,17 @@ public class Uploader {
             thumbnailSet.execute();
         }
         // Add to playlist if it is not null, empty or the "no selected" default value
-        String playlistString = video.getPlaylist();
+        String playlistString = video.getSelectedPlaylist();
         if (playlistString != null && !playlistString.equals("null") && !playlistString.equals("") &&
                 !playlistString.equals(translationsBasic.getString("noSelected"))) {
-            String newStatusText = String.format(translationsUpload.getString("playlist"), video.getPlaylist());
+            String newStatusText = String.format(translationsUpload.getString("playlist"), video.getSelectedPlaylist());
             Platform.runLater(() -> video.setStatusLabelText(newStatusText));
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
             resourceId.setVideoId(uploadedVideo.getId());
 
             PlaylistItemSnippet playlistSnippet = new PlaylistItemSnippet();
-            playlistSnippet.setPlaylistId(playlistUtils.getPlaylistId(video.getPlaylist()));
+            playlistSnippet.setPlaylistId(playlistUtils.getPlaylistId(video.getSelectedPlaylist()));
             playlistSnippet.setResourceId(resourceId);
 
             PlaylistItem playlistItem = new PlaylistItem();

@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.youtube;
 
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
+import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
@@ -47,6 +48,7 @@ public class VideoInformationBase {
     private File thumbNailFile;
     private boolean allowEdit;
     private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
+    private PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
     protected Consumer<Boolean> thumbnailCursorEventHandler = null;
 
     // Getters
@@ -105,8 +107,16 @@ public class VideoInformationBase {
      * @return returns the name of the selected playlist in the playlist ChoiceBox
      */
     @SuppressWarnings("unchecked")
-    public String getPlaylist() {
+    public String getSelectedPlaylist() {
         return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).getSelectionModel().getSelectedItem();
+    }
+
+    /**
+     * @return a list of all strings that currently is in the playlist ChoiceBox
+     */
+    @SuppressWarnings("unchecked")
+    private List<String> getPlaylistChoices() {
+        return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).getItems();
     }
 
     /**
@@ -115,6 +125,14 @@ public class VideoInformationBase {
     @SuppressWarnings("unchecked")
     public String getCategory() {
         return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).getSelectionModel().getSelectedItem();
+    }
+
+    /**
+     * @return a list of all strings that currently is in the category ChoiceBox
+     */
+    @SuppressWarnings("unchecked")
+    private List<String> getCategoryChoices() {
+        return ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).getItems();
     }
 
     /**
@@ -193,7 +211,17 @@ public class VideoInformationBase {
         videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
-        if (!newEditStatus) {
+        if (newEditStatus) {
+            // check valid status of category and playlist, update available choices if needed
+            List<String> playlistChoices = playlistUtils.getVisiblePlaylistNames();
+            if (!getPlaylistChoices().equals(playlistChoices)) {
+                setPlaylistChoices(playlistChoices);
+            }
+            List<String> categories = categoryUtils.getCategoryNames();
+            if (!getCategoryChoices().equals(categories)) {
+                setCategories(categories);
+            }
+        } else {
             // Disable thumbnail click
             setOnThumbnailClicked(null);
             setThumbnailContextMenu(null);
@@ -257,26 +285,32 @@ public class VideoInformationBase {
     }
 
     /**
-     * Sets the playlists that will appear in the playlists ChoiceBox
+     * Sets the strings that will appear in the playlists ChoiceBox
+     * If there already are some playlists set the method will attempt to keep the currently selected item selected
+     * if it still exist, else it will selected the item at index 0.
+     * If null or a empty list is provided no change will be done
      * @param playlistNames A ArrayList with the names of all playlists
      */
     @SuppressWarnings("unchecked")
-    public void setPlaylists(ArrayList<String> playlistNames) {
-        if (playlistNames != null) {
-            ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST)).setItems(FXCollections.observableArrayList(playlistNames));
+    private void setPlaylistChoices(List<String> playlistNames) {
+        if (playlistNames == null || playlistNames.size() == 0) {
+            return;
         }
-    }
-
-    /**
-     * Define something to happen then the playlist choice box is clicked, can be used with lambda like this:
-     * <pre>
-     *     setOnPlaylistsClicked(event -> {System.out.println("Example");}
-     * </pre>
-     *
-     * @param clickEvent a handler for the click event
-     */
-    public void setOnPlaylistsClicked(EventHandler<MouseEvent> clickEvent) {
-        videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setOnMouseClicked(clickEvent);
+        // Get the ChoiceBox and currently selected item
+        ChoiceBox<String> choiceBox = (ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST);
+        String selected = choiceBox.getValue();
+        // Change the items in the list
+        choiceBox.itemsProperty().set(FXCollections.observableList(playlistNames));
+        // Check if the selected item is still available and if so select it, else select item at index 0
+        if (selected == null) {
+            choiceBox.getSelectionModel().select(0);
+        } else {
+            if (choiceBox.getItems().contains(selected)) {
+                choiceBox.getSelectionModel().select(selected);
+            } else {
+                choiceBox.getSelectionModel().select(0);
+            }
+        }
     }
 
     /**
@@ -284,22 +318,10 @@ public class VideoInformationBase {
      * @param categories A ArrayList with the names of all categories
      */
     @SuppressWarnings("unchecked")
-    public void setCategories(ArrayList<String> categories) {
+    private void setCategories(List<String> categories) {
         if(categories != null) {
             ((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY)).setItems(FXCollections.observableArrayList(categories));
         }
-    }
-
-    /**
-     * Define something to happen then the categories choice box is clicked, can be used with lambda like this:
-     * <pre>
-     *     setOnCategoriesClicked(event -> {System.out.println("Example");}
-     * </pre>
-     *
-     * @param clickEvent a handler for the click event
-     */
-    public void setOnCategoriesClicked(EventHandler<MouseEvent> clickEvent) {
-        videoBasePane.lookup("#" + paneId + NODE_ID_CATEGORY).setOnMouseClicked(clickEvent);
     }
 
     // other methods
@@ -310,25 +332,27 @@ public class VideoInformationBase {
      * @param videoDescription Content of the description field
      * @param visibility If the video should be public, private or unlisted
      * @param videoTags A List of string with all tags for the video
-     * @param playlist The name of a playlist for this video to be in
+     * @param selectedPlaylist The name of a playlist for this video to be in
      * @param category Name of a Youtube category
      * @param tellSubs Set to true if subscribers should be notified
      * @param thumbNailPath File path to a image to use as thumbnail
      * @param paneId A string used for naming all UI elements
      */
     public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                String playlist, String category, boolean tellSubs, String thumbNailPath, String paneId) {
+                                String selectedPlaylist, String category, boolean tellSubs,
+                                String thumbNailPath, String paneId) {
 
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
         }
         this.paneId = paneId;
-        if(thumbNailPath != null) {
+        if (thumbNailPath != null) {
             this.thumbNailFile = new File(thumbNailPath);
         } else {
             this.thumbNailFile = null;
         }
-        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath);
+        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
+                category, tellSubs, thumbNailPath);
         allowEdit = false;
     }
 
@@ -346,7 +370,7 @@ public class VideoInformationBase {
         String videoDescription = null;
         VisibilityStatus visibility = null;
         ArrayList<String> videoTags = null;
-        String playlist = null;
+        String selectedPlaylist = null;
         String category = null;
         boolean tellSubs = false;
         String thumbnailPath = null;
@@ -391,7 +415,7 @@ public class VideoInformationBase {
                         videoTags = new ArrayList<>(Arrays.asList(line.split(",")));
                         break;
                     case NODE_ID_PLAYLIST:
-                        playlist = line.substring(colonIndex + 1);
+                        selectedPlaylist = line.substring(colonIndex + 1);
                         break;
                     case NODE_ID_CATEGORY:
                         category = line.substring(colonIndex + 1);
@@ -412,7 +436,8 @@ public class VideoInformationBase {
                 }
             }
         }
-        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbnailPath);
+        makeVideoBasePane(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
+                category, tellSubs, thumbnailPath);
     }
 
     /**
@@ -428,7 +453,7 @@ public class VideoInformationBase {
             paneIdForCopy = getPaneId();
         }
         return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
-                getPlaylist(), getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy);
+                getSelectedPlaylist(), getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy);
     }
 
     /**
@@ -440,7 +465,7 @@ public class VideoInformationBase {
         String videoDescription;
         VisibilityStatus visibility;
         List<String> videoTags;
-        String playlist;
+        String selectedPlaylist;
         String category;
         boolean tellSubs;
         String thumbNailPath;
@@ -463,8 +488,8 @@ public class VideoInformationBase {
             return videoTags;
         }
 
-        public String getPlaylist() {
-            return playlist;
+        public String getSelectedPlaylist() {
+            return selectedPlaylist;
         }
 
         public String getCategory() {
@@ -504,8 +529,8 @@ public class VideoInformationBase {
             return this;
         }
 
-        public VideoInformationBase.Builder setPlaylist(String playlist) {
-            this.playlist = playlist;
+        public VideoInformationBase.Builder setSelectedPlaylist(String selectedPlaylist) {
+            this.selectedPlaylist = selectedPlaylist;
             return this;
         }
 
@@ -530,8 +555,8 @@ public class VideoInformationBase {
         }
 
         public VideoInformationBase build() {
-            return new VideoInformationBase(videoName, videoDescription, visibility, videoTags, playlist, category,
-                    tellSubs, thumbNailPath, paneName);
+            return new VideoInformationBase(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
+                    category, tellSubs, thumbNailPath, paneName);
         }
     }
 
@@ -541,13 +566,14 @@ public class VideoInformationBase {
      * @param videoDescription Content of the video description field
      * @param visibility The VisibilityStatus to be selected by default
      * @param videoTags The tags to be inside th tags field
-     * @param playlist The name of the element to be selected by default
+     * @param selectedPlaylist The name of the playlist to be selected by default
      * @param category The category to be selected by default
      * @param tellSubs The default value of tellSubs
      * @param thumbNailPath The path to the selected thumbnail or null for the no thumbnail selected image
      */
-     protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                      String playlist, String category, boolean tellSubs, String thumbNailPath) {
+    protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility,
+                                     List<String> videoTags, String selectedPlaylist,
+                                     String category, boolean tellSubs, String thumbNailPath) {
          // Creating the pane, id, size, border
          videoBasePane = new GridPane();
          videoBasePane.setId(paneId);
@@ -598,13 +624,18 @@ public class VideoInformationBase {
                  tags.setText(newValue.replaceAll("\\R", ""));
          });
 
-         ArrayList<String> playlistStrings = new ArrayList<>();
-         if (playlist != null && !playlist.equals("")) {
-            playlistStrings.add(playlist);
-         }
-         ChoiceBox<String> playlistChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(playlistStrings));
+        ChoiceBox<String> playlistChoiceBox = new ChoiceBox<>(
+                FXCollections.observableArrayList(PlaylistUtils.INSTANCE.getVisiblePlaylistNames()));
+        if (selectedPlaylist == null) {
+            playlistChoiceBox.getSelectionModel().select(0);
+        } else {
+            if (playlistChoiceBox.getItems().contains(selectedPlaylist)) {
+                playlistChoiceBox.getSelectionModel().select(selectedPlaylist);
+            } else {
+                playlistChoiceBox.getSelectionModel().select(0);
+            }
+        }
          playlistChoiceBox.setId(paneId + NODE_ID_PLAYLIST);
-         playlistChoiceBox.getSelectionModel().select(0);
          playlistChoiceBox.setTooltip(new Tooltip("Select a playlist to add this video to"));
          playlistChoiceBox.setDisable(true);
 
@@ -706,7 +737,7 @@ public class VideoInformationBase {
                 .append(NODE_ID_DESCRIPTION).append(":").append(getVideoDescription()).append("\n")
                 .append(NODE_ID_VISIBILITY).append(":").append(getVisibility().getStatusName().toUpperCase()).append("\n")
                 .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
-                .append(NODE_ID_PLAYLIST).append(":").append(getPlaylist()).append("\n")
+                .append(NODE_ID_PLAYLIST).append(":").append(getSelectedPlaylist()).append("\n")
                 .append(NODE_ID_CATEGORY).append(":").append(getCategory()).append("\n")
                 .append(NODE_ID_TELLSUBS).append(":").append(Boolean.toString(isTellSubs())).append("\n")
                 .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave);

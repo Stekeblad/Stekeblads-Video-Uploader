@@ -51,7 +51,7 @@ public class VideoPreset extends VideoInformationBase {
      * @param videoDescription Description for the videos that uses this preset
      * @param visibility The visibility status that will be used for the video that uses this status
      * @param videoTags The tags that will be assigned to the videos that uses this preset
-     * @param playlist The name of the playlist that will be the selected one for the videos that uses this preset
+     * @param selectedPlaylist The name of the playlist that will be the selected one for the videos that uses this preset
      * @param category The name of the category to be selected  for the videos that uses this preset
      * @param tellSubs Set to true if subscribers should be notified when videos using this preset is uploaded, set to false to not notify
      * @param thumbNailPath File path to a thumbnail to use for all videos that uses this preset or null to let thumbnail be selected automatically
@@ -59,8 +59,10 @@ public class VideoPreset extends VideoInformationBase {
      * @param presetName A name used to recognize this preset
      */
     public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, String category, boolean tellSubs, String thumbNailPath, String paneId, String presetName) {
-        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath, paneId);
+                       String selectedPlaylist, String category, boolean tellSubs,
+                       String thumbNailPath, String paneId, String presetName) {
+        super(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
+                category, tellSubs, thumbNailPath, paneId);
         makePresetPane(presetName);
     }
 
@@ -112,7 +114,7 @@ public class VideoPreset extends VideoInformationBase {
         } else {
             thumbnailPath = getThumbNail().getAbsolutePath();
         }
-        return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
+        return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getSelectedPlaylist(),
                 getCategory(), isTellSubs(), thumbnailPath, paneIdForCopy, getPresetName());
     }
 
@@ -153,8 +155,8 @@ public class VideoPreset extends VideoInformationBase {
             return this;
         }
 
-        public VideoPreset.Builder setPlaylist(String playlist) {
-            this.playlist = playlist;
+        public VideoPreset.Builder setSelectedPlaylist(String selectedPlaylist) {
+            this.selectedPlaylist = selectedPlaylist;
             return this;
         }
 
@@ -179,7 +181,7 @@ public class VideoPreset extends VideoInformationBase {
         }
 
         public VideoPreset build() {
-            return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
+            return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getSelectedPlaylist(),
                     getCategory(), isTellSubs(), getThumbNailPath(), getPresetName(), presetName);
         }
     }

@@ -228,8 +228,8 @@ public class mainWindowController {
             // No preset, add videos to upload list with file name as title and blank/default values on the rest
             for(File videoFile : videosToAdd) {
                 VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
-                        null, null, null, false, null,
-                        UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
+                        null, null, null, false,
+                        null, UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
 
                 newUpload.setThumbnailCursorEventHandler(this::updateCursor);
                 // make the upload change its width together with the uploads list and the window
@@ -266,7 +266,7 @@ public class mainWindowController {
                 return;
             }
             // Get playlist url if available
-            String playlistUrl = playlistUtils.getPlaylistUrl(chosenPreset.getPlaylist());
+            String playlistUrl = playlistUtils.getPlaylistUrl(chosenPreset.getSelectedPlaylist());
             if (playlistUrl == null) {
                 playlistUrl = "";
             }
@@ -288,7 +288,7 @@ public class mainWindowController {
                         .setVideoDescription(description)
                         .setVisibility(chosenPreset.getVisibility())
                         .setVideoTags(chosenPreset.getVideoTags())
-                        .setPlaylist(chosenPreset.getPlaylist())
+                        .setSelectedPlaylist(chosenPreset.getSelectedPlaylist())
                         .setCategory(chosenPreset.getCategory())
                         .setTellSubs(chosenPreset.isTellSubs())
                         .setPaneName(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter)
@@ -598,22 +598,6 @@ public class mainWindowController {
         thumbnailRClickMenu.getItems().add(item1);
         uploadQueueVideos.get(selected).setThumbnailContextMenu(thumbnailRClickMenu);
 
-        // Playlist drop down clicked
-        uploadQueueVideos.get(selected).setOnPlaylistsClicked(event -> {
-            if (playlistUtils.getPlaylistNames().size() == 0) {
-                AlertUtils.simpleClose(transMainWin.getString("diag_noPlaylists_short"),
-                        transMainWin.getString("diag_noPlaylists_full")).show();
-            } else {
-                ArrayList<String> playlistNames = new ArrayList<>();
-                // Include a "no selected" item
-                playlistNames.add(transBasic.getString("noSelected"));
-                playlistNames.addAll(playlistUtils.getVisiblePlaylistNames());
-                uploadQueueVideos.get(selected).setPlaylists(playlistNames);
-            }
-        });
-        uploadQueueVideos.get(selected).setOnCategoriesClicked(event ->
-                uploadQueueVideos.get(selected).setCategories(categoryUtils.getCategoryNames())
-        );
         buttonStates.setEditing(uploadQueueVideos.get(selected));
         // Make sure visual change get to the UI
         updateUploadList();
@@ -637,12 +621,16 @@ public class mainWindowController {
                     transMainWin.getString("diag_noVidTitle_full")).show();
             return;
         }
-        // Make sure a category is selected and the category name still match a stored category
-        // (will not match stored if categories have been re-localized)
-        if (uploadQueueVideos.get(selected).getCategory() == null ||
-                categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
+        // Make sure a category is selected (is initially null and can be set to null if categories has been re-localized)
+        if (uploadQueueVideos.get(selected).getCategory() == null) {
             AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
                     transBasic.getString("diag_invalidCategory_full")).show();
+            return;
+        }
+        // Check if categories has been re-localized and list is no longer correct
+        if (!categoryUtils.getCategoryNames().contains(uploadQueueVideos.get(selected).getCategory())) {
+            AlertUtils.simpleClose(transBasic.getString("diag_categoryRemoved_short"),
+                    transBasic.getString("diag_categoryRemoved_full")).show();
             return;
         }
 

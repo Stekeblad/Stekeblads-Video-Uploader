@@ -50,13 +50,10 @@ public class SettingsWindowController {
 
         choice_languages.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> hasDoneChanges = true);
 
-        // translation file for this window
-        // -- tooltip for wiki button to tell user to press F1 to get to current window's wiki page
-
         // F1 for wiki on this window
         settingsWindow.getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {
-                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/------------------");
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Settings-Window");
                 event.consume();
             }
         });

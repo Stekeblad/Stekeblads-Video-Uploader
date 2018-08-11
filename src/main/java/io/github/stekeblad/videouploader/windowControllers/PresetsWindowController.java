@@ -93,7 +93,7 @@ public class PresetsWindowController {
                 VideoPreset videoPreset;
                 try {
                     videoPreset = new VideoPreset(configManager.getPresetString(presetName), PRESET_PANE_ID_PREFIX + presetCounter);
-                } catch (Exception e) { // thumbnail file no longer available is handled as no thumbnail is selected and using default, change please?
+                } catch (Exception e) {
                     e.printStackTrace();
                     System.err.println("Failed loading preset: " + presetName);
                     AlertUtils.exceptionDialog("Could not load preset", "An error occurred while trying to " +
@@ -341,7 +341,8 @@ public class PresetsWindowController {
 
         // Sets the thumbnail clickable for changing
         videoPresets.get(selected).setOnThumbnailClicked(event -> {
-            if (event.getButton() == MouseButton.SECONDARY) return; // Conflicting with context menu
+            if (event.getButton() == MouseButton.SECONDARY)
+                return; // Conflicting with context menu, only do this on left click
             File pickedThumbnail = FileUtils.pickThumbnail();
             if(pickedThumbnail != null) {
                 try {
@@ -365,26 +366,6 @@ public class PresetsWindowController {
         thumbnailRClickMenu.getItems().add(item1);
         videoPresets.get(selected).setThumbnailContextMenu(thumbnailRClickMenu);
 
-        // set the playlists list
-        videoPresets.get(selected).setOnPlaylistsClicked(event -> {
-            if (configManager.getNeverAuthed()) {
-                onManagePlaylistsClicked(new ActionEvent());
-            }
-            if (!configManager.getNeverAuthed()) {
-                ArrayList<String> playlistNames = new ArrayList<>();
-                // Include a "no selected" item
-                playlistNames.add(transBasic.getString("noSelected"));
-                playlistNames.addAll(playlistUtils.getVisiblePlaylistNames());
-                videoPresets.get(selected).setPlaylists(playlistNames);
-            }
-        });
-
-        //set categories
-        videoPresets.get(selected).setOnCategoriesClicked(event ->
-                // No default here, category is mandatory
-                videoPresets.get(selected).setCategories(categoryUtils.getCategoryNames())
-        );
-
         buttonStates.setEditing(videoPresets.get(selected));
     }
 
@@ -403,10 +384,14 @@ public class PresetsWindowController {
         }
         // Make sure a category is selected and the category name still match a stored category
         // (will not match stored if categories have been re-localized)
-        if (videoPresets.get(selected).getCategory() == null ||
-                categoryUtils.getCategoryId(videoPresets.get(selected).getCategory()).equals("-1")) {
+        if (videoPresets.get(selected).getCategory() == null) {
             AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
                     transBasic.getString("diag_invalidCategory_full")).show();
+            return;
+        }
+        if (!categoryUtils.getCategoryNames().contains(videoPresets.get(selected).getCategory())) {
+            AlertUtils.simpleClose(transBasic.getString("diag_categoryRemoved_short"),
+                    transBasic.getString("diag_categoryRemoved_full")).show();
             return;
         }
         // make sure preset name is not empty

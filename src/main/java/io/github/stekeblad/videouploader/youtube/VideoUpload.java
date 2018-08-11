@@ -115,7 +115,7 @@ public class VideoUpload extends VideoInformationBase{
      * @param videoDescription Description of the video that will be uploaded
      * @param visibility The visibility status of the video that will be uploaded
      * @param videoTags The tags that the video that will be uploaded will have
-     * @param playlist The name of a playlist that will be selected for added to after uploading
+     * @param selectedPlaylist The name of a playlist that will be selected for adding to after uploading
      * @param category The name of the category that should be selected
      * @param tellSubs Set to true if subscribers should be notified when this videos is uploaded, set to false to not notify
      * @param thumbNailPath File path to a thumbnail to use for this video or null to let thumbnail be selected automatically
@@ -123,9 +123,11 @@ public class VideoUpload extends VideoInformationBase{
      * @param videoFile The video that will be uploaded
      */
     public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                       String playlist, String category, boolean tellSubs, String thumbNailPath, String paneName, File videoFile) {
+                       String selectedPlaylist, String category, boolean tellSubs,
+                       String thumbNailPath, String paneName, File videoFile) {
 
-        super(videoName, videoDescription, visibility, videoTags, playlist, category, tellSubs, thumbNailPath, paneName);
+        super(videoName, videoDescription, visibility, videoTags, selectedPlaylist, category,
+                tellSubs, thumbNailPath, paneName);
         this.videoFile = videoFile;
         makeUploadPane();
     }
@@ -172,7 +174,7 @@ public class VideoUpload extends VideoInformationBase{
         } else {
             thumbnailPath = getThumbNail().getAbsolutePath();
         }
-        return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
+        return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getSelectedPlaylist(),
                 getCategory(), isTellSubs(), thumbnailPath, paneIdCopy, getVideoFile());
     }
 
@@ -213,8 +215,8 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
-        public VideoUpload.Builder setPlaylist(String playlist) {
-            this.playlist = playlist;
+        public VideoUpload.Builder setSelectedPlaylist(String selectedPlaylist) {
+            this.selectedPlaylist = selectedPlaylist;
             return this;
         }
 
@@ -239,8 +241,9 @@ public class VideoUpload extends VideoInformationBase{
         }
 
         public VideoUpload build() {
-            return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getPlaylist(),
-                    getCategory(), isTellSubs(), getThumbNailPath(), getPaneName(), videoFile);
+            return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
+                    getSelectedPlaylist(), getCategory(), isTellSubs(),
+                    getThumbNailPath(), getPaneName(), videoFile);
         }
     }
 
