@@ -2,9 +2,10 @@ package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.Translations;
-import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
@@ -44,8 +45,8 @@ public class ManagePlaylistsWindowController {
      */
     public void myInit() {
         // Load Translations
-        transBasic = TranslationsManager.getTranslation("baseStrings");
-        transPlaylistWindow = TranslationsManager.getTranslation("manPlayWindow");
+        transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
+        transPlaylistWindow = TranslationsManager.getTranslation(TranslationBundles.WINDOW_PLAYLIST);
         transPlaylistWindow.autoTranslate(window);
 
         // Insert the stored playlists into the list

@@ -1,4 +1,6 @@
-package io.github.stekeblad.videouploader.utils;
+package io.github.stekeblad.videouploader.utils.translation;
+
+import io.github.stekeblad.videouploader.utils.FileUtils;
 
 import java.util.HashMap;
 import java.util.List;

@@ -9,6 +9,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -23,67 +24,20 @@ import java.util.Optional;
 public class AlertUtils {
 
     /**
-     * Convenient method for creating a @code{Alert} dialog with a single CLOSE button
+     * Creates an Alert, sets Modality, Header, Content and adjusts the minHeight
      * @param header Custom window title
      * @param content The message to display to the user
-     * @return a Alert ready to display or continue to modify
+     * @return an Alert prepared with the common settings set and ready to be specialized by the caller (the most
+     * important may be the buttons in the Alert)
      */
-    public static Alert simpleClose(String header, String content) {
+    private static Alert makeShortMsgAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.NONE);
         alert.initModality(Modality.APPLICATION_MODAL);
         alert.setTitle(header);
         alert.setContentText(content);
-        alert.getButtonTypes().setAll(ButtonType.CLOSE);
+        // To fix that messages is often truncated on my test Ubuntu machine:
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         return alert;
-    }
-
-    /**
-     * Convenient method for creating a @code{Alert} dialog with a YES and a NO button.
-     * To set what to do on the buttons you can do like this:
-     * <pre>{@code
-     * Optional<ButtonType> buttonChoice = AlertUtils.yesNo(...).showAndWait();
-     * if (buttonChoice.isPresent()) {
-     *     if (buttonChoice.get() == ButtonType.YES) {
-     *         doOnYes();
-     *     } else { // ButtonType.NO or Closed with [X] button
-     *         doOnNo();
-     *     }
-     * }
-     *
-     * @param header Custom window title
-     * @param content The message to display to the user
-     * @return a Alert that needs actions bound to the buttons but is otherwise ready to be shown
-     */
-    public static Alert yesNo(String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.NONE);
-        alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setTitle(header);
-        alert.setContentText(content);
-        alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-        return alert;
-    }
-
-    /**
-     * A Dialog with three button where you define not only the header and content text but also the text on the buttons
-     * @param header Custom window title
-     * @param content The message to display to the user
-     * @param btn1Text The text on the first button
-     * @param btn2Text The text on the second button
-     * @param btn3Text The text on the third button
-     * @return the text on the button that was clicked or null if no button result is available
-     */
-    public static String threeButtons(String header, String content, String btn1Text, String btn2Text, String btn3Text) {
-        Alert alert = new Alert(Alert.AlertType.NONE);
-        alert.initModality(Modality.APPLICATION_MODAL);
-        alert.setTitle(header);
-        alert.setContentText(content);
-        alert.getButtonTypes().addAll(new ButtonType(btn1Text), new ButtonType(btn2Text), new ButtonType(btn3Text));
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent()) {
-            return result.get().getText();
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -129,6 +83,76 @@ public class AlertUtils {
     }
 
     /**
+     * Returns as a String what exception.printStackTrace would have printed to the console.
+     *
+     * @param exception the Exception you want the stacktrace of.
+     * @return the stacktrace as a String.
+     */
+    private static String getStacktrace(Throwable exception) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        exception.printStackTrace(pw);
+        return sw.toString();
+    }
+
+    /**
+     * Convenient method for creating a @code{Alert} dialog with a single CLOSE button
+     *
+     * @param header  Custom window title
+     * @param content The message to display to the user
+     * @return a Alert ready to display or continue to modify
+     */
+    public static Alert simpleClose(String header, String content) {
+        Alert alert = makeShortMsgAlert(header, content);
+        alert.getButtonTypes().setAll(ButtonType.CLOSE);
+        return alert;
+    }
+
+    /**
+     * Convenient method for creating a @code{Alert} dialog with a YES and a NO button.
+     * To set what to do on the buttons you can do like this:
+     * <pre>{@code
+     * Optional<ButtonType> buttonChoice = AlertUtils.yesNo(...).showAndWait();
+     * if (buttonChoice.isPresent()) {
+     *     if (buttonChoice.get() == ButtonType.YES) {
+     *         doOnYes();
+     *     } else { // ButtonType.NO or Closed with [X] button
+     *         doOnNo();
+     *     }
+     * }
+     *
+     * @param header Custom window title
+     * @param content The message to display to the user
+     * @return a Alert that needs actions bound to the buttons but is otherwise ready to be shown
+     */
+    public static Alert yesNo(String header, String content) {
+        Alert alert = makeShortMsgAlert(header, content);
+        alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+        return alert;
+    }
+
+    /**
+     * A Dialog with three button where you define not only the header and content text but also the text on the buttons
+     *
+     * @param header   Custom window title
+     * @param content  The message to display to the user
+     * @param btn1Text The text on the first button
+     * @param btn2Text The text on the second button
+     * @param btn3Text The text on the third button
+     * @return the text on the button that was clicked or null if no button result is available
+     */
+    public static String threeButtons(String header, String content, String btn1Text, String btn2Text, String btn3Text) {
+        Alert alert = makeShortMsgAlert(header, content);
+        alert.getButtonTypes().addAll(new ButtonType(btn1Text), new ButtonType(btn2Text), new ButtonType(btn3Text));
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent()) {
+            return result.get().getText();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Like simpleClose but designed for longer messages in the content area, it does also displays the window directly
      *
      * @param header  Custom window title
@@ -157,18 +181,5 @@ public class AlertUtils {
                 "\n" + stackTrace;
         GridPane pane = makeLongMsgPane(fullContent, false);
         paneToWindow(pane, header);
-    }
-
-    /**
-     * Returns as a String what exception.printStackTrace would have printed to the console.
-     *
-     * @param exception the Exception you want the stacktrace of.
-     * @return the stacktrace as a String.
-     */
-    public static String getStacktrace(Throwable exception) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        exception.printStackTrace(pw);
-        return sw.toString();
     }
 }

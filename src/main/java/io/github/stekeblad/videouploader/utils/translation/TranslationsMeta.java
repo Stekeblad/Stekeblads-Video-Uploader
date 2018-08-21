@@ -1,4 +1,6 @@
-package io.github.stekeblad.videouploader.utils;
+package io.github.stekeblad.videouploader.utils.translation;
+
+import io.github.stekeblad.videouploader.utils.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

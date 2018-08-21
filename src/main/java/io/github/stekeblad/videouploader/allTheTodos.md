@@ -2,9 +2,10 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- Translation package enumeration
 
 #### Higher priority things to do
+- change so newly created, unsaved presets have save/delete instead of save/cancel. similar to videos
+- Completely prevent changing category locale if user is editing presets/videos or uploads is in progress
 
 #### Lower priority things to do
 - Save window sizes/location on exit, use the saved data when starting next time
@@ -30,10 +31,11 @@ as the one they want (Can not upload a file faster than it can be read.))
 or maybe even: if the user goes live on Twitch a short video is automatically
 uploaded saying "I am live on Twitch!" and automatically delete video when stream ends.
 (probably possible, fun to try, but would someone use it?)
-- Uploader should probably have some protection against concurrent modification
-of things.
 - drag and drop thumbnails on thumbnail image box 
 and drop video files in the list of videos to add list?
+- Setting for start folder when:
+  - selecting video files
+  - selecting thumbnail
 
 #### Java 11 (planned to be released at the end of september)
 - Toast notification when all uploads finished
@@ -49,10 +51,12 @@ and drop video files in the list of videos to add list?
         - categories now checked on preset and upload save plus onStartUpload
         - Existence of video file and thumbnail file is checked in uploader
         - If playlist has been deleted from YouTube is NOT CHECKED!
-- Wikipage for settings window (add url to F1 click in settings window!)
+- The settings window wiki page
 - Clone preset button
 - R-click to
     - reset thumbnail
     - show playlist on YouTube
 - Wiki page for developers, pointing out things that i am proud of and
 that may be useful to others.
+    - The Translations system
+    - Button states(?)

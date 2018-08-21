@@ -1,7 +1,13 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
-import io.github.stekeblad.videouploader.utils.*;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsMeta;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
@@ -42,7 +48,7 @@ public class SettingsWindowController {
     public void myInit() {
         configManager = ConfigManager.INSTANCE;
         translationsMeta = new TranslationsMeta();
-        settingsTrans = TranslationsManager.getTranslation("settingsWindow");
+        settingsTrans = TranslationsManager.getTranslation(TranslationBundles.WINDOW_SETTINGS);
         settingsTrans.autoTranslate(settingsWindow);
 
         choice_languages.setItems(FXCollections.observableList(translationsMeta.getAllTranslationLocales()));

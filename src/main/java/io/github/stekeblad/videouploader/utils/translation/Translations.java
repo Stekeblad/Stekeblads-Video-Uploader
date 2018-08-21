@@ -1,6 +1,7 @@
-package io.github.stekeblad.videouploader.utils;
+package io.github.stekeblad.videouploader.utils.translation;
 
 import io.github.stekeblad.videouploader.main.mainWindowController;
+import io.github.stekeblad.videouploader.utils.FileUtils;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Labeled;
@@ -161,14 +162,14 @@ public class Translations {
             } else if (key.endsWith("_pt")) { // Test if it is a promptText translation
                 // All nodes that extend TextInputControl can have a prompt text
                 Node aNode = children.get(prefix + key.substring(0, key.length() - 3));
-                if (aNode != null && aNode instanceof TextInputControl) {
+                if (aNode instanceof TextInputControl) {
                     ((TextInputControl) aNode).setPromptText(getString(key));
                 }
                 // Else it is a text translation
             } else {
                 // All nodes that can have text extends Labeled
                 Node aNode = children.get(prefix + key);
-                if (aNode != null && aNode instanceof Labeled) {
+                if (aNode instanceof Labeled) {
                     ((Labeled) aNode).setText(getString(key));
                 }
             }

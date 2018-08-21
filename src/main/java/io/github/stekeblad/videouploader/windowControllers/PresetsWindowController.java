@@ -1,9 +1,14 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
-import io.github.stekeblad.videouploader.utils.*;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
 import io.github.stekeblad.videouploader.utils.state.VideoPresetState;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
@@ -69,10 +74,10 @@ public class PresetsWindowController {
         videoPresets = new ArrayList<>();
 
         // Load Translations
-        transPresetWin = TranslationsManager.getTranslation("presetWindow");
-        transBasic = TranslationsManager.getTranslation("baseStrings");
+        transPresetWin = TranslationsManager.getTranslation(TranslationBundles.WINDOW_PRESET);
+        transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
         transPresetWin.autoTranslate(presetWindow);
-        transPreset = TranslationsManager.getTranslation("presetsUploads");
+        transPreset = TranslationsManager.getTranslation(TranslationBundles.PRESET_UPLOAD);
 
         // Children of Toolbars can not be detected through code currently (probably a bug)
         btn_managePlaylists.setText(transPresetWin.getString("btn_managePlaylists"));

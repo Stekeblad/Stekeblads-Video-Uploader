@@ -2,9 +2,10 @@ package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.Translations;
-import io.github.stekeblad.videouploader.utils.TranslationsManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -54,8 +55,8 @@ public class LocalizeCategoriesWindowController {
         });
 
         // Load Translations
-        transLocCatWin = TranslationsManager.getTranslation("locCatWindow");
-        transBasic = TranslationsManager.getTranslation("baseStrings");
+        transLocCatWin = TranslationsManager.getTranslation(TranslationBundles.WINDOW_LOCALIZE);
+        transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
         transLocCatWin.autoTranslate(window);
 
         // Add description text

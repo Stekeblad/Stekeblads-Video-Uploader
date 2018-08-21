@@ -2,8 +2,9 @@ package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.Translations;
-import io.github.stekeblad.videouploader.utils.TranslationsManager;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -22,7 +23,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
         Parent root = loader.load();
         loadTranslations();
-        Translations trans = TranslationsManager.getTranslation("baseStrings");
+        Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
         primaryStage.setTitle(trans.getString("app_name"));
         primaryStage.setScene(new Scene(root, 900, 825));
         // Register MainWindowController.onWindowClose() to be called when the close button is clicked

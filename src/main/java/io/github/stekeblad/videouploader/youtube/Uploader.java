@@ -8,8 +8,9 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
-import io.github.stekeblad.videouploader.utils.Translations;
-import io.github.stekeblad.videouploader.utils.TranslationsManager;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
@@ -49,8 +50,8 @@ public class Uploader {
 
 
     public Uploader() {
-        translationsUpload = TranslationsManager.getTranslation("uploader");
-        translationsBasic = TranslationsManager.getTranslation("baseStrings");
+        translationsUpload = TranslationsManager.getTranslation(TranslationBundles.UPLOADER);
+        translationsBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
         tasks = Collections.synchronizedMap(new HashMap<>());
         categoryUtils = CategoryUtils.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;

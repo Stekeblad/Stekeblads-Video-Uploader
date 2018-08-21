@@ -1,9 +1,14 @@
 package io.github.stekeblad.videouploader.main;
 
-import io.github.stekeblad.videouploader.utils.*;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
 import io.github.stekeblad.videouploader.utils.state.VideoUploadState;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
 import io.github.stekeblad.videouploader.windowControllers.SettingsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
@@ -72,15 +77,15 @@ public class mainWindowController {
      */
     public void myInit() {
         // Load Translations
-        transMainWin = TranslationsManager.getTranslation("mainWindow");
+        transMainWin = TranslationsManager.getTranslation(TranslationBundles.WINDOW_MAIN);
         transMainWin.autoTranslate(mainWindowPane);
         // Bugged:
         // System.out.println(toolbar.getChildrenUnmodifiable());
         btn_presets.setText(transMainWin.getString("btn_presets"));
         btn_settings.setText(transMainWin.getString("btn_settings"));
 
-        transBasic = TranslationsManager.getTranslation("baseStrings");
-        transUpload = TranslationsManager.getTranslation("presetsUploads");
+        transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
+        transUpload = TranslationsManager.getTranslation(TranslationBundles.PRESET_UPLOAD);
 
         // Load custom CSS (for improved readability of disabled ChoiceBoxes)
         URL css_path = mainWindowController.class.getClassLoader().getResource("css/disabled.css");

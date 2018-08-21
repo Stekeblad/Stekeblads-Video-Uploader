@@ -27,14 +27,19 @@ public class VideoUploadState {
         lockedButtonProperties = properties;
     }
 
+    /**
+     * See defineLocked
+     */
     public void defineEditing(ButtonProperties[] properties) {
         editingButtonProperties = properties;
     }
 
+    /** See defineLocked */
     public void defineUploading(ButtonProperties[] properties) {
         uploadingButtonProperties = properties;
     }
 
+    /** See defineLocked */
     public void defineFailed(ButtonProperties[] properties) {
         failedButtonProperties = properties;
     }
@@ -52,6 +57,7 @@ public class VideoUploadState {
         set(node, p1, p2, p3);
     }
 
+    /** See setLocked */
     public void setEditing(VideoInformationBase node) {
         ButtonProperties p1 = editingButtonProperties[0];
         ButtonProperties p2 = editingButtonProperties[1];
@@ -59,6 +65,7 @@ public class VideoUploadState {
         set(node, p1, p2, p3);
     }
 
+    /** See setLocked */
     public void setUploading(VideoInformationBase node) {
         ButtonProperties p1 = uploadingButtonProperties[0];
         ButtonProperties p2 = uploadingButtonProperties[1];
@@ -66,6 +73,7 @@ public class VideoUploadState {
         set(node, p1, p2, p3);
     }
 
+    /** See setLocked */
     public void setFailed(VideoInformationBase node) {
         ButtonProperties p1 = failedButtonProperties[0];
         ButtonProperties p2 = failedButtonProperties[1];

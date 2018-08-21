@@ -7,7 +7,8 @@ import com.google.api.services.youtube.model.PlaylistListResponse;
 import com.google.api.services.youtube.model.PlaylistSnippet;
 import com.google.api.services.youtube.model.PlaylistStatus;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.TranslationsManager;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.Auth;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 
@@ -110,7 +111,7 @@ public enum PlaylistUtils {
     public ArrayList<String> getVisiblePlaylistNames() {
         ArrayList<String> visiblePlaylists = new ArrayList<>();
         if (noPlaylistName.equals("")) {
-            noPlaylistName = TranslationsManager.getTranslation("baseStrings").getString("noSelected");
+            noPlaylistName = TranslationsManager.getTranslation(TranslationBundles.BASE).getString("noSelected");
         }
         visiblePlaylists.add(noPlaylistName);
         playlistCache.forEach((k, v) -> {
