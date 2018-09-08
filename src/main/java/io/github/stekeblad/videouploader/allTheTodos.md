@@ -5,6 +5,7 @@
 
 #### Higher priority things to do
 - change so newly created, unsaved presets have save/delete instead of save/cancel. similar to videos
+  - Don't forget cloned presets
 - Completely prevent changing category locale if user is editing presets/videos or uploads is in progress
 
 #### Lower priority things to do
@@ -13,7 +14,7 @@
 playlists and deciding if they should be visible or not (playlists can
 be renamed, name is different but ID the same.)
 - Update YouTube API version
-- upload/preset list have a horizontal scroll bar, remove it
+- upload/preset list have a horizontal scroll bar, remove it (I don't know how)
 - Does the program freeze shortly when adding a lot of videos with apply preset button?
 Maybe do most of the work in a background thread, add a loading indicator and do only some
 preparations and finishing in main thread?
@@ -36,27 +37,9 @@ and drop video files in the list of videos to add list?
 - Setting for start folder when:
   - selecting video files
   - selecting thumbnail
+- Collapsed mode for Presets and Uploads (takes up less height)
 
 #### Java 11 (planned to be released at the end of september)
 - Toast notification when all uploads finished
 - Progress bar on taskbar icon
 - Bundle Java with the program
-
-#### Things to change on wiki when releasing next update
-- Pressing enter in playlist/preset name box
-- Pressing F1 for wiki
-- Translations
-- Red progressBar and upload failed dialogs
-    - Checking existence of category, thumbnail, video, playlist
-        - categories now checked on preset and upload save plus onStartUpload
-        - Existence of video file and thumbnail file is checked in uploader
-        - If playlist has been deleted from YouTube is NOT CHECKED!
-- The settings window wiki page
-- Clone preset button
-- R-click to
-    - reset thumbnail
-    - show playlist on YouTube
-- Wiki page for developers, pointing out things that i am proud of and
-that may be useful to others.
-    - The Translations system
-    - Button states(?)

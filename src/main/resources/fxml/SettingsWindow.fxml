@@ -21,7 +21,7 @@
     </rowConstraints>
     <Label fx:id="label_langSelect" text="Language settings" wrapText="true" GridPane.columnIndex="1"/>
     <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-    <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+    <VBox alignment="CENTER_LEFT" prefHeight="168.0" prefWidth="180.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
         <Button fx:id="btn_gotoMainPage" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                 onAction="#onGotoMainPageClicked" text="Home page"/>
         <Button fx:id="btn_gotoWiki" maxWidth="1.7976931348623157E308" mnemonicParsing="false"

@@ -1,5 +1,8 @@
 # /resources/strings
 
+Maybe its more logical for me to be in the strings directory but that is
+not allowed by the translation system
+
 This is the translations directory. The subdirectories are for different
 sets of translations, translations that is used in several windows are
 placed in the baseStrings directory, translations for the mainWindow is

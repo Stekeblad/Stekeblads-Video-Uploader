@@ -719,10 +719,12 @@ public class mainWindowController {
         if (uploadQueueVideos.get(selected).getVideoName().length() < 1) {
             AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
                     transMainWin.getString("diag_noStartUpload_full_noTitle")).show();
+            return;
         }
         if (categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
                     transMainWin.getString("diag_noStartUpload_full_noCategory")).show();
+            return;
         }
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
@@ -841,10 +843,10 @@ public class mainWindowController {
      */
     private void onUploadErred(VideoUpload video, Throwable e) {
         String header = transBasic.getString("app_name") + " - Failed to upload video";
-        if (e == null || video == null) {
-            AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
-        } else {
+        if (e != null && video != null) {
             AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
+        } else {
+            AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
         }
         //Switch to a reset upload button instead of abort
         if (video != null) {

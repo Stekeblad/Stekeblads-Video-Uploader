@@ -523,10 +523,10 @@ public class PresetsWindowController {
         transPreset.autoTranslate(copy.getPane(), copy.getPaneId());
         buttonStates.setEditing(copy);
         videoPresets.add(selected + 1, copy); // add right after original in list
-        listPresets.scrollTo(listPresets.getItems().size() - 1);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
 
         presetCounter++;
         updatePresetList();
+        listPresets.scrollTo(selected + 1);
     }
 }
