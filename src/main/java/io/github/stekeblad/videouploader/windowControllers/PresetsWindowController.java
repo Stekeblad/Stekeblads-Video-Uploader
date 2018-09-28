@@ -55,6 +55,7 @@ public class PresetsWindowController {
     private int presetCounter = 0;
     private HashMap<String, VideoPreset> presetBackups;
     private VideoPresetState buttonStates;
+    private boolean disableLocaleChange;
 
     private Translations transPresetWin;
     private Translations transBasic;
@@ -65,13 +66,17 @@ public class PresetsWindowController {
     /**
      * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
-    public void myInit() {
+    public void myInit(boolean disableLocaleChange) {
         configManager = ConfigManager.INSTANCE;
         playlistUtils = PlaylistUtils.INSTANCE;
         categoryUtils = CategoryUtils.INSTANCE;
 
         presetBackups = new HashMap<>();
         videoPresets = new ArrayList<>();
+
+        // It will cause problems if locale is changed while something is being edited or uploaded
+        this.disableLocaleChange = disableLocaleChange;
+        setLocaleButtonDisabled();
 
         // Load Translations
         transPresetWin = TranslationsManager.getTranslation(TranslationBundles.WINDOW_PRESET);
@@ -102,8 +107,8 @@ public class PresetsWindowController {
                     e.printStackTrace();
                     System.err.println("Failed loading preset: " + presetName);
                     AlertUtils.exceptionDialog("Could not load preset", "An error occurred while trying to " +
-                            "load the preset " + presetName + ". This may be because it has been externally modified or " +
-                            "because the selected thumbnail file can not be found. More details below.", e);
+                            "load the preset " + presetName + ". \nThis may be because it has been externally modified or " +
+                            "because the selected thumbnail file can not be found. \nMore details below.", e);
                     continue;
                 }
                 videoPreset.setThumbnailCursorEventHandler(this::updateCursor);
@@ -193,6 +198,13 @@ public class PresetsWindowController {
         newPreset.setThumbnailCursorEventHandler(this::updateCursor);
         videoPresets.add(newPreset);
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
+
+        // Change the cancel button to a delete button, the backed up state created by onEdit is not valid
+        Button deleteButton = new Button(transBasic.getString("delete"));
+        deleteButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_DELETE);
+        deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
+        videoPresets.get(videoPresets.size() - 1).setButton2(deleteButton);
+
         listPresets.scrollTo(listPresets.getItems().size() -1);
         txt_nameNewPreset.setText("");
         presetCounter++;
@@ -280,8 +292,8 @@ public class PresetsWindowController {
         });
 
         buttonStates.defineEditing(new ButtonProperties[]{
-                new ButtonProperties(BUTTON_CANCEL, transBasic.getString("cancel"), this::onPresetCancelEdit),
                 new ButtonProperties(BUTTON_SAVE, transBasic.getString("save"), this::onPresetSave),
+                new ButtonProperties(BUTTON_CANCEL, transBasic.getString("cancel"), this::onPresetCancelEdit),
                 new ButtonProperties("_ghost", "", null)
         });
     }
@@ -324,6 +336,20 @@ public class PresetsWindowController {
             presetWindow.getScene().setCursor(Cursor.HAND);
         } else {
             presetWindow.getScene().setCursor(Cursor.DEFAULT);
+        }
+    }
+
+    /**
+     * Updates the enabled/disabled state for the localize categories button, categories should not be relocalized if
+     * one or more videos/presets is in edit mode or an upload is in progress because updates WILL fail and preset/uploads
+     * that was in edit mode will not be possible to save!
+     */
+    private void setLocaleButtonDisabled() {
+        if (disableLocaleChange) {
+            btn_localizeCategories.setDisable(true);
+        } else {
+            btn_localizeCategories.setDisable(!presetBackups.isEmpty());
+
         }
     }
 
@@ -372,6 +398,7 @@ public class PresetsWindowController {
         videoPresets.get(selected).setThumbnailContextMenu(thumbnailRClickMenu);
 
         buttonStates.setEditing(videoPresets.get(selected));
+        setLocaleButtonDisabled();
     }
 
     /**
@@ -433,6 +460,7 @@ public class PresetsWindowController {
         videoPresets.get(selected).setEditable(false);
         configManager.savePreset(videoPresets.get(selected).getPresetName(), videoPresets.get(selected).toString());
         buttonStates.setLocked(videoPresets.get(selected));
+        setLocaleButtonDisabled();
     }
 
     /**
@@ -455,6 +483,7 @@ public class PresetsWindowController {
             // If no backup, assume preset is a newly added not saved preset, delete it directly
             videoPresets.remove(selected);
             updatePresetList();
+            setLocaleButtonDisabled();
             return;
         } else {
             // restore backup
@@ -463,15 +492,9 @@ public class PresetsWindowController {
             presetBackups.remove(videoPresets.get(selected).getPaneId());
         }
 
-        // Test if this preset exist on disc, if not it should be deleted from the UI
-        ArrayList<String> presetNames = configManager.getPresetNames();
-        if (presetNames != null && !presetNames.contains(videoPresets.get(selected).getPresetName())) {
-            videoPresets.remove(selected);
-            updatePresetList();
-            return;
-        }
         buttonStates.setLocked(videoPresets.get(selected));
         updatePresetList();
+        setLocaleButtonDisabled();
     }
 
     /**
@@ -497,6 +520,7 @@ public class PresetsWindowController {
                 } else {
                     videoPresets.remove(selected);
                     updatePresetList();
+                    setLocaleButtonDisabled();
                 }
             } //else if ButtonType.NO or closed [X] do nothing
         }
@@ -524,6 +548,12 @@ public class PresetsWindowController {
         buttonStates.setEditing(copy);
         videoPresets.add(selected + 1, copy); // add right after original in list
         onPresetEdit(PRESET_PANE_ID_PREFIX + presetCounter + "_fakeButton");
+
+        // Change the cancel button to a delete button, the backed up state created by onEdit is not valid
+        Button deleteButton = new Button(transBasic.getString("delete"));
+        deleteButton.setId(PRESET_PANE_ID_PREFIX + presetCounter + BUTTON_DELETE);
+        deleteButton.setOnMouseClicked(event -> onPresetDelete(deleteButton.getId()));
+        videoPresets.get(videoPresets.size() - 1).setButton2(deleteButton);
 
         presetCounter++;
         updatePresetList();

@@ -83,15 +83,19 @@ public class Uploader {
     /**
      * Aborts a single upload, scheduled or active. This method is threadsafe.
      * @param cancelName the cancelName that was given when the add() method was called
-     * @return true if the upload was aborted, false if it for some reason is not possible to abort it.
+     * @return true if the upload was aborted or no upload with the given name exists,
+     * false if it for some reason is not possible to abort it.
      */
     public boolean abortUpload(String cancelName) {
-        boolean success;
-        success = tasks.get(cancelName).cancel(true);
-        if (success) {
-            tasks.remove(cancelName);
+        if (tasks.containsKey(cancelName)) {
+            boolean success;
+            success = tasks.get(cancelName).cancel(true);
+            if (success) {
+                tasks.remove(cancelName);
+            }
+            return success;
         }
-        return success;
+        return true;
     }
 
     /**
@@ -165,7 +169,18 @@ public class Uploader {
 
         // debug thing to force error
         if (video.getVideoName().equals("forceUploadFailure")) {
-            throw new RuntimeException("forced by filename");
+            throw new RuntimeException("forced by filename.\nThe filename used is reserved for testing, uploads with this " +
+                    "name will ALWAYS fail");
+        }
+        // debug thing to force error after a 10 seconds delay
+        if (video.getVideoName().equals("forceUploadFailure_delayed")) {
+            try {
+                Thread.sleep(1000 * 10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("forced by filename");
+            }
+            throw new RuntimeException("forced by filename.\nThe filename used is reserved for testing, uploads with this " +
+                    "name will ALWAYS fail");
         }
 
         // Auth the user and create the Youtube object
@@ -225,7 +240,7 @@ public class Uploader {
                     double progress = ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length());
                     Platform.runLater(() -> video.setProgressBarProgress(progress));
                     String newStatusText = String.format(
-                            translationsUpload.getString("uploadWithProgress"), Math.floor(progress * 100));
+                            translationsUpload.getString("uploadWithProgress"), (int) Math.floor(progress * 100));
                     Platform.runLater(() -> video.setStatusLabelText(newStatusText));
                     break;
                 case MEDIA_COMPLETE:

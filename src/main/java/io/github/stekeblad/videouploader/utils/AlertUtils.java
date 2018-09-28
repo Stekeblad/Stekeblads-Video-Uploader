@@ -74,7 +74,7 @@ public class AlertUtils {
     private static void paneToWindow(Pane pane, String header) {
         Scene alertDialog = new Scene(pane);
         Stage stage = new Stage();
-        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(alertDialog);
         stage.setTitle(header);
         stage.setAlwaysOnTop(true);

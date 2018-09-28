@@ -4,20 +4,17 @@
 - Bugs and small things (there is always bugs and small things...)
 
 #### Higher priority things to do
-- change so newly created, unsaved presets have save/delete instead of save/cancel. similar to videos
-  - Don't forget cloned presets
-- Completely prevent changing category locale if user is editing presets/videos or uploads is in progress
 
 #### Lower priority things to do
 - Save window sizes/location on exit, use the saved data when starting next time
 - When updating playlist, use ID instead of name when looking at old
 playlists and deciding if they should be visible or not (playlists can
 be renamed, name is different but ID the same.)
-- Update YouTube API version
 - upload/preset list have a horizontal scroll bar, remove it (I don't know how)
 - Does the program freeze shortly when adding a lot of videos with apply preset button?
 Maybe do most of the work in a background thread, add a loading indicator and do only some
 preparations and finishing in main thread?
+- If error happens during the uploading, check the Google error message to give better error msg to user
 
 #### Thinking about
 - Keep even not started uploads on close?
@@ -38,8 +35,17 @@ and drop video files in the list of videos to add list?
   - selecting video files
   - selecting thumbnail
 - Collapsed mode for Presets and Uploads (takes up less height)
+- Setting for automatically moving successfully uploaded videos to the recycle bin
 
 #### Java 11 (planned to be released at the end of september)
 - Toast notification when all uploads finished
 - Progress bar on taskbar icon
-- Bundle Java with the program
+- Bundle Java with the program - or was this feature maybe removed?
+- Try remove code that fixes errors in Java 8 (see if they are fixed in 11)
+  - On Java 8, function key events is not passed on by TextFields
+  - toolbar.getChildrenUnmodifiable()
+- Update YouTube API version (while I'm updating stuff lets update this as well)
+- http://jdk.java.net/11/
+- https://adoptopenjdk.net/
+- https://gluonhq.com/products/javafx/
+- https://search.maven.org/search?q=g:org.openjfx%20AND%20a:javafx

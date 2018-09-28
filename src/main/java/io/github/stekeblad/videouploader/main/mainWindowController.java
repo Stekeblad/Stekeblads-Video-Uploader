@@ -267,7 +267,8 @@ public class mainWindowController {
                 chosenPreset = new VideoPreset(configManager.getPresetString(
                         choice_presets.getSelectionModel().getSelectedItem()), "preset");
             } catch (Exception e) {
-                AlertUtils.simpleClose("Preset error", "Cant read preset, the videos will not be added");
+                AlertUtils.simpleClose("Preset error", "Cant read preset \"" +
+                        choice_presets.getSelectionModel().getSelectedItem() + "\", the videos will not be added");
                 return;
             }
             // Get playlist url if available
@@ -341,7 +342,7 @@ public class mainWindowController {
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
             PresetsWindowController controller = fxmlLoader.getController();
             stage.setOnCloseRequest(controller::onWindowClose);
-            controller.myInit();
+            controller.myInit(!editBackups.isEmpty() || uploader.getIsActive());
             stage.showAndWait();
         } catch (IOException e) {
             AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
@@ -693,9 +694,9 @@ public class mainWindowController {
                 transMainWin.getString("diag_confirmDelete_short"), desc).showAndWait();
         if (buttonChoice.isPresent()) {
             if(buttonChoice.get() == ButtonType.YES) {
-                uploadQueueVideos.remove(selected);
                 // delete backup (may exist if upload was created with no preset and directly deleted
                 editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
+                uploadQueueVideos.remove(selected);
                 updateUploadList();
             } // else if ButtonType.NO or closed [X] do nothing
         }
@@ -810,7 +811,7 @@ public class mainWindowController {
         // Change back progressBar color, hide it and set the locked state buttons
         uploadQueueVideos.get(selected).setProgressBarColor(null);
         uploadQueueVideos.get(selected).setProgressBarVisibility(false);
-        uploadQueueVideos.get(selected).setStatusLabelText(transUpload.getString("notStarted"));
+        uploadQueueVideos.get(selected).setStatusLabelText(transUpload.getString("_status"));
         buttonStates.setLocked(uploadQueueVideos.get(selected));
 
         // Make sure visual change get to the UI
@@ -853,6 +854,7 @@ public class mainWindowController {
             video.setProgressBarColor("red");
             video.setStatusLabelText(transUpload.getString("failed"));
             buttonStates.setFailed(video);
+            updateUploadList();
         }
     }
 

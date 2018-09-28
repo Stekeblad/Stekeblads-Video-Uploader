@@ -385,7 +385,7 @@ public class VideoInformationBase {
             int colonIndex = line.indexOf(':');
             if (colonIndex < 0) {
                 System.err.println(fromString);
-                throw new Exception("Malformed string representation of class");
+                throw new Exception("Malformed string representation of class. Input: \n\"" + fromString + "\"");
             } else {
                 // Switch on field name
                 switch (line.substring(0, colonIndex)) {
