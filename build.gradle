@@ -4,7 +4,7 @@ version '0.0.0.1'
 apply plugin: 'java'
 apply plugin: 'application'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.11
 
 sourceSets {
     main {
@@ -15,6 +15,16 @@ sourceSets {
     }
 }
 
+/* OS Detection for JavaFx 11 */
+def currentOS = org.gradle.internal.os.OperatingSystem.current()
+def platform
+if (currentOS.isWindows()) {
+    platform = 'win'
+} else if (currentOS.isLinux()) {
+    platform = 'linux'
+} else if (currentOS.isMacOsX()) {
+    platform = 'mac'
+}
 
 repositories {
     mavenCentral()
@@ -26,6 +36,12 @@ dependencies {
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     compile 'com.google.apis:google-api-services-youtube:v3-rev189-1.23.0'
+
+    compile "org.openjfx:javafx-base:11:${platform}"
+    compile "org.openjfx:javafx-graphics:11:${platform}"
+    compile "org.openjfx:javafx-controls:11:${platform}"
+    
+    compile "org.openjfx:javafx-fxml:11:${platform}"
 }
 
 // https://developers.google.com/api-client-library/java/apis/youtube/v3

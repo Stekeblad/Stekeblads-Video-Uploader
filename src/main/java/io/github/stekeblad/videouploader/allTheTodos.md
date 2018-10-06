@@ -36,16 +36,20 @@ and drop video files in the list of videos to add list?
   - selecting thumbnail
 - Collapsed mode for Presets and Uploads (takes up less height)
 - Setting for automatically moving successfully uploaded videos to the recycle bin
+(java.awt.Desktop -- public boolean moveToTrash -- since 9)
 
 #### Java 11 (planned to be released at the end of september)
 - Toast notification when all uploads finished
 - Progress bar on taskbar icon
-- Bundle Java with the program - or was this feature maybe removed?
+- Bundle Java with the program - or was this feature maybe removed? JLink??
 - Try remove code that fixes errors in Java 8 (see if they are fixed in 11)
   - On Java 8, function key events is not passed on by TextFields
   - toolbar.getChildrenUnmodifiable()
 - Update YouTube API version (while I'm updating stuff lets update this as well)
+- Solve some old warnings (I have no Idea how many new warnings/errors will
+appear when updating)
 - http://jdk.java.net/11/
 - https://adoptopenjdk.net/
 - https://gluonhq.com/products/javafx/
 - https://search.maven.org/search?q=g:org.openjfx%20AND%20a:javafx
+-Notes: jlink, jdeps, StackWalker, optional

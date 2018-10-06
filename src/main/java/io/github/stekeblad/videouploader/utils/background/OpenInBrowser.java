@@ -2,9 +2,10 @@ package io.github.stekeblad.videouploader.utils.background;
 
 import javafx.concurrent.Task;
 
-import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+//import java.awt.*;
 
 /**
  * Attempts to open a web page in the user's default browser by first creating a new thread and opening it from there.
@@ -22,8 +23,8 @@ public class OpenInBrowser {
         Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                    Desktop.getDesktop().browse(uri);
+                if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                    java.awt.Desktop.getDesktop().browse(uri);
                     return null;
                 } else {
                     throw new UnsupportedOperationException("Desktop not supported");
