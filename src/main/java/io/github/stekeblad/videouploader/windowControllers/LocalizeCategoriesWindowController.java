@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 import java.util.zip.DataFormatException;
 
 public class LocalizeCategoriesWindowController {
@@ -32,8 +31,8 @@ public class LocalizeCategoriesWindowController {
     public Label label_langId;
     public Label label_countryId;
 
-    private ConfigManager configManager = ConfigManager.INSTANCE;
-    private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
+    private final ConfigManager configManager = ConfigManager.INSTANCE;
+    private final CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
     private Translations transLocCatWin;
     private Translations transBasic;
 
@@ -100,17 +99,15 @@ public class LocalizeCategoriesWindowController {
 
         // Authentication with youtube is required, check if the user has given permission, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    actionEvent.consume();
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.NO) {
+                actionEvent.consume();
+                return;
             }
+            configManager.setNeverAuthed(false);
+            configManager.saveSettings();
+
         }
 
         // Visually indicate the program is working
@@ -120,9 +117,9 @@ public class LocalizeCategoriesWindowController {
 
         // Send the request in the background
         // Tell it what to do
-        Task<Void> backgroundTask = new Task<Void>() {
+        Task<Void> backgroundTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() {
                 categoryUtils.downloadCategories();
                 Platform.runLater(() -> {
                     if (categoryUtils.getCategoryNames().size() < 2) { // < 2 because of default "no categories" category

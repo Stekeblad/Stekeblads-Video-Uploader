@@ -39,14 +39,14 @@ import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_F
  * to see if the particular method is threadsafe
  */
 public class Uploader {
-    private Map<String, Future> tasks;
-    private CategoryUtils categoryUtils;
-    private PlaylistUtils playlistUtils;
+    private final Map<String, Future> tasks;
+    private final CategoryUtils categoryUtils;
+    private final PlaylistUtils playlistUtils;
     private Consumer<String> uploadFinishedCallback = null;
     private BiConsumer<VideoUpload, Throwable> uploadErredCallback = null;
-    private ExecutorService exec;
-    private Translations translationsUpload;
-    private Translations translationsBasic;
+    private final ExecutorService exec;
+    private final Translations translationsUpload;
+    private final Translations translationsBasic;
 
 
     public Uploader() {

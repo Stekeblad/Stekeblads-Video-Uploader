@@ -5,7 +5,6 @@ import javafx.concurrent.Task;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-//import java.awt.*;
 
 /**
  * Attempts to open a web page in the user's default browser by first creating a new thread and opening it from there.
@@ -20,7 +19,7 @@ public class OpenInBrowser {
      * @param ueh A UncaughtExceptionHandler to call if an Exception is thrown, can be null
      */
     public static void openInBrowser(URI uri, Thread.UncaughtExceptionHandler ueh) {
-        Task<Void> task = new Task<Void>() {
+        Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
                 if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {

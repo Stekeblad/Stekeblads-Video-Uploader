@@ -250,7 +250,7 @@ public class VideoUpload extends VideoInformationBase{
     /**
      * Creates the UI Pane so it can be be retrieved by front end code with getPane()
      */
-    protected void makeUploadPane() {
+    private void makeUploadPane() {
         // The base class has already done most of the work
         uploadPane = super.getPane();
 

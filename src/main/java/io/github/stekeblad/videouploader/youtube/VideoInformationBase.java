@@ -44,11 +44,11 @@ public class VideoInformationBase {
 
     // Variables
     private GridPane videoBasePane;
-    private String paneId;
+    private final String paneId;
     private File thumbNailFile;
     private boolean allowEdit;
-    private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
-    private PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
+    private final CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
+    private final PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
     protected Consumer<Boolean> thumbnailCursorEventHandler = null;
 
     // Getters
@@ -571,9 +571,9 @@ public class VideoInformationBase {
      * @param tellSubs The default value of tellSubs
      * @param thumbNailPath The path to the selected thumbnail or null for the no thumbnail selected image
      */
-    protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility,
-                                     List<String> videoTags, String selectedPlaylist,
-                                     String category, boolean tellSubs, String thumbNailPath) {
+    private void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility,
+                                   List<String> videoTags, String selectedPlaylist,
+                                   String category, boolean tellSubs, String thumbNailPath) {
          // Creating the pane, id, size, border
          videoBasePane = new GridPane();
          videoBasePane.setId(paneId);

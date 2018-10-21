@@ -23,7 +23,6 @@ import javafx.stage.WindowEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.Optional;
 
 public class ManagePlaylistsWindowController {
     public Button btn_refreshPlaylists;
@@ -35,8 +34,8 @@ public class ManagePlaylistsWindowController {
     public ToolBar toolbar;
     public Label label_description;
 
-    private ConfigManager configManager = ConfigManager.INSTANCE;
-    private PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
+    private final ConfigManager configManager = ConfigManager.INSTANCE;
+    private final PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
     private Translations transPlaylistWindow;
     private Translations transBasic;
 
@@ -108,16 +107,14 @@ public class ManagePlaylistsWindowController {
      */
     public void onRefreshPlaylistsClicked(ActionEvent actionEvent) {
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    actionEvent.consume();
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.YES) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else { // ButtonType.NO or closed [X]
+                actionEvent.consume();
+                return;
             }
         }
         // Auth done or user is ready to allow it
@@ -125,9 +122,9 @@ public class ManagePlaylistsWindowController {
         btn_refreshPlaylists.setDisable(true);
 
         // Send the request in the background
-        Task<Void> backgroundTask = new Task<Void>() {
+        Task<Void> backgroundTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() {
                 playlistUtils.refreshPlaylist(); // Get playlists from Youtube on background thread
                 Platform.runLater(() -> updatePlaylistList()); // update list in window on UI thread
                 return null;
@@ -159,16 +156,14 @@ public class ManagePlaylistsWindowController {
             return;
         }
         if (configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    actionEvent.consume();
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.YES) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else { // ButtonType.NO or closed [X]
+                actionEvent.consume();
+                return;
             }
         }
 
@@ -179,9 +174,9 @@ public class ManagePlaylistsWindowController {
         final String privacyLevel = choice_privacyStatus.getSelectionModel().getSelectedItem();
 
         // Perform the request in a background thread
-        Task<Void> backgroundTask = new Task<Void>() {
+        Task<Void> backgroundTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() {
                 LocalPlaylist localPlaylist = playlistUtils.addPlaylist(listName, privacyLevel);
                 if (localPlaylist == null) {
                     Platform.runLater(() -> AlertUtils.simpleClose(transBasic.getString("error"),

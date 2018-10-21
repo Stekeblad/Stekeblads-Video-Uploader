@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -43,7 +44,7 @@ public class FileUtils {
         if (thumbnail != null) {
             if (thumbnail.length() > 2 * 1024 * 1024) { // max allowed size is 2MB
                 AlertUtils.simpleClose("Warning", "Image to large, YouTube do not allow thumbnails larger then 2 MB." +
-                        "\n the chosen file is " + BigDecimal.valueOf((double) thumbnail.length() / (1024 * 1024)).setScale(3, BigDecimal.ROUND_HALF_UP) + "MB").show();
+                        "\n the chosen file is " + BigDecimal.valueOf((double) thumbnail.length() / (1024 * 1024)).setScale(3, RoundingMode.HALF_UP) + "MB").show();
                 return null;
             }
             return thumbnail;

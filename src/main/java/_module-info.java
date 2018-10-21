@@ -1,8 +1,9 @@
+/*
 module io.github.stekeblad.videouploader {
     requires google.oauth.client;
     requires google.api.client;
     requires google.http.client;
-    requires google.api.services.youtube.v3.rev189;
+    requires google.api.services.youtube.v3.rev205;
     requires javafx.graphics;
     requires javafx.controls;
     requires javafx.fxml;
@@ -16,3 +17,4 @@ module io.github.stekeblad.videouploader {
     requires java.desktop;
     //requires java.datatransfer;
 }
+*/

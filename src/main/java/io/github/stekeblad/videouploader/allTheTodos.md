@@ -2,8 +2,19 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
+- Moving tag processing to separate classes and loading them as services 
+(https://docs.oracle.com/javase/9/docs/api/java/util/ServiceLoader.html)
 
 #### Higher priority things to do
+- Find a way to produce a .jar file that the end user can easily run
+Currently it can be launched from the commandline with the following command:
+```java
+"%JAVA11_HOME%\bin\java.exe" --module-path "%JAVAFX_HOME%" --add-modules=javafx.controls --add-modules=javafx.fxml -jar Stekeblads_Video_Uploader.jar
+```
+  - %JAVA11_HOME% is a Windows environment variable I created that points
+  to my Java 11 installation directory (%JAVA_HOME% points to my Java 8 installation)
+  - %JAVAFX_HOME% points to the /lib directory for JavaFX 11
+  - The end user should not need to think about the modules!
 
 #### Lower priority things to do
 - Save window sizes/location on exit, use the saved data when starting next time
@@ -45,11 +56,8 @@ and drop video files in the list of videos to add list?
 - Try remove code that fixes errors in Java 8 (see if they are fixed in 11)
   - On Java 8, function key events is not passed on by TextFields
   - toolbar.getChildrenUnmodifiable()
-- Update YouTube API version (while I'm updating stuff lets update this as well)
-- Solve some old warnings (I have no Idea how many new warnings/errors will
-appear when updating)
 - http://jdk.java.net/11/
 - https://adoptopenjdk.net/
 - https://gluonhq.com/products/javafx/
 - https://search.maven.org/search?q=g:org.openjfx%20AND%20a:javafx
--Notes: jlink, jdeps, StackWalker, optional
+- Notes: jlink, jdeps, StackWalker, optional

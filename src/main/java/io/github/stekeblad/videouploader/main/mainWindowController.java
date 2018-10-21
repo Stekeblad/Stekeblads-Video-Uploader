@@ -33,7 +33,10 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
@@ -393,22 +396,20 @@ public class mainWindowController {
     public void onStartAllUploadsClicked(ActionEvent actionEvent) {
         // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.YES) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else { // ButtonType.NO or closed [X]
+                return;
             }
         }
         // Permission given, start uploads
-        for (int i = 0; i < uploadQueueVideos.size(); i++) {
-            if (uploadQueueVideos.get(i).getButton3Id() != null &&
-                    uploadQueueVideos.get(i).getButton3Id().contains(BUTTON_START_UPLOAD)) {
-                onStartUpload(uploadQueueVideos.get(i).getButton3Id());
+        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
+            if (uploadQueueVideo.getButton3Id() != null &&
+                    uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
+                onStartUpload(uploadQueueVideo.getButton3Id());
             }
         }
         actionEvent.consume();
@@ -438,13 +439,10 @@ public class mainWindowController {
     public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
         // Show confirmation dialog
         if (!bypassAbortWarning) { // can be set from onAbortAndClearClicked
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
-                    transMainWin.getString("diag_abortAll_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() != ButtonType.YES) {
-                    // ButtonType.NO or Closed with [X] button
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
+                    transMainWin.getString("diag_abortAll_full"), ButtonType.NO);
+            if (userChoice == ButtonType.NO) {
+                return;
             }
         }
         // Prevent the "Are you sure you want to abort X?" dialog for every upload
@@ -468,16 +466,14 @@ public class mainWindowController {
      * @param actionEvent the button click event
      */
     public void onAbortAndClearClicked(ActionEvent actionEvent) {
-        Optional<ButtonType> choice = AlertUtils.yesNo(transMainWin.getString("diag_abortAllClear_short"),
-                transMainWin.getString("diag_abortAllClear_full")).showAndWait();
-        if (choice.isPresent()) {
-            if (choice.get() == ButtonType.YES) {
-                bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
-                onAbortAllUploadsClicked(new ActionEvent());
-                uploadQueueVideos.clear();
-                uploadPaneCounter = 0;
-                updateUploadList();
-            }
+        ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAllClear_short"),
+                transMainWin.getString("diag_abortAllClear_full"), ButtonType.NO);
+        if (userChoice == ButtonType.YES) {
+            bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
+            onAbortAllUploadsClicked(new ActionEvent());
+            uploadQueueVideos.clear();
+            uploadPaneCounter = 0;
+            updateUploadList();
         }
         actionEvent.consume();
     }
@@ -690,16 +686,16 @@ public class mainWindowController {
         }
         String desc = String.format(transMainWin.getString("diag_confirmDelete_full"),
                 uploadQueueVideos.get(selected).getVideoName());
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
-                transMainWin.getString("diag_confirmDelete_short"), desc).showAndWait();
-        if (buttonChoice.isPresent()) {
-            if(buttonChoice.get() == ButtonType.YES) {
-                // delete backup (may exist if upload was created with no preset and directly deleted
-                editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-                uploadQueueVideos.remove(selected);
-                updateUploadList();
-            } // else if ButtonType.NO or closed [X] do nothing
-        }
+
+        ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_confirmDelete_short"),
+                desc, ButtonType.NO);
+        if (userChoice == ButtonType.YES) {
+            // delete backup (may exist if upload was created with no preset and directly deleted
+            editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
+            uploadQueueVideos.remove(selected);
+            updateUploadList();
+        } // else if ButtonType.NO or closed [X] do nothing
+
         // Make sure visual change get to the UI
         updateUploadList();
     }
@@ -730,18 +726,17 @@ public class mainWindowController {
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.YES) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else { // ButtonType.NO or closed [X]
+                return;
             }
+
         }
-        // User is authenticated or warned about the upcoming prompt to do so.
+        // User is authenticated or is warned about the upcoming prompt to do so.
 
         // Queue upload
         uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());
@@ -770,13 +765,12 @@ public class mainWindowController {
         if (!bypassAbortWarning) {
             String desc = String.format(transMainWin.getString("diag_abortSingle_full"),
                     uploadQueueVideos.get(selected).getVideoName());
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
-                    transMainWin.getString("diag_abortSingle_short"), desc).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() != ButtonType.YES) {
-                    // ButtonType.NO or Closed with [X] button
-                    return;
-                }
+
+            ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortSingle_short"),
+                    desc, ButtonType.NO);
+            if (userChoice == ButtonType.NO) {
+                // ButtonType.NO or Closed with [X] button
+                return;
             }
         }
         // Abort upload

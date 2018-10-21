@@ -11,7 +11,6 @@ import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
-import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -31,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 
@@ -50,7 +48,6 @@ public class PresetsWindowController {
 
     private ArrayList<VideoPreset> videoPresets;
     private ConfigManager configManager;
-    private PlaylistUtils playlistUtils;
     private CategoryUtils categoryUtils;
     private int presetCounter = 0;
     private HashMap<String, VideoPreset> presetBackups;
@@ -68,7 +65,6 @@ public class PresetsWindowController {
      */
     public void myInit(boolean disableLocaleChange) {
         configManager = ConfigManager.INSTANCE;
-        playlistUtils = PlaylistUtils.INSTANCE;
         categoryUtils = CategoryUtils.INSTANCE;
 
         presetBackups = new HashMap<>();
@@ -149,19 +145,17 @@ public class PresetsWindowController {
      */
     public void onWindowClose(WindowEvent windowEvent) {
         boolean editingPreset = false;
-        for(VideoPreset aPreset : videoPresets) {
-            if(aPreset.getButton2Id().contains(BUTTON_SAVE)) {
+        for (VideoPreset aPreset : videoPresets) {
+            if (aPreset.getButton2Id().contains(BUTTON_SAVE)) {
                 editingPreset = true;
                 break;
             }
         }
         if(editingPreset) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transPresetWin.getString("diag_closeWarn_short"),
-                    transPresetWin.getString("diag_closeWarn_full")).showAndWait();
-            if(buttonChoice.isPresent()) {
-                if(buttonChoice.get() == ButtonType.NO) {
-                    windowEvent.consume(); // do not close the window
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transPresetWin.getString("diag_closeWarn_short"),
+                    transPresetWin.getString("diag_closeWarn_full"), ButtonType.NO);
+            if (userChoice == ButtonType.NO) {
+                windowEvent.consume(); // do not close the window
             }
         }
     }
@@ -511,19 +505,19 @@ public class PresetsWindowController {
         }
         String desc = String.format(transPresetWin.getString("diag_presetDelete_full"),
                 videoPresets.get(selected).getPresetName());
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
-                transPresetWin.getString("diag_presetDelete_short"), desc).showAndWait();
-        if(buttonChoice.isPresent()) {
-            if(buttonChoice.get() == ButtonType.YES) {
-                if (!configManager.deletePreset(videoPresets.get(selected).getPresetName())) {
-                    AlertUtils.simpleClose(transBasic.getString("error"), "Could not delete preset").show();
-                } else {
-                    videoPresets.remove(selected);
-                    updatePresetList();
-                    setLocaleButtonDisabled();
-                }
-            } //else if ButtonType.NO or closed [X] do nothing
-        }
+
+        ButtonType userChoice = AlertUtils.yesNo(transPresetWin.getString("diag_presetDelete_short"),
+                desc, ButtonType.NO);
+        if (userChoice == ButtonType.YES) {
+            if (!configManager.deletePreset(videoPresets.get(selected).getPresetName())) {
+                AlertUtils.simpleClose(transBasic.getString("error"), "Could not delete preset").show();
+            } else {
+                videoPresets.remove(selected);
+                updatePresetList();
+                setLocaleButtonDisabled();
+            }
+        } //else if ButtonType.NO or closed [X] do nothing
+
     }
 
     /**
