@@ -40,7 +40,7 @@ public class VideoInformationBase {
     private static final String NODE_ID_TELLSUBS = "_tellSubs";
     private static final String NODE_ID_THUMBNAIL = "_thumbNail";
 
-    protected static final String NODE_ID_BUTTONSBOX = "_buttons";
+    static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     // Variables
     private GridPane videoBasePane;
@@ -49,7 +49,7 @@ public class VideoInformationBase {
     private boolean allowEdit;
     private final CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
     private final PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
-    protected Consumer<Boolean> thumbnailCursorEventHandler = null;
+    Consumer<Boolean> thumbnailCursorEventHandler = null;
 
     // Getters
 
@@ -338,9 +338,9 @@ public class VideoInformationBase {
      * @param thumbNailPath File path to a image to use as thumbnail
      * @param paneId A string used for naming all UI elements
      */
-    public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                String selectedPlaylist, String category, boolean tellSubs,
-                                String thumbNailPath, String paneId) {
+    VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
+                         String selectedPlaylist, String category, boolean tellSubs,
+                         String thumbNailPath, String paneId) {
 
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
@@ -362,7 +362,7 @@ public class VideoInformationBase {
      * @param paneId A string used for naming all UI elements
      * @throws Exception If the string could not be converted to a VideoInformationBase
      */
-    public VideoInformationBase(String fromString, String paneId) throws Exception {
+    VideoInformationBase(String fromString, String paneId) throws Exception {
 
         this.paneId = paneId;
 

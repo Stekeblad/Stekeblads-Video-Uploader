@@ -8,7 +8,7 @@
 #### Higher priority things to do
 - Find a way to produce a .jar file that the end user can easily run
 Currently it can be launched from the commandline with the following command:
-```java
+```
 "%JAVA11_HOME%\bin\java.exe" --module-path "%JAVAFX_HOME%" --add-modules=javafx.controls --add-modules=javafx.fxml -jar Stekeblads_Video_Uploader.jar
 ```
   - %JAVA11_HOME% is a Windows environment variable I created that points
@@ -48,6 +48,9 @@ and drop video files in the list of videos to add list?
 - Collapsed mode for Presets and Uploads (takes up less height)
 - Setting for automatically moving successfully uploaded videos to the recycle bin
 (java.awt.Desktop -- public boolean moveToTrash -- since 9)
+- Move auto numbering into VideoPreset to remember the numbering for each preset
+- User defined tags of some sort
+- do something with video meta data? https://github.com/artclarke/humble-video/blob/master/humble-video-demos/src/main/java/io/humble/video/demos/GetContainerInfo.java
 
 #### Java 11 (planned to be released at the end of september)
 - Toast notification when all uploads finished

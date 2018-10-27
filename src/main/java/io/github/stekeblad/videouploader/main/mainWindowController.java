@@ -14,6 +14,7 @@ import io.github.stekeblad.videouploader.windowControllers.SettingsWindowControl
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
+import io.github.stekeblad.videouploader.youtube.tagProcessing.ITagProcessor;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
@@ -33,10 +34,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
@@ -257,15 +255,9 @@ public class mainWindowController {
                 uploadPaneCounter++;
             }
         } else { // preset selected
-            VideoPreset chosenPreset;
-            // Get the auto numbering and preset
-            int autoNum;
-            try {
-                autoNum = Integer.valueOf(txt_autoNum.getText());
-            } catch (NumberFormatException e) {
-                autoNum = 1;
-            }
+
             // Load details of the selected preset
+            VideoPreset chosenPreset;
             try {
                 chosenPreset = new VideoPreset(configManager.getPresetString(
                         choice_presets.getSelectionModel().getSelectedItem()), "preset");
@@ -274,29 +266,42 @@ public class mainWindowController {
                         choice_presets.getSelectionModel().getSelectedItem() + "\", the videos will not be added");
                 return;
             }
-            // Get playlist url if available
-            String playlistUrl = playlistUtils.getPlaylistUrl(chosenPreset.getSelectedPlaylist());
-            if (playlistUrl == null) {
-                playlistUrl = "";
+
+            // Get the auto numbering and preset
+            int autoNum = Integer.valueOf(txt_autoNum.getText());
+
+            // Find TagProcessors
+            ArrayList<ITagProcessor> tagProcessors = new ArrayList<>();
+            ServiceLoader<ITagProcessor> tagProcessorServiceLoader = ServiceLoader.load(ITagProcessor.class);
+            for (ITagProcessor tagProcessor : tagProcessorServiceLoader) {
+                tagProcessor.init(chosenPreset, autoNum);
+                tagProcessors.add(tagProcessor);
             }
+
             // Iterate over all selected video files
             for (File videoFile : videosToAdd) {
-                // Apply automatic numbering on video name
-                String name = chosenPreset.getVideoName().replace("$(ep)", String.valueOf(autoNum++));
                 // Insert raw file name in title, exclude file extension
+                // (may be a TagProcessor later, do not want to pass the File to all TagProcesors)
+                String name = chosenPreset.getVideoName();
                 if (name.contains("$(rawname)")) {
                     String rawFileName = videoFile.getName().substring(0, videoFile.getName().lastIndexOf("."));
                     name = name.replace("$(rawname)", rawFileName);
                 }
-                // Insert playlist URL in description
-                String description = chosenPreset.getVideoDescription()
-                        .replace("$(playlist)", playlistUrl);
+
+                // Execute the TagProcessors
+                String description = chosenPreset.getVideoDescription();
+                List<String> videoTags = chosenPreset.getVideoTags();
+                for (ITagProcessor processor : tagProcessors) {
+                    name = processor.processTitle(name);
+                    description = processor.processDescription(description);
+                    videoTags = processor.processTags(videoTags);
+                }
 
                 VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()
                         .setVideoName(name)
                         .setVideoDescription(description)
                         .setVisibility(chosenPreset.getVisibility())
-                        .setVideoTags(chosenPreset.getVideoTags())
+                        .setVideoTags(videoTags)
                         .setSelectedPlaylist(chosenPreset.getSelectedPlaylist())
                         .setCategory(chosenPreset.getCategory())
                         .setTellSubs(chosenPreset.isTellSubs())
