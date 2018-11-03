@@ -19,7 +19,7 @@ public class OpenInBrowser {
      * @param ueh A UncaughtExceptionHandler to call if an Exception is thrown, can be null
      */
     public static void openInBrowser(URI uri, Thread.UncaughtExceptionHandler ueh) {
-        Task<Void> task = new Task<>() {
+        Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {

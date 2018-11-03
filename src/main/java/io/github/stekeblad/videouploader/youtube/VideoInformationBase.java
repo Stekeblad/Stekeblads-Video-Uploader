@@ -30,6 +30,7 @@ public class VideoInformationBase {
 
     // Constants
     public static final List<String> THUMBNAIL_FILE_FORMAT = Arrays.asList("*.jpg", "*.png");
+    public static final long MAX_THUMB_SIZE = 2 * 1024 * 1024;
 
     private static final String NODE_ID_TITLE = "_title";
     private static final String NODE_ID_DESCRIPTION = "_description";

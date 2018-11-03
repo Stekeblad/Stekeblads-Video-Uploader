@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.utils.state;
+package io.github.stekeblad.videouploader.state;
 
 import java.util.function.Consumer;
 

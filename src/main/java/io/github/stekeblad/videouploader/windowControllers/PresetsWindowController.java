@@ -1,11 +1,11 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
+import io.github.stekeblad.videouploader.state.ButtonProperties;
+import io.github.stekeblad.videouploader.state.VideoPresetState;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
-import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
-import io.github.stekeblad.videouploader.utils.state.VideoPresetState;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX_THUMB_SIZE;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
 
 
 public class PresetsWindowController {
@@ -368,7 +370,7 @@ public class PresetsWindowController {
         videoPresets.get(selected).setOnThumbnailClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY)
                 return; // Conflicting with context menu, only do this on left click
-            File pickedThumbnail = FileUtils.pickThumbnail();
+            File pickedThumbnail = FileUtils.pickThumbnail(THUMBNAIL_FILE_FORMAT, MAX_THUMB_SIZE);
             if(pickedThumbnail != null) {
                 try {
                     videoPresets.get(selected).setThumbNailFile(pickedThumbnail);

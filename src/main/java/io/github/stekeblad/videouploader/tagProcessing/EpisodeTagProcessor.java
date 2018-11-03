@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.youtube.tagProcessing;
+package io.github.stekeblad.videouploader.tagProcessing;
 
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 

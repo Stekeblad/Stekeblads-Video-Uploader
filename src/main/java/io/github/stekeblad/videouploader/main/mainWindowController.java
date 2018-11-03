@@ -1,11 +1,12 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.state.ButtonProperties;
+import io.github.stekeblad.videouploader.state.VideoUploadState;
+import io.github.stekeblad.videouploader.tagProcessing.ITagProcessor;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
-import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
-import io.github.stekeblad.videouploader.utils.state.VideoUploadState;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
@@ -14,7 +15,6 @@ import io.github.stekeblad.videouploader.windowControllers.SettingsWindowControl
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
-import io.github.stekeblad.videouploader.youtube.tagProcessing.ITagProcessor;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
@@ -37,6 +37,8 @@ import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX_THUMB_SIZE;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 public class mainWindowController {
@@ -206,7 +208,7 @@ public class mainWindowController {
      * @param actionEvent the click event
      */
     public void onPickFileClicked(ActionEvent actionEvent) {
-        videosToAdd = FileUtils.pickVideos();
+        videosToAdd = FileUtils.pickVideos(Long.MAX_VALUE);
         ArrayList<String> filenames = new ArrayList<>();
         if(videosToAdd != null) {
             for (File file : videosToAdd) {
@@ -582,7 +584,7 @@ public class mainWindowController {
         uploadQueueVideos.get(selected).setEditable(true);
         uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY) return; // Conflicting with context menu
-            File pickedThumbnail = FileUtils.pickThumbnail();
+            File pickedThumbnail = FileUtils.pickThumbnail(THUMBNAIL_FILE_FORMAT, MAX_THUMB_SIZE);
             if(pickedThumbnail != null) {
                 try {
                     uploadQueueVideos.get(selected).setThumbNailFile(pickedThumbnail);

@@ -29,8 +29,6 @@ import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_FORMAT;
-
 /**
  * Uploader handles the actual uploading to Youtube and contains a queue for all uploads. New uploads can be added,
  * existing once can be aborted all at the same time or just a specific. It is possible to get if their is a upload
@@ -39,6 +37,8 @@ import static io.github.stekeblad.videouploader.youtube.VideoUpload.VIDEO_FILE_F
  * to see if the particular method is threadsafe
  */
 public class Uploader {
+    private final String VIDEO_FILE_FORMAT = "video/";
+
     private final Map<String, Future> tasks;
     private final CategoryUtils categoryUtils;
     private final PlaylistUtils playlistUtils;

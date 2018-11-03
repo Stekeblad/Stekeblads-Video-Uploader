@@ -19,8 +19,6 @@ import java.util.List;
  */
 public class VideoUpload extends VideoInformationBase{
 
-    public static final String VIDEO_FILE_FORMAT = "video/";
-
     private static final String NODE_ID_PROGRESS = "_progress";
     private static final String NODE_ID_UPLOADSTATUS = "_status";
 

@@ -141,7 +141,7 @@ public class AlertUtils {
     }
 
     /**
-     * Like simpleClose but designed for longer messages in the content area, it does also displays the window directly
+     * Like simpleClose but designed for longer messages in the content area, it does also displays the window directly without blocking
      *
      * @param header  Custom window title
      * @param content The message to display to the user

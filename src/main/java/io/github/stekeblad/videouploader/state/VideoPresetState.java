@@ -1,20 +1,17 @@
-package io.github.stekeblad.videouploader.utils.state;
+package io.github.stekeblad.videouploader.state;
 
 import io.github.stekeblad.videouploader.youtube.VideoInformationBase;
 import javafx.scene.control.Button;
 
 /**
- * VideoUploadState exists to reduce the number of lines required to change the buttons
- * for VideoUploads in MainWindowController. Instead of (in every method that changes the buttons) create new buttons,
+ * VideoPresetState exists to reduce the number of lines required to change the buttons
+ * for VideoPresets in PresetWindowController. Instead of (in every method that changes the buttons) create new buttons,
  * setting Ids and method to call -- what buttons to display is defined in the beginning and in the code for the buttons
  * you just say witch set of buttons to use.
  */
-public class VideoUploadState {
+public class VideoPresetState {
     private ButtonProperties[] lockedButtonProperties;
     private ButtonProperties[] editingButtonProperties;
-    private ButtonProperties[] uploadingButtonProperties;
-    private ButtonProperties[] failedButtonProperties;
-
 
     /**
      * Defines the properties of the buttons to be set when setLocked() is called
@@ -27,21 +24,8 @@ public class VideoUploadState {
         lockedButtonProperties = properties;
     }
 
-    /**
-     * See defineLocked
-     */
     public void defineEditing(ButtonProperties[] properties) {
         editingButtonProperties = properties;
-    }
-
-    /** See defineLocked */
-    public void defineUploading(ButtonProperties[] properties) {
-        uploadingButtonProperties = properties;
-    }
-
-    /** See defineLocked */
-    public void defineFailed(ButtonProperties[] properties) {
-        failedButtonProperties = properties;
     }
 
     /**
@@ -57,27 +41,10 @@ public class VideoUploadState {
         set(node, p1, p2, p3);
     }
 
-    /** See setLocked */
     public void setEditing(VideoInformationBase node) {
         ButtonProperties p1 = editingButtonProperties[0];
         ButtonProperties p2 = editingButtonProperties[1];
         ButtonProperties p3 = editingButtonProperties[2];
-        set(node, p1, p2, p3);
-    }
-
-    /** See setLocked */
-    public void setUploading(VideoInformationBase node) {
-        ButtonProperties p1 = uploadingButtonProperties[0];
-        ButtonProperties p2 = uploadingButtonProperties[1];
-        ButtonProperties p3 = uploadingButtonProperties[2];
-        set(node, p1, p2, p3);
-    }
-
-    /** See setLocked */
-    public void setFailed(VideoInformationBase node) {
-        ButtonProperties p1 = failedButtonProperties[0];
-        ButtonProperties p2 = failedButtonProperties[1];
-        ButtonProperties p3 = failedButtonProperties[2];
         set(node, p1, p2, p3);
     }
 
