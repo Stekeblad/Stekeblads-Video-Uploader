@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="videouploader" default="all">
+
+
+    <property file="build.properties"/>
+    <!-- Uncomment the following property if no tests compilation is needed -->
+    <!--
+    <property name="skip.tests" value="true"/>
+     -->
+
+    <!-- Compiler options -->
+
+    <property name="compiler.debug" value="on"/>
+    <property name="compiler.generate.no.warnings" value="off"/>
+    <property name="compiler.args" value="-Xlint:unchecked"/>
+    <property name="compiler.max.memory" value="700m"/>
+    <patternset id="ignored.files">
+        <exclude name="**/*.hprof/**"/>
+        <exclude name="**/*.pyc/**"/>
+        <exclude name="**/*.pyo/**"/>
+        <exclude name="**/*.rbc/**"/>
+        <exclude name="**/*.yarb/**"/>
+        <exclude name="**/*~/**"/>
+        <exclude name="**/.DS_Store/**"/>
+        <exclude name="**/.git/**"/>
+        <exclude name="**/.hg/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/__pycache__/**"/>
+        <exclude name="**/_svn/**"/>
+        <exclude name="**/vssver.scc/**"/>
+        <exclude name="**/vssver2.scc/**"/>
+    </patternset>
+    <patternset id="library.patterns">
+        <include name="*.war"/>
+        <include name="*.swc"/>
+        <include name="*.zip"/>
+        <include name="*.egg"/>
+        <include name="*.ane"/>
+        <include name="*.jar"/>
+        <include name="*.ear"/>
+    </patternset>
+    <patternset id="compiler.resources">
+        <exclude name="**/?*.java"/>
+        <exclude name="**/?*.form"/>
+        <exclude name="**/?*.class"/>
+        <exclude name="**/?*.groovy"/>
+        <exclude name="**/?*.scala"/>
+        <exclude name="**/?*.flex"/>
+        <exclude name="**/?*.kt"/>
+        <exclude name="**/?*.clj"/>
+        <exclude name="**/?*.aj"/>
+    </patternset>
+
+    <!-- JDK definitions -->
+
+    <property name="jdk.bin.11" value="${jdk.home.11}/bin"/>
+    <path id="jdk.classpath.11">
+        <fileset dir="${jdk.home.11}">
+            <include name="../jdk-11+28!/java.base"/>
+            <include name="../jdk-11+28!/java.compiler"/>
+            <include name="../jdk-11+28!/java.datatransfer"/>
+            <include name="../jdk-11+28!/java.desktop"/>
+            <include name="../jdk-11+28!/java.instrument"/>
+            <include name="../jdk-11+28!/java.logging"/>
+            <include name="../jdk-11+28!/java.management"/>
+            <include name="../jdk-11+28!/java.management.rmi"/>
+            <include name="../jdk-11+28!/java.naming"/>
+            <include name="../jdk-11+28!/java.net.http"/>
+            <include name="../jdk-11+28!/java.prefs"/>
+            <include name="../jdk-11+28!/java.rmi"/>
+            <include name="../jdk-11+28!/java.scripting"/>
+            <include name="../jdk-11+28!/java.se"/>
+            <include name="../jdk-11+28!/java.security.jgss"/>
+            <include name="../jdk-11+28!/java.security.sasl"/>
+            <include name="../jdk-11+28!/java.smartcardio"/>
+            <include name="../jdk-11+28!/java.sql"/>
+            <include name="../jdk-11+28!/java.sql.rowset"/>
+            <include name="../jdk-11+28!/java.transaction.xa"/>
+            <include name="../jdk-11+28!/java.xml"/>
+            <include name="../jdk-11+28!/java.xml.crypto"/>
+            <include name="../jdk-11+28!/jdk.accessibility"/>
+            <include name="../jdk-11+28!/jdk.aot"/>
+            <include name="../jdk-11+28!/jdk.attach"/>
+            <include name="../jdk-11+28!/jdk.charsets"/>
+            <include name="../jdk-11+28!/jdk.compiler"/>
+            <include name="../jdk-11+28!/jdk.crypto.cryptoki"/>
+            <include name="../jdk-11+28!/jdk.crypto.ec"/>
+            <include name="../jdk-11+28!/jdk.crypto.mscapi"/>
+            <include name="../jdk-11+28!/jdk.dynalink"/>
+            <include name="../jdk-11+28!/jdk.editpad"/>
+            <include name="../jdk-11+28!/jdk.hotspot.agent"/>
+            <include name="../jdk-11+28!/jdk.httpserver"/>
+            <include name="../jdk-11+28!/jdk.internal.ed"/>
+            <include name="../jdk-11+28!/jdk.internal.jvmstat"/>
+            <include name="../jdk-11+28!/jdk.internal.le"/>
+            <include name="../jdk-11+28!/jdk.internal.opt"/>
+            <include name="../jdk-11+28!/jdk.internal.vm.ci"/>
+            <include name="../jdk-11+28!/jdk.internal.vm.compiler"/>
+            <include name="../jdk-11+28!/jdk.internal.vm.compiler.management"/>
+            <include name="../jdk-11+28!/jdk.jartool"/>
+            <include name="../jdk-11+28!/jdk.javadoc"/>
+            <include name="../jdk-11+28!/jdk.jcmd"/>
+            <include name="../jdk-11+28!/jdk.jconsole"/>
+            <include name="../jdk-11+28!/jdk.jdeps"/>
+            <include name="../jdk-11+28!/jdk.jdi"/>
+            <include name="../jdk-11+28!/jdk.jdwp.agent"/>
+            <include name="../jdk-11+28!/jdk.jfr"/>
+            <include name="../jdk-11+28!/jdk.jlink"/>
+            <include name="../jdk-11+28!/jdk.jshell"/>
+            <include name="../jdk-11+28!/jdk.jsobject"/>
+            <include name="../jdk-11+28!/jdk.jstatd"/>
+            <include name="../jdk-11+28!/jdk.localedata"/>
+            <include name="../jdk-11+28!/jdk.management"/>
+            <include name="../jdk-11+28!/jdk.management.agent"/>
+            <include name="../jdk-11+28!/jdk.management.jfr"/>
+            <include name="../jdk-11+28!/jdk.naming.dns"/>
+            <include name="../jdk-11+28!/jdk.naming.rmi"/>
+            <include name="../jdk-11+28!/jdk.net"/>
+            <include name="../jdk-11+28!/jdk.pack"/>
+            <include name="../jdk-11+28!/jdk.rmic"/>
+            <include name="../jdk-11+28!/jdk.scripting.nashorn"/>
+            <include name="../jdk-11+28!/jdk.scripting.nashorn.shell"/>
+            <include name="../jdk-11+28!/jdk.sctp"/>
+            <include name="../jdk-11+28!/jdk.security.auth"/>
+            <include name="../jdk-11+28!/jdk.security.jgss"/>
+            <include name="../jdk-11+28!/jdk.unsupported"/>
+            <include name="../jdk-11+28!/jdk.unsupported.desktop"/>
+            <include name="../jdk-11+28!/jdk.xml.dom"/>
+            <include name="../jdk-11+28!/jdk.zipfs"/>
+        </fileset>
+    </path>
+
+    <property name="project.jdk.home" value="${jdk.home.11}"/>
+    <property name="project.jdk.bin" value="${jdk.bin.11}"/>
+    <property name="project.jdk.classpath" value="jdk.classpath.11"/>
+
+
+    <!-- Project Libraries -->
+
+    <path id="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath">
+        <pathelement
+                location="${gradle_repo}/com.fasterxml.jackson.core/jackson-core/2.9.6/4e393793c37c77e042ccc7be5a914ae39251b365/jackson-core-2.9.6.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.api-client/google-api-client/1.25.0/e7ff725e89ff5dcbed107be1a24e8102ae2441ee/google-api-client-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.apis/google-api-services-youtube/v3-rev205-1.25.0/c226341a2ca08952421158537f87afe53374744/google-api-services-youtube-v3-rev205-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.guava:guava:20.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.guava/guava/20.0/89507701249388e1ed5ddcf8c41f4ce1be7831ef/guava-20.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.http-client/google-http-client-jackson2/1.25.0/7c5c89bd4d0d34d9f1cb3396e8da6233e5074b5c/google-http-client-jackson2-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.http-client/google-http-client/1.25.0/5fb16523c393bfe0210c29db44742bd308311841/google-http-client-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.j2objc/j2objc-annotations/1.1/ed28ded51a8b1c6b112568def5f4b455e6809019/j2objc-annotations-1.1.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.oauth-client/google-oauth-client-java6/1.25.0/4d55c0a4d0c38d065f9fe3f25d9082bda436db2/google-oauth-client-java6-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.oauth-client/google-oauth-client-jetty/1.25.0/d6137803b8f4333b5408a26dd70de803ccb6c244/google-oauth-client-jetty-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath">
+        <pathelement
+                location="${gradle_repo}/com.google.oauth-client/google-oauth-client/1.25.0/c9ee14e8b095b4b301b28d57755cc482b8d6f39f/google-oauth-client-1.25.0.jar"/>
+    </path>
+
+    <path id="library.gradle:_commons-codec:commons-codec:1.10.classpath">
+        <pathelement
+                location="${gradle_repo}/commons-codec/commons-codec/1.10/4b95f4897fa13f2cd904aee711aeafc0c5295cd8/commons-codec-1.10.jar"/>
+    </path>
+
+    <path id="library.gradle:_commons-logging:commons-logging:1.2.classpath">
+        <pathelement
+                location="${gradle_repo}/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath">
+        <pathelement
+                location="${gradle_repo}/org.apache.httpcomponents/httpclient/4.5.5/1603dfd56ebcd583ccdf337b6c3984ac55d89e58/httpclient-4.5.5.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath">
+        <pathelement
+                location="${gradle_repo}/org.apache.httpcomponents/httpcore/4.4.9/a86ce739e5a7175b4b234c290a00a5fdb80957a0/httpcore-4.4.9.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath">
+        <pathelement
+                location="${gradle_repo}/org.mortbay.jetty/jetty-util/6.1.26/e5642fe0399814e1687d55a3862aa5a3417226a9/jetty-util-6.1.26.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath">
+        <pathelement
+                location="${gradle_repo}/org.mortbay.jetty/jetty/6.1.26/2f546e289fddd5b1fab1d4199fbb6e9ef43ee4b0/jetty-6.1.26.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath">
+        <pathelement
+                location="${gradle_repo}/org.mortbay.jetty/servlet-api/2.5-20081211/22bff70037e1e6fa7e6413149489552ee2064702/servlet-api-2.5-20081211.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-base:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-base/11/9fcd3e8e3227ec97bf503f7991fad1f3b14d005/javafx-base-11.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-base:win:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-base/11/ad3a4acfaa28b484d30c40c1f009445cc3f6e68b/javafx-base-11-win.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-controls:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-controls/11/58d961774262ec972bf304e16c154a8e18c2050b/javafx-controls-11.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-controls:win:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-controls/11/af8d24de44e16a19ae959028eb23a48c145fb682/javafx-controls-11-win.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-fxml/11/d5ff9262ef49d166db658d15f37e3ecff38fde4b/javafx-fxml-11-win.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-graphics:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-graphics/11/a736dd079047ec0b72b8c4970842a5c5e0c19f2f/javafx-graphics-11.jar"/>
+    </path>
+
+    <path id="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath">
+        <pathelement
+                location="${gradle_repo}/org.openjfx/javafx-graphics/11/9345c7ea43dbcc73a62eca5332717b4ce617e6c6/javafx-graphics-11-win.jar"/>
+    </path>
+
+
+    <!-- Global Libraries -->
+    <!-- Register Custom Compiler Taskdefs -->
+    <property name="javac2.home" value="${idea.home}/lib"/>
+    <path id="javac2.classpath">
+        <fileset dir="${javac2.home}">
+            <include name="javac2.jar"/>
+            <include name="jdom.jar"/>
+            <include name="asm-all*.jar"/>
+            <include name="forms-*.jar"/>
+        </fileset>
+    </path>
+    <target name="register.custom.compilers">
+        <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
+        <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions"
+                 classpathref="javac2.classpath"/>
+    </target>
+
+    <!-- Modules -->
+
+
+    <!-- Module videouploader -->
+
+    <dirname property="module.videouploader.basedir" file="${ant.file}"/>
+
+
+    <property name="module.jdk.home.videouploader" value="${project.jdk.home}"/>
+    <property name="module.jdk.bin.videouploader" value="${project.jdk.bin}"/>
+    <property name="module.jdk.classpath.videouploader" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.videouploader" value="-encoding UTF-8 -source 11 -target 11 ${compiler.args}"/>
+
+    <property name="videouploader.output.dir" value="${module.videouploader.basedir}/out/production/videouploader"/>
+    <property name="videouploader.testoutput.dir" value="${module.videouploader.basedir}/out/test/videouploader"/>
+
+    <path id="videouploader.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="videouploader.module.production.classpath">
+        <path refid="${module.jdk.classpath.videouploader}"/>
+    </path>
+
+    <path id="videouploader.runtime.production.module.classpath">
+        <pathelement location="${videouploader.output.dir}"/>
+    </path>
+
+    <path id="videouploader.module.classpath">
+        <path refid="${module.jdk.classpath.videouploader}"/>
+        <pathelement location="${videouploader.output.dir}"/>
+    </path>
+
+    <path id="videouploader.runtime.module.classpath">
+        <pathelement location="${videouploader.testoutput.dir}"/>
+        <pathelement location="${videouploader.output.dir}"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.videouploader">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.videouploader">
+        <patternset refid="excluded.from.module.videouploader"/>
+    </patternset>
+
+
+    <target name="compile.module.videouploader"
+            depends="compile.module.videouploader.production,compile.module.videouploader.tests"
+            description="Compile module videouploader"/>
+
+    <target name="compile.module.videouploader.production" depends="register.custom.compilers"
+            description="Compile module videouploader; production classes"/>
+
+    <target name="compile.module.videouploader.tests"
+            depends="register.custom.compilers,compile.module.videouploader.production"
+            description="compile module videouploader; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.videouploader" description="cleanup module">
+        <delete dir="${videouploader.output.dir}"/>
+        <delete dir="${videouploader.testoutput.dir}"/>
+    </target>
+
+
+    <!-- Module videouploader_main -->
+
+    <dirname property="module.videouploader_main.basedir" file="${ant.file}"/>
+
+
+    <property name="module.jdk.home.videouploader_main" value="${project.jdk.home}"/>
+    <property name="module.jdk.bin.videouploader_main" value="${project.jdk.bin}"/>
+    <property name="module.jdk.classpath.videouploader_main" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.videouploader_main" value="-encoding UTF-8 -source 11 -target 11 ${compiler.args}"/>
+
+    <property name="videouploader_main.output.dir" value="${module.videouploader_main.basedir}/out/production/classes"/>
+    <property name="videouploader_main.testoutput.dir"
+              value="${module.videouploader_main.basedir}/out/production/classes"/>
+
+    <path id="videouploader_main.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>-->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>-->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>-->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>-->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>-->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>-->
+        <!--<path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>-->
+    </path>
+
+    <path id="videouploader_main.module.production.classpath">
+        <path refid="${module.jdk.classpath.videouploader_main}"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+    <path id="videouploader_main.runtime.production.module.classpath">
+        <pathelement location="${videouploader_main.output.dir}"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+    <path id="videouploader_main.module.classpath">
+        <path refid="${module.jdk.classpath.videouploader_main}"/>
+        <pathelement location="${videouploader_main.output.dir}"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+    <path id="videouploader_main.runtime.module.classpath">
+        <pathelement location="${videouploader_main.output.dir}"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.videouploader_main">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.videouploader_main">
+        <patternset refid="excluded.from.module.videouploader_main"/>
+    </patternset>
+
+    <path id="videouploader_main.module.sourcepath">
+        <dirset dir="${module.videouploader_main.basedir}/src/main">
+            <include name="java"/>
+            <include name="resources"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.videouploader_main"
+            depends="compile.module.videouploader_main.production,compile.module.videouploader_main.tests"
+            description="Compile module videouploader_main"/>
+
+    <target name="compile.module.videouploader_main.production" depends="register.custom.compilers"
+            description="Compile module videouploader_main; production classes">
+        <mkdir dir="${videouploader_main.output.dir}"/>
+        <javac2 destdir="${videouploader_main.output.dir}" debug="${compiler.debug}"
+                nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true"
+                executable="${module.jdk.bin.videouploader_main}/javac">
+            <compilerarg line="${compiler.args.videouploader_main}"/>
+            <compilerarg line="--module-path 'C:\Program Files\Java\javafx-sdk-11\lib'"/>
+            <compilerarg line="--add-modules=javafx.fxml,javafx.controls,javafx.graphics"/>
+            <bootclasspath refid="videouploader_main.module.bootclasspath"/>
+            <classpath refid="videouploader_main.module.production.classpath"/>
+            <src refid="videouploader_main.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.videouploader_main"/>
+        </javac2>
+
+        <copy todir="${videouploader_main.output.dir}">
+            <fileset dir="${module.videouploader_main.basedir}/src/main/java">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+            <fileset dir="${module.videouploader_main.basedir}/src/main/resources">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.module.videouploader_main.tests"
+            depends="register.custom.compilers,compile.module.videouploader_main.production"
+            description="compile module videouploader_main; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.videouploader_main" description="cleanup module">
+        <delete dir="${videouploader_main.output.dir}"/>
+        <delete dir="${videouploader_main.testoutput.dir}"/>
+    </target>
+
+
+    <!-- Module videouploader_test -->
+
+    <dirname property="module.videouploader_test.basedir" file="${ant.file}"/>
+
+
+    <property name="module.jdk.home.videouploader_test" value="${project.jdk.home}"/>
+    <property name="module.jdk.bin.videouploader_test" value="${project.jdk.bin}"/>
+    <property name="module.jdk.classpath.videouploader_test" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.videouploader_test" value="-encoding UTF-8 -source 11 -target 11 ${compiler.args}"/>
+
+    <property name="videouploader_test.output.dir" value="undefined"/>
+    <property name="videouploader_test.testoutput.dir" value="${module.videouploader_test.basedir}/out/test/classes"/>
+
+    <path id="videouploader_test.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="videouploader_test.module.production.classpath">
+        <path refid="${module.jdk.classpath.videouploader_test}"/>
+        <pathelement location="${videouploader_main.output.dir}"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+    <path id="videouploader_test.runtime.production.module.classpath">
+        <path refid="videouploader_main.runtime.production.module.classpath"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+    <path id="videouploader_test.module.classpath">
+        <path refid="${module.jdk.classpath.videouploader_test}"/>
+        <pathelement location="${videouploader_main.output.dir}"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+    <path id="videouploader_test.runtime.module.classpath">
+        <pathelement location="${videouploader_test.testoutput.dir}"/>
+        <path refid="videouploader_main.runtime.module.classpath"/>
+        <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev205-1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.api-client:google-api-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.25.0.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-fxml:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-controls:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-graphics:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:win:11.classpath"/>
+        <path refid="library.gradle:_org.openjfx:javafx-base:11.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.guava:guava:20.0.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
+        <path refid="library.gradle:_com.google.http-client:google-http-client:1.25.0.classpath"/>
+        <path refid="library.gradle:_com.google.code.findbugs:jsr305:3.0.2.classpath"/>
+        <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.9.6.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
+        <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.5.5.classpath"/>
+        <path refid="library.gradle:_com.google.j2objc:j2objc-annotations:1.1.classpath"/>
+        <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.4.9.classpath"/>
+        <path refid="library.gradle:_commons-logging:commons-logging:1.2.classpath"/>
+        <path refid="library.gradle:_commons-codec:commons-codec:1.10.classpath"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.videouploader_test">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.videouploader_test">
+        <patternset refid="excluded.from.module.videouploader_test"/>
+    </patternset>
+
+
+    <target name="compile.module.videouploader_test"
+            depends="compile.module.videouploader_test.production,compile.module.videouploader_test.tests"
+            description="Compile module videouploader_test"/>
+
+    <target name="compile.module.videouploader_test.production"
+            depends="register.custom.compilers,compile.module.videouploader_main"
+            description="Compile module videouploader_test; production classes"/>
+
+    <target name="compile.module.videouploader_test.tests"
+            depends="register.custom.compilers,compile.module.videouploader_test.production"
+            description="compile module videouploader_test; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.videouploader_test" description="cleanup module">
+        <delete dir="${videouploader_test.output.dir}"/>
+        <delete dir="${videouploader_test.testoutput.dir}"/>
+    </target>
+
+    <target name="init" description="Build initialization">
+        <!-- Perform any build initialization in this target -->
+    </target>
+
+    <target name="clean"
+            depends="clean.module.videouploader, clean.module.videouploader_main, clean.module.videouploader_test"
+            description="cleanup all"/>
+
+    <target name="build.modules"
+            depends="init, clean, compile.module.videouploader, compile.module.videouploader_main, compile.module.videouploader_test"
+            description="build all modules"/>
+
+    <target name="init.artifacts">
+        <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+        <property name="artifact.output.videouploader_main:jar"
+                  value="${basedir}/out/artifacts/videouploader_main_jar"/>
+        <mkdir dir="${artifacts.temp.dir}"/>
+        <property name="temp.jar.path.Stekeblads_Video_Uploader.jar"
+                  value="${artifacts.temp.dir}/Stekeblads_Video_Uploader.jar"/>
+    </target>
+
+    <target name="artifact.videouploader_main:jar" depends="init.artifacts, compile.module.videouploader_main"
+            description="Build &#39;videouploader_main:jar&#39; artifact">
+        <property name="artifact.temp.output.videouploader_main:jar"
+                  value="${artifacts.temp.dir}/videouploader_main_jar"/>
+        <mkdir dir="${artifact.temp.output.videouploader_main:jar}"/>
+        <jar destfile="${temp.jar.path.Stekeblads_Video_Uploader.jar}" duplicate="preserve"
+             filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="io.github.stekeblad.videouploader.main.Main"/>
+            </manifest>
+            <zipfileset dir="${videouploader_main.output.dir}"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.oauth-client/google-oauth-client-jetty/1.25.0/d6137803b8f4333b5408a26dd70de803ccb6c244/google-oauth-client-jetty-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.mortbay.jetty/jetty/6.1.26/2f546e289fddd5b1fab1d4199fbb6e9ef43ee4b0/jetty-6.1.26.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.http-client/google-http-client-jackson2/1.25.0/7c5c89bd4d0d34d9f1cb3396e8da6233e5074b5c/google-http-client-jackson2-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.guava/guava/20.0/89507701249388e1ed5ddcf8c41f4ce1be7831ef/guava-20.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.fasterxml.jackson.core/jackson-core/2.9.6/4e393793c37c77e042ccc7be5a914ae39251b365/jackson-core-2.9.6.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.mortbay.jetty/servlet-api/2.5-20081211/22bff70037e1e6fa7e6413149489552ee2064702/servlet-api-2.5-20081211.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.mortbay.jetty/jetty-util/6.1.26/e5642fe0399814e1687d55a3862aa5a3417226a9/jetty-util-6.1.26.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.apache.httpcomponents/httpclient/4.5.5/1603dfd56ebcd583ccdf337b6c3984ac55d89e58/httpclient-4.5.5.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/commons-codec/commons-codec/1.10/4b95f4897fa13f2cd904aee711aeafc0c5295cd8/commons-codec-1.10.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.oauth-client/google-oauth-client-java6/1.25.0/4d55c0a4d0c38d065f9fe3f25d9082bda436db2/google-oauth-client-java6-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.apache.httpcomponents/httpcore/4.4.9/a86ce739e5a7175b4b234c290a00a5fdb80957a0/httpcore-4.4.9.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.api-client/google-api-client/1.25.0/e7ff725e89ff5dcbed107be1a24e8102ae2441ee/google-api-client-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.http-client/google-http-client/1.25.0/5fb16523c393bfe0210c29db44742bd308311841/google-http-client-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.oauth-client/google-oauth-client/1.25.0/c9ee14e8b095b4b301b28d57755cc482b8d6f39f/google-oauth-client-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/com.google.apis/google-api-services-youtube/v3-rev205-1.25.0/c226341a2ca08952421158537f87afe53374744/google-api-services-youtube-v3-rev205-1.25.0.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.openjfx/javafx-controls/11/af8d24de44e16a19ae959028eb23a48c145fb682/javafx-controls-11-win.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.openjfx/javafx-fxml/11/d5ff9262ef49d166db658d15f37e3ecff38fde4b/javafx-fxml-11-win.jar"/>
+            <zipfileset
+                    src="${gradle_repo}/org.openjfx/javafx-graphics/11/9345c7ea43dbcc73a62eca5332717b4ce617e6c6/javafx-graphics-11-win.jar"/>
+            <zipfileset dir="${basedir}/src/main/resources"/>
+        </jar>
+        <copy file="${temp.jar.path.Stekeblads_Video_Uploader.jar}"
+              tofile="${artifact.temp.output.videouploader_main:jar}/Stekeblads_Video_Uploader.jar"/>
+    </target>
+
+    <target name="build.all.artifacts" depends="artifact.videouploader_main:jar" description="Build all artifacts">
+        <mkdir dir="${artifact.output.videouploader_main:jar}"/>
+        <copy todir="${artifact.output.videouploader_main:jar}">
+            <fileset dir="${artifact.temp.output.videouploader_main:jar}"/>
+        </copy>
+
+        <!-- Delete temporary files -->
+        <delete dir="${artifacts.temp.dir}"/>
+    </target>
+
+    <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+</project>

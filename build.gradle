@@ -1,12 +1,18 @@
 group 'io.github.stekeblad'
 version '0.0.0.1'
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'application'
-
-mainClassName = "io.github.stekeblad.videouploader.main.Main"
-
-sourceCompatibility = 1.11
+apply plugin: 'com.google.osdetector'
 
 sourceSets {
     main {
@@ -17,16 +23,13 @@ sourceSets {
     }
 }
 
-/* OS Detection for JavaFx 11 */
-def currentOS = org.gradle.internal.os.OperatingSystem.current()
-def platform
-if (currentOS.isWindows()) {
-    platform = 'win'
-} else if (currentOS.isLinux()) {
-    platform = 'linux'
-} else if (currentOS.isMacOsX()) {
-    platform = 'mac'
-}
+sourceCompatibility = 1.11
+
+ext.platform = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os
+
+
+
+
 
 repositories {
     mavenCentral()
@@ -44,6 +47,28 @@ dependencies {
     
     compile "org.openjfx:javafx-fxml:11:${platform}"
 }
+
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'javafx.controls,javafx.fxml'
+        ]
+    }
+}
+
+run {
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'javafx.controls,javafx.fxml'
+        ]
+    }
+}
+
+
+mainClassName = "io.github.stekeblad.videouploader.main.Main"
 
 // https://developers.google.com/api-client-library/java/apis/youtube/v3
 // https://search.maven.org/#search%7Cgav%7C1%7Cg%3A"com.google.apis"%20AND%20a%3A"google-api-services-youtube"

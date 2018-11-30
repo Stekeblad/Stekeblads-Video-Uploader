@@ -4,8 +4,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
@@ -20,7 +19,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * Different fileChoosers for different types of files
+ * Contains different fileChoosers for different types of files (pick*), methods for directory listing,
+ * reading/writing/deleting files...
  */
 public class FileUtils {
 
@@ -175,5 +175,106 @@ public class FileUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Attempts to read an entire file and returns a list with one line from the file per item.
+     * This method makes sure the file stream is closed even if an IO Exception is thrown.
+     *
+     * @param path path of the file to read
+     * @return An ArrayList with strings where each item in the list represents one line in the file
+     * @throws IOException          If the file at the given path does not exist or if an IO Exception occurrs
+     * @throws NullPointerException if path is null
+     */
+    public static ArrayList<String> readAllLines(String path) throws IOException {
+        BufferedReader reader = null;
+        ArrayList<String> lines = new ArrayList<>();
+        try {
+            reader = new BufferedReader(new FileReader(new File(path)));
+            String line = reader.readLine();
+            while (line != null) { // while not end of file
+                lines.add(line);
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+            closeReadBuffer(reader);
+            throw e;
+        } finally {
+            closeReadBuffer(reader);
+        }
+        return lines;
+    }
+
+    /**
+     * Attempts to read an entire file and returns it as a long string.
+     * This method makes sure the file stream is closed even if an IO Exception is thrown.
+     *
+     * @param path path of the file to read
+     * @return A string with the entire content of the file at the given path
+     * @throws IOException          If the file at the given path does not exist or if an IO Exception occurrs
+     * @throws NullPointerException if path is null
+     */
+    public static String readAll(String path) throws IOException {
+        BufferedReader reader = null;
+        StringBuilder builder = new StringBuilder();
+        try {
+            reader = new BufferedReader(new FileReader(new File(path)));
+            String line = reader.readLine();
+            while (line != null) { // while not end of file
+                builder.append(line);
+                line = reader.readLine();
+                if (line != null) {
+                    builder.append("\n"); // do not end the last line with '\n'
+                }
+            }
+        } catch (IOException e) {
+            closeReadBuffer(reader);
+            throw e;
+        } finally {
+            closeReadBuffer(reader);
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Writes data to a file. This method makes sure the file stream is closed even if an IO Excecption occurrs
+     *
+     * @param path path of the file to write
+     * @param data the data to write to the file
+     * @throws IOException           If the file does not exist and cannot be created, the file can not be read
+     *                               or if the path points to a directory instead of a file.
+     * @throws FileNotFoundException if path is null
+     */
+    public static void writeAll(String path, String data) throws IOException {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(new File(path)));
+            writer.write(data);
+        } catch (IOException e) {
+            closeWriteBuffer(writer);
+            throw e;
+        } finally {
+            closeWriteBuffer(writer);
+        }
+    }
+
+    private static void closeReadBuffer(BufferedReader reader) {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void closeWriteBuffer(BufferedWriter writer) {
+        if (writer != null) {
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
