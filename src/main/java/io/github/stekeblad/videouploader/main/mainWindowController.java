@@ -1,17 +1,18 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.state.ButtonProperties;
 import io.github.stekeblad.videouploader.state.VideoUploadState;
 import io.github.stekeblad.videouploader.tagProcessing.ITagProcessor;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
-import io.github.stekeblad.videouploader.windowControllers.SettingsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
@@ -342,10 +343,6 @@ public class mainWindowController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/PresetsWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 725, 700);
-            URL css_path = mainWindowController.class.getClassLoader().getResource("css/disabled.css");
-            if (css_path != null) {
-                scene.getStylesheets().add(css_path.toString());
-            }
             Stage stage = new Stage();
             stage.setTitle(transBasic.getString("app_presetWindowTitle"));
             stage.setScene(scene);
@@ -380,18 +377,29 @@ public class mainWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 600, 450);
-            Stage stage = new Stage();
+            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.SETTINGS);
+            stage.makeScene(fxmlLoader.load(), Constants.SETTINGS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
-            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
-            SettingsWindowController controller = fxmlLoader.getController();
-            stage.setOnCloseRequest(controller::onWindowClose);
-            controller.myInit();
-            stage.show();
+            stage.prepareControllerAndShow(fxmlLoader.getController());
         } catch (IOException e) {
             AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
         }
+//        try {
+//            FXMLLoader fxmlLoader = new FXMLLoader();
+//            fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
+//            Scene scene = new Scene(fxmlLoader.load(), 600, 450);
+//            Stage stage = new Stage();
+//            stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
+//            stage.setScene(scene);
+//            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
+//            SettingsWindowController controller = fxmlLoader.getController();
+//            stage.setOnCloseRequest(controller::onWindowClose);
+//            controller.myInit();
+//            stage.show();
+//        } catch (IOException e) {
+//            AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
+//        }
         actionEvent.consume();
     }
 

@@ -1,9 +1,11 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
+import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.state.ButtonProperties;
 import io.github.stekeblad.videouploader.state.VideoPresetState;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
@@ -28,6 +30,7 @@ import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -75,6 +78,12 @@ public class PresetsWindowController {
         // It will cause problems if locale is changed while something is being edited or uploaded
         this.disableLocaleChange = disableLocaleChange;
         setLocaleButtonDisabled();
+
+        // Load custom CSS (for improved readability of disabled ChoiceBoxes)
+        URL css_path = PresetsWindowController.class.getClassLoader().getResource("css/disabled.css");
+        if (css_path != null) {
+            presetWindow.getScene().getStylesheets().add(css_path.toString());
+        }
 
         // Load Translations
         transPresetWin = TranslationsManager.getTranslation(TranslationBundles.WINDOW_PRESET);
@@ -229,10 +238,7 @@ public class PresetsWindowController {
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/LocalizeCategoriesWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 400, 450);
             Stage stage = new Stage();
-            stage.setMinWidth(400);
-            stage.setMinHeight(450);
-            stage.setMaxWidth(400);
-            stage.setMaxHeight(450);
+            stage.setResizable(false);
             stage.setTitle(transBasic.getString("app_locCatWindowTitle"));
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -254,17 +260,13 @@ public class PresetsWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/ManagePlaylistsWindow.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 400, 500);
-            Stage stage = new Stage();
+            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.PLAYLISTS);
+            stage.makeScene(fxmlLoader.load(), Constants.SETTINGS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setMinWidth(350);
             stage.setMinHeight(250);
             stage.setTitle(transBasic.getString("app_manPlayWindowTitle"));
-            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
-            ManagePlaylistsWindowController controller = fxmlLoader.getController();
-            stage.setOnCloseRequest(controller::onWindowClose);
-            controller.myInit();
-            stage.showAndWait();
+            stage.prepareControllerAndShowAndWait(fxmlLoader.getController());
         } catch (IOException e) {
             e.printStackTrace();
         }

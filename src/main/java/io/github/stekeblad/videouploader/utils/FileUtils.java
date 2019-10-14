@@ -49,7 +49,7 @@ public class FileUtils {
         Stage fileChooserStage = new Stage();
         File thumbnail = fileChooser.showOpenDialog(fileChooserStage);
         if (thumbnail != null) {
-            if (thumbnail.length() > maxFileSize) { // max allowed size is 2MB
+            if (thumbnail.length() > maxFileSize) {
                 AlertUtils.simpleClose("Warning", "Image to large, the max size is " +
                         BigDecimal.valueOf((double) maxFileSize / (1024 * 1024)).setScale(3, RoundingMode.HALF_UP) + "MB" +
                         "\n the chosen file is " + BigDecimal.valueOf((double) thumbnail.length() / (1024 * 1024)).setScale(3, RoundingMode.HALF_UP) + "MB").show();
@@ -196,11 +196,14 @@ public class FileUtils {
                 lines.add(line);
                 line = reader.readLine();
             }
-        } catch (IOException e) {
-            closeReadBuffer(reader);
-            throw e;
         } finally {
-            closeReadBuffer(reader);
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return lines;
     }
@@ -227,11 +230,14 @@ public class FileUtils {
                     builder.append("\n"); // do not end the last line with '\n'
                 }
             }
-        } catch (IOException e) {
-            closeReadBuffer(reader);
-            throw e;
         } finally {
-            closeReadBuffer(reader);
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return builder.toString();
     }
@@ -250,30 +256,13 @@ public class FileUtils {
         try {
             writer = new BufferedWriter(new FileWriter(new File(path)));
             writer.write(data);
-        } catch (IOException e) {
-            closeWriteBuffer(writer);
-            throw e;
         } finally {
-            closeWriteBuffer(writer);
-        }
-    }
-
-    private static void closeReadBuffer(BufferedReader reader) {
-        if (reader != null) {
-            try {
-                reader.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void closeWriteBuffer(BufferedWriter writer) {
-        if (writer != null) {
-            try {
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

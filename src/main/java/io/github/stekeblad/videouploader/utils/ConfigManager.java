@@ -92,15 +92,31 @@ public enum ConfigManager {
                     System.err.println("Could not close settings file");
                 }
             }
-            //if 0 properties was loaded, add default values
-            if ( mainProp.size() == 0) {
-                mainProp.setProperty("noSettings", "true");
-                mainProp.setProperty("neverAuthed", "true");
-                mainProp.setProperty("category_country", "");
-                mainProp.setProperty("category_language", "");
-                mainProp.setProperty("ui_language", String.valueOf(Locale.getDefault()));
-            }
+
+            // Set missing properties
+            setIfMissing("noSettings", "true");
+            setIfMissing("neverAuthed", "true");
+            setIfMissing("category_country", "");
+            setIfMissing("category_language", "");
+            setIfMissing("ui_language", String.valueOf(Locale.getDefault()));
+
+            setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x825");
+            setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "50x50");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.PRESETS, "725x700");
+            setIfMissing(WIN_LOC + WindowPropertyNames.PRESETS, "150x100");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "600x450");
+            setIfMissing(WIN_LOC + WindowPropertyNames.SETTINGS, "200x150");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.LOCALIZE, "400x450");
+            setIfMissing(WIN_LOC + WindowPropertyNames.LOCALIZE, "275x250");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.PLAYLISTS, "400x500");
+            setIfMissing(WIN_LOC + WindowPropertyNames.PLAYLISTS, "250x200");
+
         }
+    }
+
+    private void setIfMissing(String prop, String value) {
+        if (mainProp.getProperty(prop) == null)
+            mainProp.setProperty(prop, value);
     }
 
     /**
@@ -164,6 +180,31 @@ public enum ConfigManager {
 
     public void setSelectedLanguage(String languageName) {
         mainProp.setProperty("ui_language", languageName);
+    }
+
+    private static final String WIN_LOC = "window_location_";
+    private static final String WIN_SIZE = "window_size_";
+
+    public static final class WindowPropertyNames {
+        public static final String MAIN = "main";
+        public static final String PRESETS = "preset";
+        public static final String SETTINGS = "settings";
+        public static final String LOCALIZE = "localize";
+        public static final String PLAYLISTS = "playlist";
+    }
+
+    public void setWindowRectangle(String window, WindowFrame rect) {
+        String data = rect.x + "x" + rect.y;
+        mainProp.setProperty(WIN_LOC + window, data);
+        data = rect.width + "x" + rect.height;
+        mainProp.setProperty(WIN_SIZE + window, data);
+    }
+
+    public WindowFrame getWindowRectangle(String window) {
+        String[] loc = mainProp.getProperty(WIN_LOC + window).split("x");
+        String[] size = mainProp.getProperty(WIN_SIZE + window).split("x");
+        return new WindowFrame(Double.valueOf(loc[0]), Double.valueOf(loc[1]),
+                Double.valueOf(size[0]), Double.valueOf(size[1]));
     }
 
     // Presets

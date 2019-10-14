@@ -2,8 +2,6 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- Moving tag processing to separate classes and loading them as services 
-(https://docs.oracle.com/javase/9/docs/api/java/util/ServiceLoader.html)
 
 #### Higher priority things to do
 - Find a way to produce a .jar file that the end user can easily run
@@ -51,6 +49,7 @@ and drop video files in the list of videos to add list?
 - Move auto numbering into VideoPreset to remember the numbering for each preset
 - User defined tags of some sort
 - do something with video meta data? https://github.com/artclarke/humble-video/blob/master/humble-video-demos/src/main/java/io/humble/video/demos/GetContainerInfo.java
+- An option for presets to keep videos editable after the preset has been applied.
 
 #### Java 11 (planned to be released at the end of september)
 - Toast notification when all uploads finished
