@@ -92,15 +92,31 @@ public enum ConfigManager {
                     System.err.println("Could not close settings file");
                 }
             }
-            //if 0 properties was loaded, add default values
-            if ( mainProp.size() == 0) {
-                mainProp.setProperty("noSettings", "true");
-                mainProp.setProperty("neverAuthed", "true");
-                mainProp.setProperty("category_country", "");
-                mainProp.setProperty("category_language", "");
-                mainProp.setProperty("ui_language", String.valueOf(Locale.getDefault()));
-            }
+
+            // Set missing properties
+            setIfMissing("noSettings", "true");
+            setIfMissing("neverAuthed", "true");
+            setIfMissing("category_country", "");
+            setIfMissing("category_language", "");
+            setIfMissing("ui_language", String.valueOf(Locale.getDefault()));
+
+            setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x825");
+            setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "50x50");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.PRESETS, "725x700");
+            setIfMissing(WIN_LOC + WindowPropertyNames.PRESETS, "150x100");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "600x450");
+            setIfMissing(WIN_LOC + WindowPropertyNames.SETTINGS, "200x150");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.LOCALIZE, "400x450");
+            setIfMissing(WIN_LOC + WindowPropertyNames.LOCALIZE, "275x250");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.PLAYLISTS, "400x500");
+            setIfMissing(WIN_LOC + WindowPropertyNames.PLAYLISTS, "250x200");
+
         }
+    }
+
+    private void setIfMissing(String prop, String value) {
+        if (mainProp.getProperty(prop) == null)
+            mainProp.setProperty(prop, value);
     }
 
     /**
@@ -110,7 +126,7 @@ public enum ConfigManager {
         OutputStream output = null;
         try {
             output = new FileOutputStream(filesPath + "/settings.properties");
-                    mainProp.store(output, "main settings file for Stekeblads Video Uploader");
+            mainProp.store(output, "main settings file for Stekeblads Video Uploader");
         } catch (FileNotFoundException e) {
             System.err.println("File is not a file or do not have permission to create settings file");
         } catch (IOException e) {
@@ -166,6 +182,31 @@ public enum ConfigManager {
         mainProp.setProperty("ui_language", languageName);
     }
 
+    private static final String WIN_LOC = "window_location_";
+    private static final String WIN_SIZE = "window_size_";
+
+    public static final class WindowPropertyNames {
+        public static final String MAIN = "main";
+        public static final String PRESETS = "preset";
+        public static final String SETTINGS = "settings";
+        public static final String LOCALIZE = "localize";
+        public static final String PLAYLISTS = "playlist";
+    }
+
+    public void setWindowRectangle(String window, WindowFrame rect) {
+        String data = rect.x + "x" + rect.y;
+        mainProp.setProperty(WIN_LOC + window, data);
+        data = rect.width + "x" + rect.height;
+        mainProp.setProperty(WIN_SIZE + window, data);
+    }
+
+    public WindowFrame getWindowRectangle(String window) {
+        String[] loc = mainProp.getProperty(WIN_LOC + window).split("x");
+        String[] size = mainProp.getProperty(WIN_SIZE + window).split("x");
+        return new WindowFrame(Double.valueOf(loc[0]), Double.valueOf(loc[1]),
+                Double.valueOf(size[0]), Double.valueOf(size[1]));
+    }
+
     // Presets
 
     /**
@@ -208,20 +249,11 @@ public enum ConfigManager {
      */
     private String loadPreset(String presetName) throws IOException {
         if (Files.exists(Paths.get(PRESET_DIR + "/" + presetName))) {
-            BufferedReader reader = new BufferedReader(new FileReader(
-                    new File(PRESET_DIR + "/" + presetName)));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line = reader.readLine();
-            while (line != null) { // while not end of file
-                stringBuilder.append(line);
-                line = reader.readLine();
-                if (line != null) {
-                    stringBuilder.append("\n"); // do not end the last line with '\n'
-                }
+            try {
+                return FileUtils.readAll(PRESET_DIR + "/" + presetName);
+            } catch (IOException e) {
+                throw new IOException("Failed reading preset save file for preset \"" + presetName + "\"", e);
             }
-            reader.close();
-            return stringBuilder.toString();
-
         } else {
             throw new IOException("Preset " + presetName + " does not exist or cant be accessed");
         }
@@ -233,21 +265,11 @@ public enum ConfigManager {
      * @param stringRepresentation the string representation of the preset.
      */
     public void savePreset(String presetName, String stringRepresentation) {
-        BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(
-                    new File(PRESET_DIR + "/" + presetName)));
-            writer.write(stringRepresentation);
+            FileUtils.writeAll(PRESET_DIR + "/" + presetName, stringRepresentation);
         } catch (IOException e) {
+            System.err.println("Can not save preset \"" + presetName + "\"");
             e.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
         presetStringsMap.put(presetName, stringRepresentation);
     }
@@ -303,21 +325,11 @@ public enum ConfigManager {
      * @param playlistData the playlist data to save
      */
     public void savePlaylistCache(String playlistData) {
-        BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(
-                    new File(PLAYLIST_FILE)));
-            writer.write(playlistData);
+            FileUtils.writeAll(PLAYLIST_FILE, playlistData);
         } catch (IOException e) {
+            System.err.println("Could not save playlists to file");
             e.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -326,32 +338,13 @@ public enum ConfigManager {
      * @return a ArrayList with one row of the save file per element
      */
     public ArrayList<String> loadPlaylistCache() {
-        BufferedReader reader = null;
-        ArrayList<String> playlistString = new ArrayList<>();
+        ArrayList<String> playlistString = null;
         try {
-            if (!Files.exists(Paths.get(PLAYLIST_FILE))) {
-                Files.createFile(Paths.get(PLAYLIST_FILE));
-            } else {
-                reader = new BufferedReader(new FileReader(
-                        new File(PLAYLIST_FILE)));
-                String line = reader.readLine();
-                while (line != null) { // while not end of file
-                    playlistString.add(line);
-                    line = reader.readLine();
-                }
-            }
+            playlistString = FileUtils.readAllLines(PLAYLIST_FILE);
         } catch (FileNotFoundException e) {
             System.err.println("Could not find playlist cache file");
         } catch (IOException e) {
             System.err.println("Could not create playlists cache file");
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
         }
         return playlistString;
     }
@@ -398,21 +391,11 @@ public enum ConfigManager {
      *                 to the caller to make sure a previously saved upload is not overwritten.
      */
     public void saveWaitingUpload(String waitingUpload, String fileName) {
-        BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(
-                    new File(UPLOAD_DIR + "/" + fileName)));
-            writer.write(waitingUpload);
+            FileUtils.writeAll(UPLOAD_DIR + "/" + fileName, waitingUpload);
         } catch (IOException e) {
+            System.err.println("Failed saving waiting upload \"" + fileName + "\"");
             e.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -422,31 +405,13 @@ public enum ConfigManager {
      * @return the content of the file (a string representation of the upload)
      */
     private String loadWaitingUploadsFile(File waitingUpload) {
-        BufferedReader reader = null;
-        StringBuilder stringBuilder = new StringBuilder();
         try {
-            reader = new BufferedReader(new FileReader(waitingUpload));
-            String line = reader.readLine();
-            while (line != null) { // while not end of file
-                stringBuilder.append(line);
-                line = reader.readLine();
-                if (line != null) {
-                    stringBuilder.append("\n"); // do not end the last line with '\n'
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading a waiting upload!");
+            return FileUtils.readAll(waitingUpload.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Error loading a waiting upload \"" + waitingUpload.getName() + "\"");
+            e.printStackTrace();
             return null;
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
         }
-        return stringBuilder.toString();
     }
 
     // Categories
@@ -456,21 +421,11 @@ public enum ConfigManager {
      * @param categoryData information about categories that should be saved
      */
     public void saveLocalizedCategories(String categoryData) {
-        BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(
-                    new File(CATEGORIES_FILE)));
-            writer.write(categoryData);
+            FileUtils.writeAll(CATEGORIES_FILE, categoryData);
         } catch (IOException e) {
+            System.err.println("Could not save categories");
             e.printStackTrace();
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -479,33 +434,27 @@ public enum ConfigManager {
      * @return the content of the categories file with one line per element in the ArrayList
      */
     public ArrayList<String> loadLocalizedCategories() {
-        BufferedReader reader = null;
-        ArrayList<String> playlistString = new ArrayList<>();
         try {
             if (!Files.exists(Paths.get(CATEGORIES_FILE))) {
                 Files.createFile(Paths.get(CATEGORIES_FILE));
-            } else {
-                reader = new BufferedReader(new FileReader(
-                        new File(CATEGORIES_FILE)));
-                String line = reader.readLine();
-                while (line != null) { // while not end of file
-                    playlistString.add(line);
-                    line = reader.readLine();
-                }
+                return new ArrayList<>();
             }
         } catch (FileNotFoundException e) {
-            System.err.println("Could not find categories file");
-        } catch (IOException e) {
-            System.err.println("Could not create categories file");
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            System.err.println("Could not find or access categories file");
+            e.printStackTrace();
+            return new ArrayList<>();
+        } catch (IOException e1) {
+            System.err.println("Could not create new categories file");
+            e1.printStackTrace();
+            return new ArrayList<>();
         }
-        return playlistString;
+
+        try {
+            return FileUtils.readAllLines(CATEGORIES_FILE);
+        } catch (IOException e) {
+            System.err.println("Could not read categories file");
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

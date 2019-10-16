@@ -11,7 +11,7 @@ import java.util.*;
  * and get the meta data about them
  */
 public class TranslationsMeta {
-    private HashMap<String, ResourceBundle> transMeta;
+    private final HashMap<String, ResourceBundle> transMeta;
 
     /**
      * The constructor for TranslationsMeta, loads all files in strings/meta as PropertyResourceBundle

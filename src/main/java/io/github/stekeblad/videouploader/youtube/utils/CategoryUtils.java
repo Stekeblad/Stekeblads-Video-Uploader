@@ -19,7 +19,7 @@ import java.util.List;
 public enum CategoryUtils {
     INSTANCE;
 
-    private ConfigManager configManager = ConfigManager.INSTANCE;
+    private final ConfigManager configManager = ConfigManager.INSTANCE;
 
     private HashMap<String, String> categories = null;
 

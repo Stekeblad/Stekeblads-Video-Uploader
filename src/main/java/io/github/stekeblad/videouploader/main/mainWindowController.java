@@ -1,7 +1,10 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.jfxExtension.MyStage;
+import io.github.stekeblad.videouploader.tagProcessing.ITagProcessor;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
@@ -10,7 +13,6 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
-import io.github.stekeblad.videouploader.windowControllers.SettingsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
@@ -36,6 +38,8 @@ import java.net.URL;
 import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX_THUMB_SIZE;
+import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 public class mainWindowController {
@@ -205,7 +209,7 @@ public class mainWindowController {
      * @param actionEvent the click event
      */
     public void onPickFileClicked(ActionEvent actionEvent) {
-        videosToAdd = FileUtils.pickVideos();
+        videosToAdd = FileUtils.pickVideos(Long.MAX_VALUE);
         ArrayList<String> filenames = new ArrayList<>();
         if(videosToAdd != null) {
             for (File file : videosToAdd) {
@@ -254,15 +258,9 @@ public class mainWindowController {
                 uploadPaneCounter++;
             }
         } else { // preset selected
-            VideoPreset chosenPreset;
-            // Get the auto numbering and preset
-            int autoNum;
-            try {
-                autoNum = Integer.valueOf(txt_autoNum.getText());
-            } catch (NumberFormatException e) {
-                autoNum = 1;
-            }
+
             // Load details of the selected preset
+            VideoPreset chosenPreset;
             try {
                 chosenPreset = new VideoPreset(configManager.getPresetString(
                         choice_presets.getSelectionModel().getSelectedItem()), "preset");
@@ -271,29 +269,47 @@ public class mainWindowController {
                         choice_presets.getSelectionModel().getSelectedItem() + "\", the videos will not be added");
                 return;
             }
-            // Get playlist url if available
-            String playlistUrl = playlistUtils.getPlaylistUrl(chosenPreset.getSelectedPlaylist());
-            if (playlistUrl == null) {
-                playlistUrl = "";
-            }
+
+            // Get the auto numbering and preset
+            int autoNum = Integer.valueOf(txt_autoNum.getText());
+
+            // Find TagProcessors
+            ArrayList<ITagProcessor> tagProcessors = new ArrayList<>();
+            ServiceLoader<ITagProcessor> tagProcessorServiceLoader = ServiceLoader.load(ITagProcessor.class);
+//            for (ITagProcessor tagProcessor : tagProcessorServiceLoader) {
+//                tagProcessor.init(chosenPreset, autoNum);
+//                tagProcessors.add(tagProcessor);
+//            }
+
+            tagProcessorServiceLoader.forEach(tagProcessor -> {
+                tagProcessor.init(chosenPreset, autoNum);
+                tagProcessors.add(tagProcessor);
+            });
+
             // Iterate over all selected video files
             for (File videoFile : videosToAdd) {
-                // Apply automatic numbering on video name
-                String name = chosenPreset.getVideoName().replace("$(ep)", String.valueOf(autoNum++));
                 // Insert raw file name in title, exclude file extension
+                // (may be a TagProcessor later, do not want to pass the File to all TagProcessors)
+                String name = chosenPreset.getVideoName();
                 if (name.contains("$(rawname)")) {
                     String rawFileName = videoFile.getName().substring(0, videoFile.getName().lastIndexOf("."));
                     name = name.replace("$(rawname)", rawFileName);
                 }
-                // Insert playlist URL in description
-                String description = chosenPreset.getVideoDescription()
-                        .replace("$(playlist)", playlistUrl);
+
+                // Execute the TagProcessors
+                String description = chosenPreset.getVideoDescription();
+                List<String> videoTags = chosenPreset.getVideoTags();
+                for (ITagProcessor processor : tagProcessors) {
+                    name = processor.processTitle(name);
+                    description = processor.processDescription(description);
+                    videoTags = processor.processTags(videoTags);
+                }
 
                 VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()
                         .setVideoName(name)
                         .setVideoDescription(description)
                         .setVisibility(chosenPreset.getVisibility())
-                        .setVideoTags(chosenPreset.getVideoTags())
+                        .setVideoTags(videoTags)
                         .setSelectedPlaylist(chosenPreset.getSelectedPlaylist())
                         .setCategory(chosenPreset.getCategory())
                         .setTellSubs(chosenPreset.isTellSubs())
@@ -302,7 +318,7 @@ public class mainWindowController {
                 if (chosenPreset.getThumbNail() != null) {
                     newUploadBuilder.setThumbNailPath(chosenPreset.getThumbNail().getAbsolutePath());
                 }
-                 VideoUpload newUpload = newUploadBuilder.build();
+                VideoUpload newUpload = newUploadBuilder.build();
                 // make the upload change its width together with the uploads list and the window
                 newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
                 newUpload.setThumbnailCursorEventHandler(this::updateCursor);
@@ -332,10 +348,6 @@ public class mainWindowController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/PresetsWindow.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 725, 700);
-            URL css_path = mainWindowController.class.getClassLoader().getResource("css/disabled.css");
-            if (css_path != null) {
-                scene.getStylesheets().add(css_path.toString());
-            }
             Stage stage = new Stage();
             stage.setTitle(transBasic.getString("app_presetWindowTitle"));
             stage.setScene(scene);
@@ -370,18 +382,29 @@ public class mainWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 600, 450);
-            Stage stage = new Stage();
+            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.SETTINGS);
+            stage.makeScene(fxmlLoader.load(), Constants.SETTINGS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
-            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
-            SettingsWindowController controller = fxmlLoader.getController();
-            stage.setOnCloseRequest(controller::onWindowClose);
-            controller.myInit();
-            stage.show();
+            stage.prepareControllerAndShow(fxmlLoader.getController());
         } catch (IOException e) {
             AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
         }
+//        try {
+//            FXMLLoader fxmlLoader = new FXMLLoader();
+//            fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
+//            Scene scene = new Scene(fxmlLoader.load(), 600, 450);
+//            Stage stage = new Stage();
+//            stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
+//            stage.setScene(scene);
+//            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
+//            SettingsWindowController controller = fxmlLoader.getController();
+//            stage.setOnCloseRequest(controller::onWindowClose);
+//            controller.myInit();
+//            stage.show();
+//        } catch (IOException e) {
+//            AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
+//        }
         actionEvent.consume();
     }
 
@@ -393,22 +416,20 @@ public class mainWindowController {
     public void onStartAllUploadsClicked(ActionEvent actionEvent) {
         // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.YES) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else { // ButtonType.NO or closed [X]
+                return;
             }
         }
         // Permission given, start uploads
-        for (int i = 0; i < uploadQueueVideos.size(); i++) {
-            if (uploadQueueVideos.get(i).getButton3Id() != null &&
-                    uploadQueueVideos.get(i).getButton3Id().contains(BUTTON_START_UPLOAD)) {
-                onStartUpload(uploadQueueVideos.get(i).getButton3Id());
+        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
+            if (uploadQueueVideo.getButton3Id() != null &&
+                    uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
+                onStartUpload(uploadQueueVideo.getButton3Id());
             }
         }
         actionEvent.consume();
@@ -438,13 +459,10 @@ public class mainWindowController {
     public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
         // Show confirmation dialog
         if (!bypassAbortWarning) { // can be set from onAbortAndClearClicked
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
-                    transMainWin.getString("diag_abortAll_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() != ButtonType.YES) {
-                    // ButtonType.NO or Closed with [X] button
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
+                    transMainWin.getString("diag_abortAll_full"), ButtonType.NO);
+            if (userChoice == ButtonType.NO) {
+                return;
             }
         }
         // Prevent the "Are you sure you want to abort X?" dialog for every upload
@@ -468,16 +486,14 @@ public class mainWindowController {
      * @param actionEvent the button click event
      */
     public void onAbortAndClearClicked(ActionEvent actionEvent) {
-        Optional<ButtonType> choice = AlertUtils.yesNo(transMainWin.getString("diag_abortAllClear_short"),
-                transMainWin.getString("diag_abortAllClear_full")).showAndWait();
-        if (choice.isPresent()) {
-            if (choice.get() == ButtonType.YES) {
-                bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
-                onAbortAllUploadsClicked(new ActionEvent());
-                uploadQueueVideos.clear();
-                uploadPaneCounter = 0;
-                updateUploadList();
-            }
+        ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAllClear_short"),
+                transMainWin.getString("diag_abortAllClear_full"), ButtonType.NO);
+        if (userChoice == ButtonType.YES) {
+            bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
+            onAbortAllUploadsClicked(new ActionEvent());
+            uploadQueueVideos.clear();
+            uploadPaneCounter = 0;
+            updateUploadList();
         }
         actionEvent.consume();
     }
@@ -581,7 +597,7 @@ public class mainWindowController {
         uploadQueueVideos.get(selected).setEditable(true);
         uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY) return; // Conflicting with context menu
-            File pickedThumbnail = FileUtils.pickThumbnail();
+            File pickedThumbnail = FileUtils.pickThumbnail(THUMBNAIL_FILE_FORMAT, MAX_THUMB_SIZE);
             if(pickedThumbnail != null) {
                 try {
                     uploadQueueVideos.get(selected).setThumbNailFile(pickedThumbnail);
@@ -690,16 +706,16 @@ public class mainWindowController {
         }
         String desc = String.format(transMainWin.getString("diag_confirmDelete_full"),
                 uploadQueueVideos.get(selected).getVideoName());
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
-                transMainWin.getString("diag_confirmDelete_short"), desc).showAndWait();
-        if (buttonChoice.isPresent()) {
-            if(buttonChoice.get() == ButtonType.YES) {
-                // delete backup (may exist if upload was created with no preset and directly deleted
-                editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-                uploadQueueVideos.remove(selected);
-                updateUploadList();
-            } // else if ButtonType.NO or closed [X] do nothing
-        }
+
+        ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_confirmDelete_short"),
+                desc, ButtonType.NO);
+        if (userChoice == ButtonType.YES) {
+            // delete backup (may exist if upload was created with no preset and directly deleted
+            editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
+            uploadQueueVideos.remove(selected);
+            updateUploadList();
+        } // else if ButtonType.NO or closed [X] do nothing
+
         // Make sure visual change get to the UI
         updateUploadList();
     }
@@ -730,18 +746,17 @@ public class mainWindowController {
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
         if(configManager.getNeverAuthed()) {
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full")).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() == ButtonType.YES) {
-                    configManager.setNeverAuthed(false);
-                    configManager.saveSettings();
-                } else { // ButtonType.NO or closed [X]
-                    return;
-                }
+            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
+                    transBasic.getString("auth_full"), ButtonType.NO);
+            if (userChoice == ButtonType.YES) {
+                configManager.setNeverAuthed(false);
+                configManager.saveSettings();
+            } else { // ButtonType.NO or closed [X]
+                return;
             }
+
         }
-        // User is authenticated or warned about the upcoming prompt to do so.
+        // User is authenticated or is warned about the upcoming prompt to do so.
 
         // Queue upload
         uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());
@@ -770,13 +785,12 @@ public class mainWindowController {
         if (!bypassAbortWarning) {
             String desc = String.format(transMainWin.getString("diag_abortSingle_full"),
                     uploadQueueVideos.get(selected).getVideoName());
-            Optional<ButtonType> buttonChoice = AlertUtils.yesNo(
-                    transMainWin.getString("diag_abortSingle_short"), desc).showAndWait();
-            if (buttonChoice.isPresent()) {
-                if (buttonChoice.get() != ButtonType.YES) {
-                    // ButtonType.NO or Closed with [X] button
-                    return;
-                }
+
+            ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortSingle_short"),
+                    desc, ButtonType.NO);
+            if (userChoice == ButtonType.NO) {
+                // ButtonType.NO or Closed with [X] button
+                return;
             }
         }
         // Abort upload

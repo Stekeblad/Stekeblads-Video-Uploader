@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_youtubeuploader" default="compile.module.youtubeuploader">
+  <dirname property="module.youtubeuploader.basedir" file="${ant.file.module_youtubeuploader}"/>
+  
+  <property name="module.jdk.home.youtubeuploader" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.youtubeuploader" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.youtubeuploader" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.youtubeuploader" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="youtubeuploader.output.dir" value="${module.youtubeuploader.basedir}/../out/production/youtubeuploader"/>
+  <property name="youtubeuploader.testoutput.dir" value="${module.youtubeuploader.basedir}/../out/test/youtubeuploader"/>
+  
+  <path id="youtubeuploader.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="youtubeuploader.module.production.classpath">
+    <path refid="${module.jdk.classpath.youtubeuploader}"/>
+  </path>
+  
+  <path id="youtubeuploader.runtime.production.module.classpath">
+    <pathelement location="${youtubeuploader.output.dir}"/>
+  </path>
+  
+  <path id="youtubeuploader.module.classpath">
+    <path refid="${module.jdk.classpath.youtubeuploader}"/>
+    <pathelement location="${youtubeuploader.output.dir}"/>
+  </path>
+  
+  <path id="youtubeuploader.runtime.module.classpath">
+    <pathelement location="${youtubeuploader.testoutput.dir}"/>
+    <pathelement location="${youtubeuploader.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.youtubeuploader">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.youtubeuploader">
+    <patternset refid="excluded.from.module.youtubeuploader"/>
+  </patternset>
+  
+  
+  <target name="compile.module.youtubeuploader" depends="compile.module.youtubeuploader.production,compile.module.youtubeuploader.tests" description="Compile module youtubeuploader"/>
+  
+  <target name="compile.module.youtubeuploader.production" description="Compile module youtubeuploader; production classes"/>
+  
+  <target name="compile.module.youtubeuploader.tests" depends="compile.module.youtubeuploader.production" description="compile module youtubeuploader; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.youtubeuploader" description="cleanup module">
+    <delete dir="${youtubeuploader.output.dir}"/>
+    <delete dir="${youtubeuploader.testoutput.dir}"/>
+  </target>
+</project>

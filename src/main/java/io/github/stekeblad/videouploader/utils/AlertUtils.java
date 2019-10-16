@@ -109,26 +109,18 @@ public class AlertUtils {
     }
 
     /**
-     * Convenient method for creating a @code{Alert} dialog with a YES and a NO button.
-     * To set what to do on the buttons you can do like this:
-     * <pre>{@code
-     * Optional<ButtonType> buttonChoice = AlertUtils.yesNo(...).showAndWait();
-     * if (buttonChoice.isPresent()) {
-     *     if (buttonChoice.get() == ButtonType.YES) {
-     *         doOnYes();
-     *     } else { // ButtonType.NO or Closed with [X] button
-     *         doOnNo();
-     *     }
-     * }
-     *
+     * Convenient method for creating a {@code Alert} dialog with a YES and a NO button.
      * @param header Custom window title
      * @param content The message to display to the user
-     * @return a Alert that needs actions bound to the buttons but is otherwise ready to be shown
+     * @param defaultButton if the window is closed without one of the buttons being clicked, treat it as a click on this button.
+     *                      Expected values are {@code ButtonType.NO} and {@code ButtonType.YES}
+     * @return Returns ButtonType.YES if the yes button was pressed and ButtonType.NO if the no button was pressed.
+     * If the dialog was closed but none of the buttons was pressed then defaultButton is returned
      */
-    public static Alert yesNo(String header, String content) {
+    public static ButtonType yesNo(String header, String content, ButtonType defaultButton) {
         Alert alert = makeShortMsgAlert(header, content);
         alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-        return alert;
+        return alert.showAndWait().orElse(defaultButton);
     }
 
     /**
@@ -145,15 +137,12 @@ public class AlertUtils {
         Alert alert = makeShortMsgAlert(header, content);
         alert.getButtonTypes().addAll(new ButtonType(btn1Text), new ButtonType(btn2Text), new ButtonType(btn3Text));
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent()) {
-            return result.get().getText();
-        } else {
-            return null;
-        }
+        return result.map(ButtonType::getText).orElse(null);
     }
 
     /**
-     * Like simpleClose but designed for longer messages in the content area, it does also displays the window directly
+     * Like simpleClose but designed for longer messages in the content area,
+     * it does also displays the window directly without blocking
      *
      * @param header  Custom window title
      * @param content The message to display to the user

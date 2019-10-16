@@ -23,7 +23,7 @@ public class Translations {
     private ResourceBundle localized;
     private ResourceBundle fallback;
     private Locale locale;
-    private String translationFamily;
+    private final String translationFamily;
 
     /**
      * Creates the translations object. It searches for translations files in the resources directory at strings/ for

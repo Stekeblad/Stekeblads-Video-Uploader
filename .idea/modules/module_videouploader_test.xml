@@ -6,10 +6,10 @@
   <property name="module.jdk.bin.videouploader_test" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.videouploader_test" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.videouploader_test" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  <property name="compiler.args.videouploader_test" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
   
   <property name="videouploader_test.output.dir" value="undefined"/>
-  <property name="videouploader_test.testoutput.dir" value="${module.videouploader_test.basedir}/../../out/test/classes"/>
+  <property name="videouploader_test.testoutput.dir" value="${module.videouploader_test.basedir}/../../build/classes/java/test"/>
   
   <path id="videouploader_test.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->

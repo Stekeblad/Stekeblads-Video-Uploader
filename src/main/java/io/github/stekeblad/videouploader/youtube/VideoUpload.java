@@ -18,9 +18,6 @@ import java.util.List;
  * Can represents a video that is being prepared for uploading or currently being uploaded.
  */
 public class VideoUpload extends VideoInformationBase{
-
-    public static final String VIDEO_FILE_FORMAT = "video/";
-
     private static final String NODE_ID_PROGRESS = "_progress";
     private static final String NODE_ID_UPLOADSTATUS = "_status";
 
@@ -250,7 +247,7 @@ public class VideoUpload extends VideoInformationBase{
     /**
      * Creates the UI Pane so it can be be retrieved by front end code with getPane()
      */
-    protected void makeUploadPane() {
+    private void makeUploadPane() {
         // The base class has already done most of the work
         uploadPane = super.getPane();
 

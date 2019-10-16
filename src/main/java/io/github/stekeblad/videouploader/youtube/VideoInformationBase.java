@@ -30,6 +30,7 @@ public class VideoInformationBase {
 
     // Constants
     public static final List<String> THUMBNAIL_FILE_FORMAT = Arrays.asList("*.jpg", "*.png");
+    public static final long MAX_THUMB_SIZE = 2 * 1024 * 1024;
 
     private static final String NODE_ID_TITLE = "_title";
     private static final String NODE_ID_DESCRIPTION = "_description";
@@ -40,16 +41,16 @@ public class VideoInformationBase {
     private static final String NODE_ID_TELLSUBS = "_tellSubs";
     private static final String NODE_ID_THUMBNAIL = "_thumbNail";
 
-    protected static final String NODE_ID_BUTTONSBOX = "_buttons";
+    static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     // Variables
     private GridPane videoBasePane;
-    private String paneId;
+    private final String paneId;
     private File thumbNailFile;
     private boolean allowEdit;
-    private CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
-    private PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
-    protected Consumer<Boolean> thumbnailCursorEventHandler = null;
+    private final CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
+    private final PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
+    Consumer<Boolean> thumbnailCursorEventHandler = null;
 
     // Getters
 
@@ -338,9 +339,9 @@ public class VideoInformationBase {
      * @param thumbNailPath File path to a image to use as thumbnail
      * @param paneId A string used for naming all UI elements
      */
-    public VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
-                                String selectedPlaylist, String category, boolean tellSubs,
-                                String thumbNailPath, String paneId) {
+    VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
+                         String selectedPlaylist, String category, boolean tellSubs,
+                         String thumbNailPath, String paneId) {
 
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
@@ -362,7 +363,7 @@ public class VideoInformationBase {
      * @param paneId A string used for naming all UI elements
      * @throws Exception If the string could not be converted to a VideoInformationBase
      */
-    public VideoInformationBase(String fromString, String paneId) throws Exception {
+    VideoInformationBase(String fromString, String paneId) throws Exception {
 
         this.paneId = paneId;
 
@@ -421,7 +422,7 @@ public class VideoInformationBase {
                         category = line.substring(colonIndex + 1);
                         break;
                     case NODE_ID_TELLSUBS:
-                        tellSubs = Boolean.valueOf(line.substring(colonIndex + 1));
+                        tellSubs = Boolean.parseBoolean(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_THUMBNAIL:
                         thumbnailPath = line.substring(colonIndex + 1);
@@ -571,9 +572,9 @@ public class VideoInformationBase {
      * @param tellSubs The default value of tellSubs
      * @param thumbNailPath The path to the selected thumbnail or null for the no thumbnail selected image
      */
-    protected void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility,
-                                     List<String> videoTags, String selectedPlaylist,
-                                     String category, boolean tellSubs, String thumbNailPath) {
+    private void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility,
+                                   List<String> videoTags, String selectedPlaylist,
+                                   String category, boolean tellSubs, String thumbNailPath) {
          // Creating the pane, id, size, border
          videoBasePane = new GridPane();
          videoBasePane.setId(paneId);

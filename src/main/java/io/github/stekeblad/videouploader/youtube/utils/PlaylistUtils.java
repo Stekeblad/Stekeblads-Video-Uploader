@@ -24,7 +24,7 @@ import java.util.List;
 public enum PlaylistUtils {
     INSTANCE;
 
-    private ConfigManager configManager = ConfigManager.INSTANCE;
+    private final ConfigManager configManager = ConfigManager.INSTANCE;
     private String noPlaylistName = "";
     private HashMap<String, LocalPlaylist> playlistCache = null;
 

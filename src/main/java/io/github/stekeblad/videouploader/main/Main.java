@@ -19,9 +19,16 @@ import java.util.Locale;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
-        Parent root = loader.load();
+        Parent root;
+        try {
+            root = loader.load();
+        } catch (Exception e) {
+            AlertUtils.exceptionDialog("Stekeblads Video Uploader",
+                    "Unable to load main window, the program will exit", e);
+            return;
+        }
         loadTranslations();
         Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
         primaryStage.setTitle(trans.getString("app_name"));

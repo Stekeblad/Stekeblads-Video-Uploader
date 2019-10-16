@@ -3,9 +3,9 @@ package io.github.stekeblad.videouploader.utils.state;
 import java.util.function.Consumer;
 
 public class ButtonProperties {
-    private String id;
-    private String text;
-    private Consumer<String> onClick;
+    private final String id;
+    private final String text;
+    private final Consumer<String> onClick;
 
     public ButtonProperties(String id, String text, Consumer<String> onClick) {
         this.id = id;

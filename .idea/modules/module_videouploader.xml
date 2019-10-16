@@ -6,7 +6,7 @@
   <property name="module.jdk.bin.videouploader" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.videouploader" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.videouploader" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  <property name="compiler.args.videouploader" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
   
   <property name="videouploader.output.dir" value="${module.videouploader.basedir}/../../out/production/videouploader"/>
   <property name="videouploader.testoutput.dir" value="${module.videouploader.basedir}/../../out/test/videouploader"/>

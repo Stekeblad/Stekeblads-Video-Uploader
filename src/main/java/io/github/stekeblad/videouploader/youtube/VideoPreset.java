@@ -20,7 +20,6 @@ public class VideoPreset extends VideoInformationBase {
 
     private GridPane presetPane;
 
-
     public void setPresetName(String newName) {
         ((TextField) presetPane.lookup("#" + getPaneId() + NODE_ID_PRESETNAME)).setText(newName);
     }
@@ -190,7 +189,7 @@ public class VideoPreset extends VideoInformationBase {
      * Creates the UI Pane so it can be be retrieved by front end code with getPane()
      * @param name The preset name
      */
-    protected void makePresetPane(String name) {
+    private void makePresetPane(String name) {
         // The base class has already done most of the work
         presetPane = super.getPane();
 

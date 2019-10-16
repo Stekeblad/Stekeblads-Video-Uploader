@@ -6,6 +6,7 @@
 #### Higher priority things to do
 
 #### Lower priority things to do
+- https://accounts.google.com/o/oauth2/revoke?token={token} withdraw YouTube auth via code
 - Save window sizes/location on exit, use the saved data when starting next time
 - When updating playlist, use ID instead of name when looking at old
 playlists and deciding if they should be visible or not (playlists can

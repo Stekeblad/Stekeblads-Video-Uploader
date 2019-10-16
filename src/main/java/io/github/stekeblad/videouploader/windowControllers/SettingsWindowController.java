@@ -21,7 +21,6 @@ import javafx.stage.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Optional;
 
 import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
 
@@ -110,16 +109,14 @@ public class SettingsWindowController {
     }
 
     public void onClearStoredDataClicked(ActionEvent actionEvent) {
-        Optional<ButtonType> buttonChoice = AlertUtils.yesNo(settingsTrans.getString("diag_clearStoredData_short"),
-                settingsTrans.getString("diag_clearStoredData_full")).showAndWait();
-        if (buttonChoice.isPresent()) {
-            if (buttonChoice.get() == ButtonType.YES) {
-                AlertUtils.simpleClose(settingsTrans.getString("diag_delAfterExit_short"),
-                        settingsTrans.getString("diag_delAfterExit_full")).show();
-            } else { // ButtonType.NO or Closed with [X] button
-                return;
-            }
-        }
+        ButtonType buttonChoice = AlertUtils.yesNo(settingsTrans.getString("diag_clearStoredData_short"),
+                settingsTrans.getString("diag_clearStoredData_full"), ButtonType.NO);
+        if (buttonChoice == ButtonType.NO)
+            return;
+
+        AlertUtils.simpleClose(settingsTrans.getString("diag_delAfterExit_short"),
+                settingsTrans.getString("diag_delAfterExit_full")).show();
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 Files.walkFileTree(new File(DATA_DIR).toPath(), new RecursiveDirectoryDeleter());

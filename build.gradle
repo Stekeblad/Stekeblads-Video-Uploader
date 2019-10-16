@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 sourceSets {
     main {
         resources {
-            srcDirs = ["src/main/java", "src/main/resources"]
+            srcDirs = ["src/main/java", "src/main/resources", "src/main/java/META-INF/**/*.*"]
             includes = ["**/*.fxml", "**/*.png", "**/*.json", "**/*.properties", "**/*.css"]
         }
     }
