@@ -5,43 +5,29 @@ import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import java.io.File;
 import java.util.List;
 
-public class EpisodeTagProcessor implements ITagProcessor {
-    private int autoNum;
-    private boolean tagFound;
-    private final String EPISODE_TAG = "$(ep)";
-
-    public EpisodeTagProcessor() {
-    }
-
+public class RawnameTagProcessor implements ITagProcessor {
     @Override
     public void init(VideoPreset preset, int initialAutoNum) {
-        tagFound = preset.getVideoName().contains(EPISODE_TAG);
-        if (!tagFound)
-            return;
-        autoNum = initialAutoNum;
 
     }
 
     @Override
     public String processTitle(String currentTitle, File videoFile) {
-        if (tagFound)
-            return currentTitle.replace(EPISODE_TAG, Integer.toString(autoNum++));
-        else
-            return currentTitle;
+        return null;
     }
 
     @Override
     public String processDescription(String currentDescription, File videoFile) {
-        return currentDescription;
+        return null;
     }
 
     @Override
     public List<String> processTags(List<String> currentTags, File videoFile) {
-        return currentTags;
+        return null;
     }
 
     @Override
     public String processorName() {
-        return "Episode TagProcessor";
+        return null;
     }
 }

@@ -272,20 +272,20 @@ public class mainWindowController {
             }
 
             // Get the auto numbering and preset
-            int autoNum = Integer.valueOf(txt_autoNum.getText());
+            int autoNum;
+            try {
+                autoNum = Integer.parseInt(txt_autoNum.getText());
+            } catch (NumberFormatException ex) {
+                autoNum = 1;
+            }
 
             // Find TagProcessors
             ArrayList<ITagProcessor> tagProcessors = new ArrayList<>();
             ServiceLoader<ITagProcessor> tagProcessorServiceLoader = ServiceLoader.load(ITagProcessor.class);
-//            for (ITagProcessor tagProcessor : tagProcessorServiceLoader) {
-//                tagProcessor.init(chosenPreset, autoNum);
-//                tagProcessors.add(tagProcessor);
-//            }
-
-            tagProcessorServiceLoader.forEach(tagProcessor -> {
+            for (ITagProcessor tagProcessor : tagProcessorServiceLoader) {
                 tagProcessor.init(chosenPreset, autoNum);
                 tagProcessors.add(tagProcessor);
-            });
+            }
 
             // Iterate over all selected video files
             for (File videoFile : videosToAdd) {
@@ -316,9 +316,9 @@ public class mainWindowController {
                 String description = chosenPreset.getVideoDescription();
                 List<String> videoTags = chosenPreset.getVideoTags();
                 for (ITagProcessor processor : tagProcessors) {
-                    name = processor.processTitle(name);
-                    description = processor.processDescription(description);
-                    videoTags = processor.processTags(videoTags);
+                    name = processor.processTitle(name, videoFile);
+                    description = processor.processDescription(description, videoFile);
+                    videoTags = processor.processTags(videoTags, videoFile);
                 }
 
                 VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()

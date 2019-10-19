@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.tagProcessing;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 
+import java.io.File;
 import java.util.List;
 
 public class PlaylistTagProcessor implements ITagProcessor {
@@ -25,12 +26,12 @@ public class PlaylistTagProcessor implements ITagProcessor {
     }
 
     @Override
-    public String processTitle(String currentTitle) {
+    public String processTitle(String currentTitle, File videoFile) {
         return currentTitle;
     }
 
     @Override
-    public String processDescription(String currentDescription) {
+    public String processDescription(String currentDescription, File videoFile) {
         if (tagFound)
             return currentDescription.replace(PLAYLIST_TAG, playlistUrl);
         else
@@ -38,7 +39,7 @@ public class PlaylistTagProcessor implements ITagProcessor {
     }
 
     @Override
-    public List<String> processTags(List<String> currentTags) {
+    public List<String> processTags(List<String> currentTags, File videoFile) {
         return currentTags;
     }
 

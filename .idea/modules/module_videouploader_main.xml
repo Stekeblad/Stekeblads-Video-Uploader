@@ -20,6 +20,7 @@
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
+    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
@@ -41,6 +42,7 @@
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
+    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
@@ -63,6 +65,7 @@
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
+    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
@@ -84,6 +87,7 @@
     <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
+    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
