@@ -13,11 +13,11 @@ public class EpisodeTagProcessor implements ITagProcessor {
     }
 
     @Override
-    public void init(VideoPreset preset, int initalAutoNum) {
+    public void init(VideoPreset preset, int initialAutoNum) {
         tagFound = preset.getVideoName().contains(EPISODE_TAG);
         if (!tagFound)
             return;
-        autoNum = initalAutoNum;
+        autoNum = initialAutoNum;
 
     }
 

@@ -9,7 +9,7 @@ sourceCompatibility = 1.8
 sourceSets {
     main {
         resources {
-            srcDirs = ["src/main/java", "src/main/resources", "src/main/java/META-INF/**/*.*"]
+            srcDirs = ["src/main/java", "src/main/resources"]
             includes = ["**/*.fxml", "**/*.png", "**/*.json", "**/*.properties", "**/*.css"]
         }
     }
@@ -26,6 +26,7 @@ dependencies {
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     compile 'com.google.apis:google-api-services-youtube:v3-rev189-1.23.0'
+    compile 'org.jcodec:jcodec:0.2.5'
 }
 
 // https://developers.google.com/api-client-library/java/apis/youtube/v3

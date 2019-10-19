@@ -69,3 +69,7 @@ fabric.properties
 
 # Hide secrets
 src/main/resources/.auth/client_secrets.json
+# Project exclude paths
+/libraries/
+# Default ignored files
+/workspace.xml

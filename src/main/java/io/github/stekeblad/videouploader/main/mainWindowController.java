@@ -31,6 +31,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jcodec.containers.mp4.boxes.MetaValue;
 
 import java.io.File;
 import java.io.IOException;
@@ -295,6 +296,21 @@ public class mainWindowController {
                     String rawFileName = videoFile.getName().substring(0, videoFile.getName().lastIndexOf("."));
                     name = name.replace("$(rawname)", rawFileName);
                 }
+
+
+                // Debug: print all metadata to the console
+                try {
+                    org.jcodec.movtool.MetadataEditor f = org.jcodec.movtool.MetadataEditor.createFrom(videoFile);
+                    Map<String, org.jcodec.containers.mp4.boxes.MetaValue> m = f.getKeyedMeta();
+                    m.forEach((s, metaValue) -> System.out.println(s + " contains " + metaValue.toString()));
+                    Map<Integer, MetaValue> n = f.getItunesMeta();
+                    n.forEach((integer, metaValue) -> System.out.println(fourccToString(integer) + " contains " + metaValue.toString()));
+
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                }
+
+
 
                 // Execute the TagProcessors
                 String description = chosenPreset.getVideoDescription();
@@ -887,5 +903,12 @@ public class mainWindowController {
         uploadQueueVideos.remove(selected);
         editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         updateUploadList();
+    }
+
+    // Taken from https://github.com/jcodec/jcodec/blob/155e0106850381a087f7359325777e3ae190e9e8/src/main/java/org/jcodec/movtool/MetadataEditorMain.java#L201
+    private String fourccToString(int key) {
+        byte[] bytes = new byte[4];
+        java.nio.ByteBuffer.wrap(bytes).order(java.nio.ByteOrder.BIG_ENDIAN).putInt(key);
+        return org.jcodec.platform.Platform.stringFromCharset(bytes, org.jcodec.platform.Platform.ISO8859_1);
     }
 }

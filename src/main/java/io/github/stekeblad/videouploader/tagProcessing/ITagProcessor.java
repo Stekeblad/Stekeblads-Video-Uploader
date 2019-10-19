@@ -18,9 +18,9 @@ public interface ITagProcessor {
      * does not exist in the preset it can set a boolean so it returns directly in the process methods.
      *
      * @param preset        the selected VideoPreset
-     * @param initalAutoNum the value in the auto num field when the apply preset button was pressed
+     * @param initialAutoNum the value in the auto num field when the apply preset button was pressed
      */
-    void init(VideoPreset preset, int initalAutoNum);
+    void init(VideoPreset preset, int initialAutoNum);
 
     /**
      * Processes the title field of a video and replaces the tags target by this TagProcessor with new data. Note that the
