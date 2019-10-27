@@ -6,6 +6,9 @@ import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import java.io.File;
 import java.util.List;
 
+/**
+ * Locates the $(playlist) tag in video descriptions and replaces them with the URL to the playlist set in the preset
+ */
 public class PlaylistTagProcessor implements ITagProcessor {
     private String playlistUrl;
     private boolean tagFound;

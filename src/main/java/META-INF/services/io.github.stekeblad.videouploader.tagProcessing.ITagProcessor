@@ -1,3 +1,4 @@
 io.github.stekeblad.videouploader.tagProcessing.EpisodeTagProcessor
 io.github.stekeblad.videouploader.tagProcessing.PlaylistTagProcessor
-io.github.stekeblad.videouploader.tagProcessing.MetaTagProcessor
+io.github.stekeblad.videouploader.tagProcessing.metaDataTagProcessor.MetaDataTagProcessor
+io.github.stekeblad.videouploader.tagProcessing.RawnameTagProcessor

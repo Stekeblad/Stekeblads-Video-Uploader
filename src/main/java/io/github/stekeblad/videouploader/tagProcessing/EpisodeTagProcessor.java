@@ -5,6 +5,10 @@ import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import java.io.File;
 import java.util.List;
 
+/**
+ * Numbers videos that uses this preset starting at initialAutoNum.
+ * The number is inserted at the location of the tag $(ep) inside the title field
+ */
 public class EpisodeTagProcessor implements ITagProcessor {
     private int autoNum;
     private boolean tagFound;
