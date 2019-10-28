@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * A MetaDataReader extracts metadata from a video file and allows you to query the tags in it using friendly names and
- * four-character codes. This does not work for all files. Depending on there in the file the metadata is located
+ * four-character codes. This does not work for all files. Depending on where in the file the metadata is located
  * the entire file may need to be read and that may take some time depending on size!
  * <p>
  * To check if the metadata could be read you can check the return value of isFileSupported().
@@ -22,7 +22,7 @@ public class MetaDataReader {
     private boolean _isFileSupported;
 
     /**
-     * Creates a MetaDataReader and scans the given file for metadata. Depending on there in the file the metadata is located
+     * Creates a MetaDataReader and scans the given file for metadata. Depending on where in the file the metadata is located
      * the entire file may need to be read and that may take some time depending on size!
      *
      * @param videoFile

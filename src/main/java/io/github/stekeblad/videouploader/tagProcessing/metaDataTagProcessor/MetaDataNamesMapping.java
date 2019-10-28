@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class MetaDataNamesMapping {
     private static ArrayList<Pair<String, String>> namesMap = new ArrayList<>();
-
+    private static final char COPY = (char) 169;
     /**
      * @return a list of some 4-character metadata names and their friendly alternative
      */
@@ -20,24 +20,24 @@ public class MetaDataNamesMapping {
         // List taken from the following link, its the best one I could find
         // http://atomicparsley.sourceforge.net/mpeg-4files.html
 
-        namesMap.add(new Pair<>("©alb", "Album"));
-        namesMap.add(new Pair<>("©art", "Artist"));
+        namesMap.add(new Pair<>(COPY + "alb", "Album"));
+        namesMap.add(new Pair<>(COPY + "art", "Artist"));
         namesMap.add(new Pair<>("aART", "AlbumArtist"));
-        namesMap.add(new Pair<>("©cmt", "Comment"));
-        namesMap.add(new Pair<>("©day", "Year"));
-        namesMap.add(new Pair<>("©nam", "Title"));
-        namesMap.add(new Pair<>("©gen", "Genre"));
+        namesMap.add(new Pair<>(COPY + "cmt", "Comment"));
+        namesMap.add(new Pair<>(COPY + "day", "Year"));
+        namesMap.add(new Pair<>(COPY + "nam", "Title"));
+        namesMap.add(new Pair<>(COPY + "gen", "Genre"));
         namesMap.add(new Pair<>("gnre", "Genre"));
         namesMap.add(new Pair<>("trkn", "TrackNumber"));
         namesMap.add(new Pair<>("disk", "DiskNumber"));
-        namesMap.add(new Pair<>("©wrt", "Composer"));
-        namesMap.add(new Pair<>("©too", "Encoder"));
+        namesMap.add(new Pair<>(COPY + "wrt", "Composer"));
+        namesMap.add(new Pair<>(COPY + "too", "Encoder"));
         namesMap.add(new Pair<>("tmpo", "BPM"));
         namesMap.add(new Pair<>("cprt", "Copyright"));
         namesMap.add(new Pair<>("cpil", "Compilation"));
         namesMap.add(new Pair<>("covr", "Artwork"));
         namesMap.add(new Pair<>("rtng", "RatingAdvisory"));
-        namesMap.add(new Pair<>("©grp", "Grouping"));
+        namesMap.add(new Pair<>(COPY + "grp", "Grouping"));
         namesMap.add(new Pair<>("stik", "stik"));
         namesMap.add(new Pair<>("pcst", "Podcast"));
         namesMap.add(new Pair<>("catg", "Category"));
@@ -45,7 +45,7 @@ public class MetaDataNamesMapping {
         namesMap.add(new Pair<>("purl", "PodcastURL"));
         namesMap.add(new Pair<>("egid", "EpisodeGlobalUniqueID"));
         namesMap.add(new Pair<>("desc", "Description"));
-        namesMap.add(new Pair<>("©lyr", "Lyrics"));
+        namesMap.add(new Pair<>(COPY + "lyr", "Lyrics"));
         namesMap.add(new Pair<>("tvnn", "TVNetworkName"));
         namesMap.add(new Pair<>("tvsh", "TVShowName"));
         namesMap.add(new Pair<>("tven", "TVEpisodeNumber"));
