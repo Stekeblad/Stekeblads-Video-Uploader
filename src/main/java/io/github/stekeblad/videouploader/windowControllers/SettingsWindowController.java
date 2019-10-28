@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
+import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
@@ -16,7 +17,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
-import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.nio.file.Files;
 
 import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
 
-public class SettingsWindowController {
+public class SettingsWindowController implements IWindowController {
     public GridPane settingsWindow;
     public Label label_langSelect;
     public Label label_links;
@@ -64,18 +64,14 @@ public class SettingsWindowController {
         });
     }
 
-    /**
-     * Executed when the user tries to close the window
-     *
-     * @param windowEvent the close window event
-     */
-    public void onWindowClose(WindowEvent windowEvent) {
+    @Override
+    public boolean onWindowClose() {
         if (hasDoneChanges) {
             AlertUtils.simpleClose("restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
         }
         configManager.setSelectedLanguage(translationsMeta.langNameToLocaleCode(choice_languages.getValue()));
         configManager.saveSettings();
-        // do not consume event, it will prevent the window from closing
+        return true;
     }
 
     public void onGotoMainPageClicked(ActionEvent actionEvent) {

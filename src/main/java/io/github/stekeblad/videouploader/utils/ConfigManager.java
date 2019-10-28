@@ -203,8 +203,8 @@ public enum ConfigManager {
     public WindowFrame getWindowRectangle(String window) {
         String[] loc = mainProp.getProperty(WIN_LOC + window).split("x");
         String[] size = mainProp.getProperty(WIN_SIZE + window).split("x");
-        return new WindowFrame(Double.valueOf(loc[0]), Double.valueOf(loc[1]),
-                Double.valueOf(size[0]), Double.valueOf(size[1]));
+        return new WindowFrame(Double.parseDouble(loc[0]), Double.parseDouble(loc[1]),
+                Double.parseDouble(size[0]), Double.parseDouble(size[1]));
     }
 
     // Presets

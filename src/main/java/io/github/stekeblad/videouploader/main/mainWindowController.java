@@ -385,21 +385,6 @@ public class mainWindowController {
         } catch (IOException e) {
             AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
         }
-//        try {
-//            FXMLLoader fxmlLoader = new FXMLLoader();
-//            fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
-//            Scene scene = new Scene(fxmlLoader.load(), 600, 450);
-//            Stage stage = new Stage();
-//            stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
-//            stage.setScene(scene);
-//            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
-//            SettingsWindowController controller = fxmlLoader.getController();
-//            stage.setOnCloseRequest(controller::onWindowClose);
-//            controller.myInit();
-//            stage.show();
-//        } catch (IOException e) {
-//            AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
-//        }
         actionEvent.consume();
     }
 

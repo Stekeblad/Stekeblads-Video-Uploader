@@ -25,7 +25,7 @@ public class MetaDataReader {
      * Creates a MetaDataReader and scans the given file for metadata. Depending on where in the file the metadata is located
      * the entire file may need to be read and that may take some time depending on size!
      *
-     * @param videoFile
+     * @param videoFile The file to find metadata inside
      */
     public MetaDataReader(File videoFile) {
         _isFileSupported = true;

@@ -9,6 +9,8 @@ import java.util.ArrayList;
  */
 public class MetaDataNamesMapping {
     private static ArrayList<Pair<String, String>> namesMap = new ArrayList<>();
+
+    // The copyright symbol created from a code, directly using the character did not work properly in the pairs
     private static final char COPY = (char) 169;
     /**
      * @return a list of some 4-character metadata names and their friendly alternative
