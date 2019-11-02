@@ -3,19 +3,33 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.stekeblad.videouploader.main.mainWindowController">
+<AnchorPane fx:id="mainWindowPane" prefHeight="828.0" prefWidth="1105.0" xmlns="http://javafx.com/javafx/8.0.111"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="io.github.stekeblad.videouploader.main.mainWindowController">
     <ToolBar fx:id="toolbar" prefHeight="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
              AnchorPane.topAnchor="0.0">
         <Button id="btn_presets" fx:id="btn_presets" mnemonicParsing="false" onAction="#onPresetsClicked"
                 text="Presets"/>
         <Button fx:id="btn_settings" mnemonicParsing="false" onAction="#onSettingsClicked" text="Settings"/>
+        <HBox id="box_presetProgress" fx:id="box_presetProgress" alignment="CENTER_LEFT" prefHeight="25.0"
+              spacing="3.0" visible="false">
+            <opaqueInsets>
+                <Insets/>
+            </opaqueInsets>
+            <padding>
+                <Insets left="20.0"/>
+            </padding>
+            <Label id="label_presetProgress" fx:id="label_presetProgress" text="Applying preset... (3 left)"/>
+            <ProgressBar prefHeight="18.0" prefWidth="47.0"/>
+        </HBox>
     </ToolBar>
     <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" AnchorPane.bottomAnchor="15.0"
               AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="200.0"/>
-   <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="154.0" prefWidth="309.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0" />
+    <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="154.0" prefWidth="309.0"
+              AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0"/>
     <VBox layoutX="324.0" layoutY="40.0" prefHeight="145.0" prefWidth="177.0" spacing="4.0">
-        <Button fx:id="btn_pickFile" mnemonicParsing="false" onAction="#onPickFileClicked" prefHeight="25.0"
-                prefWidth="148.0" text="Pick files to upload"/>
+        <Button fx:id="btn_pickFile" mnemonicParsing="false" onAction="#onPickFileClicked"
+                prefHeight="25.0" prefWidth="148.0" text="Pick files to upload"/>
         <Label fx:id="label_selectPreset" text="Select a preset"/>
         <ChoiceBox id="choice_presets" fx:id="choice_presets" prefWidth="150.0" />
         <Label fx:id="label_numbering" text="Automatic numbering"/>

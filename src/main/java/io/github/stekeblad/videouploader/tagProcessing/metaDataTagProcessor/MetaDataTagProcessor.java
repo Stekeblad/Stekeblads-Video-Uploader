@@ -28,7 +28,7 @@ public class MetaDataTagProcessor implements ITagProcessor {
     // Cache all metadata for the existence of this instance of the tag processor. The scanning of tags may sometimes
     // require the entire video file to be scanned. If the tag is used in more than one of [title / description / tag list]
     // we want to avoid to read the file multiple times.
-    private HashMap<String, MetaDataReader> fileMetaDataCache;
+    private HashMap<String, MetaDataReader> fileMetaDataCache = null;
 
     // match strings like $(metadata:nameOfTag) and $(metadata:nameOfTag,fallback)
     // nameOfTag starts after : and ends at the first occurrence of , or )
@@ -38,10 +38,13 @@ public class MetaDataTagProcessor implements ITagProcessor {
     public void init(VideoPreset preset, int initialAutoNum) {
         tagFoundInTitle = false;
         tagFoundInDescription = false;
+        tagFoundInTagsList = false;
         tagsInTitle = new ArrayList<>();
         tagsInDescription = new ArrayList<>();
         tagsInTagsList = new ArrayList<>();
-        fileMetaDataCache = new HashMap<>();
+        if (fileMetaDataCache == null) {
+            fileMetaDataCache = new HashMap<>();
+        }
 
         // Search for metadata tags in preset title
         tagsInTitle = matchPatternInString(preset.getVideoName());

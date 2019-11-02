@@ -1,12 +1,12 @@
 package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
-import io.github.stekeblad.videouploader.tagProcessing.ITagProcessor;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.background.PresetApplicator;
 import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
 import io.github.stekeblad.videouploader.utils.state.VideoUploadState;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
@@ -29,13 +29,17 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX_THUMB_SIZE;
@@ -46,6 +50,7 @@ public class mainWindowController {
     public AnchorPane mainWindowPane;
     public ToolBar toolbar;
     public ListView<GridPane> listView;
+    public HBox box_presetProgress;
     public ListView<String> chosen_files;
     public ChoiceBox<String> choice_presets;
     public TextField txt_autoNum;
@@ -59,18 +64,22 @@ public class mainWindowController {
     public Button btn_abortAndClear;
     public Label label_selectPreset;
     public Label label_numbering;
+    public Label label_presetProgress;
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
     private CategoryUtils categoryUtils;
     private int uploadPaneCounter = 0;
+    private int presetsInProgress = 0;
     private List<VideoUpload> uploadQueueVideos;
     private List<File> videosToAdd;
     private HashMap<String, VideoUpload> editBackups;
-    private Uploader uploader;
     private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
     private boolean bypassAbortWarning = false;
     private VideoUploadState buttonStates;
+
+    private Uploader uploader;
+    private PresetApplicator presetApplicator;
 
     private Translations transMainWin;
     private Translations transBasic;
@@ -98,6 +107,7 @@ public class mainWindowController {
         }
 
         uploader = new Uploader();
+        presetApplicator = new PresetApplicator();
 
         uploadPaneCounter = 0;
         uploadQueueVideos = new ArrayList<>();
@@ -128,6 +138,9 @@ public class mainWindowController {
         });
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
         uploader.setUploadErredCallback((videoUpload, throwable) -> Platform.runLater(() -> onUploadErred(videoUpload, throwable)));
+
+        presetApplicator.setSuccessCallback(upload -> Platform.runLater(() -> onPresetApplicationSuccess(upload)));
+        presetApplicator.setErrorCallback((video, throwable) -> Platform.runLater(() -> onPresetApplicationError(video, throwable)));
 
         // Set up button sets for the different states a upload can be in: editing, locked, uploading, failed/erred
         defineUploadStates();
@@ -171,6 +184,9 @@ public class mainWindowController {
      * @return true if the window should to be closed, false if not
      */
     public boolean onWindowClose() {
+        // stop PresetApplicator
+        presetApplicator.kill();
+
         // Check if uploads is in progress, if not then directly return true
         if (! uploader.getIsActive()) {
             uploader.kill(); // just because it does not do anything it started and must be stopped
@@ -270,7 +286,7 @@ public class mainWindowController {
                 return;
             }
 
-            // Get the auto numbering and preset
+            // Get the auto numbering
             int autoNum;
             try {
                 autoNum = Integer.parseInt(txt_autoNum.getText());
@@ -278,58 +294,18 @@ public class mainWindowController {
                 autoNum = 1;
             }
 
-            // Find TagProcessors
-            ArrayList<ITagProcessor> tagProcessors = new ArrayList<>();
-            ServiceLoader<ITagProcessor> tagProcessorServiceLoader = ServiceLoader.load(ITagProcessor.class);
-            for (ITagProcessor tagProcessor : tagProcessorServiceLoader) {
-                tagProcessor.init(chosenPreset, autoNum);
-                tagProcessors.add(tagProcessor);
-            }
+            // update progress message
+            updatePresetProgressIndicator(videosToAdd.size());
 
-            // Iterate over all selected video files
-            for (File videoFile : videosToAdd) {
-                String name = chosenPreset.getVideoName();
-                String description = chosenPreset.getVideoDescription();
-                List<String> videoTags = chosenPreset.getVideoTags();
+            // Queue the videos and preset to be combined in a background thread
+            presetApplicator.applyPreset(videosToAdd, chosenPreset, autoNum);
 
-                // Execute the TagProcessors
-                for (ITagProcessor processor : tagProcessors) {
-                    name = processor.processTitle(name, videoFile);
-                    description = processor.processDescription(description, videoFile);
-                    videoTags = processor.processTags(videoTags, videoFile);
-                }
-
-                VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()
-                        .setVideoName(name)
-                        .setVideoDescription(description)
-                        .setVisibility(chosenPreset.getVisibility())
-                        .setVideoTags(videoTags)
-                        .setSelectedPlaylist(chosenPreset.getSelectedPlaylist())
-                        .setCategory(chosenPreset.getCategory())
-                        .setTellSubs(chosenPreset.isTellSubs())
-                        .setPaneName(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter)
-                        .setVideoFile(videoFile);
-                if (chosenPreset.getThumbNail() != null) {
-                    newUploadBuilder.setThumbNailPath(chosenPreset.getThumbNail().getAbsolutePath());
-                }
-                VideoUpload newUpload = newUploadBuilder.build();
-                // make the upload change its width together with the uploads list and the window
-                newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
-                newUpload.setThumbnailCursorEventHandler(this::updateCursor);
-
-                transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
-                buttonStates.setLocked(newUpload);
-                uploadQueueVideos.add(newUpload);
-                uploadPaneCounter++;
-                autoNum++;
-            }
             // update autoNum textField
-            txt_autoNum.setText(String.valueOf(autoNum));
+            txt_autoNum.setText(String.valueOf(autoNum + videosToAdd.size()));
         }
         // Removes the newly added uploads from the selected files list and update UI
         videosToAdd = null;
         chosen_files.setItems(FXCollections.observableArrayList(new ArrayList<>()));
-        updateUploadList();
         actionEvent.consume();
     }
 
@@ -540,6 +516,19 @@ public class mainWindowController {
         } else {
             mainWindowPane.getScene().setCursor(Cursor.DEFAULT);
         }
+    }
+
+    /**
+     * Adds and removes the progress indicator for presets currently being applied to videos.
+     * Sets the progress indicator to invisible if presetInProgress counter becomes zero, otherwise sets it to visible
+     *
+     * @param change how much to change the counter with, a positive number when the queue is growing,
+     *               negative when tasks finish
+     */
+    private void updatePresetProgressIndicator(int change) {
+        presetsInProgress += change;
+        box_presetProgress.setVisible(presetsInProgress != 0);
+        label_presetProgress.setText(String.format(transMainWin.getString("label_presetProgress"), presetsInProgress));
     }
 
     /**
@@ -813,6 +802,53 @@ public class mainWindowController {
     }
 
     /**
+     * Called when the hide button that appears then a upload finishes is clicked.
+     * Removes that upload from the list
+     *
+     * @param callerId the id of the upload + button name
+     */
+    private void onRemoveFinishedUpload(String callerId) {
+        String parentId = callerId.substring(0, callerId.indexOf('_'));
+        int selected = getUploadIndexByName(parentId);
+        if (selected == -1) {
+            System.err.println("remove finished upload, button belongs to a invalid or non-existing parent");
+            return;
+        }
+        uploadQueueVideos.remove(selected);
+        editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
+        updateUploadList();
+    }
+
+    /**
+     * Called when PresetApplicator successfully applied a preset to a video
+     *
+     * @param newUpload the newly created VideoUpload created from a File and a VideoPreset
+     */
+    private void onPresetApplicationSuccess(VideoUpload newUpload) {
+        // make the upload change its width together with the uploads list and the window
+        newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+        newUpload.setThumbnailCursorEventHandler(this::updateCursor);
+
+        transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
+        buttonStates.setLocked(newUpload);
+        uploadQueueVideos.add(newUpload);
+        updateUploadList();
+        updatePresetProgressIndicator(-1);
+    }
+
+    /**
+     * Called if PresetApplicator fail with applying a preset to a video
+     *
+     * @param video the video that was being processed when the exception was thrown
+     * @param e     the exception that occurred
+     */
+    private void onPresetApplicationError(File video, Throwable e) {
+        String header = transBasic.getString("app_name") + " - Failed to apply preset";
+        AlertUtils.exceptionDialog(header, "Failed to apply preset to the file \"" + video.getName() + "\"", e);
+        updatePresetProgressIndicator(-1);
+    }
+
+    /**
      * Called when an upload finishes.
      * Places the hide button
      * @param paneId the id of the upload
@@ -850,22 +886,5 @@ public class mainWindowController {
             buttonStates.setFailed(video);
             updateUploadList();
         }
-    }
-
-    /**
-     * Called when the hide button that appears then a upload finishes is clicked.
-     * Removes that upload from the list
-     * @param callerId the id of the upload + button name
-     */
-    private void onRemoveFinishedUpload(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("remove finished upload, button belongs to a invalid or non-existing parent");
-            return;
-        }
-        uploadQueueVideos.remove(selected);
-        editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-        updateUploadList();
     }
 }
