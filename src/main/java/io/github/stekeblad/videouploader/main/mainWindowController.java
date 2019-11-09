@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
@@ -46,7 +47,7 @@ import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX
 import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
-public class mainWindowController {
+public class mainWindowController implements IWindowController {
     public AnchorPane mainWindowPane;
     public ToolBar toolbar;
     public ListView<GridPane> listView;

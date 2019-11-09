@@ -65,6 +65,11 @@ public class MyStage extends Stage {
                 } else {
                     event.consume();
                 }
+
+                // Make sure all settings is saved on exit do not save when not needed
+                if (myWindowPropertyName.equals(ConfigManager.WindowPropertyNames.MAIN)) {
+                    ConfigManager.INSTANCE.saveSettings();
+                }
             });
             cont.myInit();
         }

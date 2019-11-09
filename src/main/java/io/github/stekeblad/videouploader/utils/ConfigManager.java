@@ -101,7 +101,7 @@ public enum ConfigManager {
             setIfMissing("ui_language", String.valueOf(Locale.getDefault()));
 
             setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x825");
-            setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "50x50");
+            setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "150x100");
             setIfMissing(WIN_SIZE + WindowPropertyNames.PRESETS, "725x700");
             setIfMissing(WIN_LOC + WindowPropertyNames.PRESETS, "150x100");
             setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "500x500");

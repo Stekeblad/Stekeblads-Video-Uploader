@@ -20,6 +20,8 @@ public class Constants {
 
     public static final String DEFAULT_LOCALE = "default (english)";
 
+    public static final WindowDimensionsRestriction MAIN_WINDOW_DIMENSIONS_RESTRICTION =
+            new WindowDimensionsRestriction(800, 1500, 400, 3000);
     public static final WindowDimensionsRestriction SETTINGS_WINDOW_DIMENSIONS_RESTRICTION =
             new WindowDimensionsRestriction(550, 550, 450, 450);
     public static final WindowDimensionsRestriction PLAYLISTS_WINDOW_DIMENSIONS_RESTRICTION =

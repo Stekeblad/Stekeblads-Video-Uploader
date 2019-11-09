@@ -1,16 +1,17 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -20,33 +21,29 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
-        Parent root;
         try {
-            root = loader.load();
+            loadTranslations();
         } catch (Exception e) {
-            AlertUtils.exceptionDialog("Stekeblads Video Uploader",
-                    "Unable to load main window, the program will exit", e);
+            e.printStackTrace();
+            AlertUtils.exceptionDialog("ERROR",
+                    "Failed to load translations, unable to launch. Your detected language: " + Locale.getDefault(), e);
             return;
         }
-        loadTranslations();
         Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
-        primaryStage.setTitle(trans.getString("app_name"));
-        primaryStage.setScene(new Scene(root, 900, 825));
-        // Register MainWindowController.onWindowClose() to be called when the close button is clicked
-        mainWindowController controller = loader.getController();
-        primaryStage.setOnCloseRequest(event -> {
-            if(! controller.onWindowClose()) {
-                // Close or not close based on return value
-                event.consume();
-            }
-        });
-        controller.myInit();
-        primaryStage.show();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
+            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.MAIN);
+            stage.makeScene(loader.load(), Constants.MAIN_WINDOW_DIMENSIONS_RESTRICTION);
+            stage.setTitle(trans.getString("app_name"));
+            stage.prepareControllerAndShow(loader.getController());
+        } catch (IOException e) {
+            AlertUtils.exceptionDialog("Stekeblads Video Uploader",
+                    "Unable to load main window, the program will exit", e);
+        }
     }
 
-    private void loadTranslations() {
-        try {
+    private void loadTranslations() throws Exception {
             ConfigManager configManager = ConfigManager.INSTANCE;
             configManager.configManager();
             String localeString = configManager.getSelectedLanguage();
@@ -57,11 +54,6 @@ public class Main extends Application {
                 locale = Locale.getDefault();
             }
             TranslationsManager.loadAllTranslations(locale);
-        } catch (Exception e) {
-            e.printStackTrace();
-            AlertUtils.exceptionDialog("ERROR",
-                    "Failed to load a translation, unable to launch. Your detected language: " + Locale.getDefault(), e);
-        }
     }
 
 

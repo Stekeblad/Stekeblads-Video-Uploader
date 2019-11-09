@@ -42,7 +42,7 @@ public class MetaDataToolWindowController implements IWindowController {
         // F1 for wiki on this window
         MetaDataToolWindow.getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {
-                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Meta-Data-Tool-Window");
                 event.consume();
             }
         });
