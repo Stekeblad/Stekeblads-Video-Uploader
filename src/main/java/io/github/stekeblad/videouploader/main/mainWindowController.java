@@ -156,7 +156,7 @@ public class mainWindowController {
                         buttonStates.setLocked(loadedUpload);
 
                         // Auto resize width and translation
-                        loadedUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+                        loadedUpload.getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
                         transUpload.autoTranslate(loadedUpload.getPane(), loadedUpload.getPaneId());
 
                         uploadQueueVideos.add(loadedUpload);
@@ -258,7 +258,7 @@ public class mainWindowController {
 
                 newUpload.setThumbnailCursorEventHandler(this::updateCursor);
                 // make the upload change its width together with the uploads list and the window
-                newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+                newUpload.getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
                 // Translate the upload
                 transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
                 uploadQueueVideos.add(newUpload);
@@ -649,7 +649,7 @@ public class mainWindowController {
         // Restore from backup and delete it if there is one
         if(editBackups.containsKey(uploadQueueVideos.get(selected).getPaneId())) {
             uploadQueueVideos.set(selected, editBackups.get(uploadQueueVideos.get(selected).getPaneId()));
-            uploadQueueVideos.get(selected).getPane().prefWidthProperty().bind(listView.widthProperty());
+            uploadQueueVideos.get(selected).getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
             editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         } else {
             AlertUtils.simpleClose(transMainWin.getString("diag_backupNoRestore_short"),
@@ -826,7 +826,7 @@ public class mainWindowController {
      */
     private void onPresetApplicationSuccess(VideoUpload newUpload) {
         // make the upload change its width together with the uploads list and the window
-        newUpload.getPane().prefWidthProperty().bind(listView.widthProperty());
+        newUpload.getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
         newUpload.setThumbnailCursorEventHandler(this::updateCursor);
 
         transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());

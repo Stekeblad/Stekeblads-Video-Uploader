@@ -21,5 +21,11 @@ public class Constants {
     public static final String DEFAULT_LOCALE = "default (english)";
 
     public static final WindowDimensionsRestriction SETTINGS_WINDOW_DIMENSIONS_RESTRICTION =
-            new WindowDimensionsRestriction(500, 500, 500, 500);
+            new WindowDimensionsRestriction(550, 550, 450, 450);
+    public static final WindowDimensionsRestriction PLAYLISTS_WINDOW_DIMENSIONS_RESTRICTION =
+            new WindowDimensionsRestriction(350, 500, 250, 1000);
+    public static final WindowDimensionsRestriction LOCALIZE_WINDOW_DIMENSIONS_RESTRICTION =
+            new WindowDimensionsRestriction(400, 400, 450, 450);
+    public static final WindowDimensionsRestriction META_TOOL_WINDOW_DIMENSIONS_RESTRICTION =
+            new WindowDimensionsRestriction(350, 1500, 350, 1000);
 }

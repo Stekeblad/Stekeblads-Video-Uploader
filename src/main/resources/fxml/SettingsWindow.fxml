@@ -3,25 +3,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <GridPane fx:id="settingsWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-          prefHeight="457.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
+          prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
           xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="io.github.stekeblad.videouploader.windowControllers.SettingsWindowController">
     <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="30.0" prefWidth="30.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="249.0" minWidth="10.0" prefWidth="203.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="192.0" minWidth="10.0" prefWidth="169.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="145.0" minWidth="10.0" prefWidth="145.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="30.0" prefWidth="30.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="20.0" minWidth="20.0" prefWidth="20.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="190.0" minWidth="10.0" prefWidth="190.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="210.0" minWidth="10.0" prefWidth="210.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="165.0" minWidth="10.0" prefWidth="165.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="20.0" minWidth="20.0" prefWidth="20.0"/>
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints maxHeight="95.0" minHeight="10.0" prefHeight="95.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="180.0" minHeight="0.0" prefHeight="180.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="131.0" minHeight="10.0" prefHeight="23.0" vgrow="SOMETIMES"/>
-        <RowConstraints maxHeight="59.0" minHeight="10.0" prefHeight="47.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="150.0" minHeight="0.0" prefHeight="150.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES"/>
     </rowConstraints>
     <Label fx:id="label_langSelect" text="Language settings" wrapText="true" GridPane.columnIndex="1"/>
-    <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-    <VBox alignment="CENTER_LEFT" prefHeight="168.0" prefWidth="180.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+    <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <VBox alignment="CENTER_LEFT" prefHeight="168.0" prefWidth="180.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
         <Button fx:id="btn_gotoMainPage" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                 onAction="#onGotoMainPageClicked" text="Home page"/>
         <Button fx:id="btn_gotoWiki" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
@@ -29,11 +30,16 @@
         <Button fx:id="btn_gotoDownload" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                 onAction="#onGotoDownloadClicked" text="Download page"/>
     </VBox>
-    <ChoiceBox fx:id="choice_languages" prefWidth="150.0" GridPane.columnIndex="2"/>
-    <Button fx:id="btn_translationDetails" mnemonicParsing="false" onAction="#onTranslationDetailsClicked"
-            text="About this translation" GridPane.columnIndex="3"/>
+    <ChoiceBox fx:id="choice_languages" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2"/>
+    <Button fx:id="btn_translationDetails" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+            onAction="#onTranslationDetailsClicked" text="About this translation" GridPane.columnIndex="3"/>
     <Label fx:id="label_resetSettings" text="Reset application settings" GridPane.columnIndex="1"
-           GridPane.rowIndex="2"/>
-    <Button fx:id="btn_clearStoredData" mnemonicParsing="false" onAction="#onClearStoredDataClicked"
-            text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+           GridPane.rowIndex="3"/>
+    <Button fx:id="btn_clearStoredData" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+            onAction="#onClearStoredDataClicked" text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2"
+            GridPane.rowIndex="3"/>
+    <Label fx:id="label_tools" text="Tools" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <Button fx:id="btn_metaDataTool" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+            onAction="#onMetaDataToolClicked" prefHeight="25.0" prefWidth="0.0" text="Meta data tool"
+            GridPane.columnIndex="2" GridPane.rowIndex="1"/>
 </GridPane>

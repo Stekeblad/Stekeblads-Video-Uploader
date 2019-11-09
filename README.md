@@ -24,6 +24,8 @@ a couple of pages on the [wiki](https://github.com/Stekeblad/Stekeblads-Video-Up
 Downloads can be found under "Releases" tab close to the top of this page
 [or by clicking here](https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases)
 
+Note that you need Java 8 to use Stekeblads Video Uploader.
+
 ### Images
 Thanks to [IsosceleTriangle](https://www.twitch.tv/isosceletriangle) for the Images!
 

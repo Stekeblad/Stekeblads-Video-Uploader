@@ -80,17 +80,11 @@ public class FileUtils {
         if (chosenFiles != null) {
             List<Pair<String, String>> skippedFiles = new ArrayList<>();
             for (File chosenFile : chosenFiles) {
-                try { // Check file MIME to see if it is a video file
-                    String contentType = Files.probeContentType(Paths.get(chosenFile.toURI()));
-                    if (contentType == null || !contentType.startsWith(VIDEO_FILE_FORMAT)) {
-                        skippedFiles.add(new Pair<>(chosenFile.getName(), "Invalid file type"));
-                    } else if (chosenFile.length() > maxFileSize) {
-                        skippedFiles.add(new Pair<>(chosenFile.getName(), "Too large"));
-                    } else {
-                        filesToUpload.add(chosenFile);
-                    }
-                } catch (Exception e) {
-                    skippedFiles.add(new Pair<>(chosenFile.getName(), "Could not read file"));
+                String result = validateVideoChoice(chosenFile, maxFileSize);
+                if (result == null) {
+                    filesToUpload.add(chosenFile);
+                } else {
+                    skippedFiles.add(new Pair<>(chosenFile.getName(), result));
                 }
             }
             if (!skippedFiles.isEmpty()) {
@@ -108,6 +102,34 @@ public class FileUtils {
             }
         }
         return filesToUpload;
+    }
+
+    /**
+     * Video file chooser dialog. Allows only a single file to be selected and only allow files witch do have a mimeType
+     * of "video/*" and are smaller than maxFileSize. Invalid choice throws exception.
+     *
+     * @param maxFileSize The max allowed file size in bytes, for no limit pass Long.Max_VALUE
+     * @return A File if the user made a valid choice, returns null if no file was selected
+     * @throws Exception                if user made an invalid choice with a message of how it was invalid
+     * @throws IllegalArgumentException if maxFileSize is less than or equal to zero
+     */
+    public static File pickVideo(long maxFileSize) throws Exception {
+        if (maxFileSize < 1)
+            throw new IllegalArgumentException("Max file size can't be a negative value or zero");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose one video file");
+        Stage fileChooserStage = new Stage();
+        File chosenFile = fileChooser.showOpenDialog(fileChooserStage);
+
+        if (chosenFile == null)
+            return null;
+
+        String validationResult = validateVideoChoice(chosenFile, maxFileSize);
+        if (validationResult != null)
+            throw new Exception(validationResult);
+
+        return chosenFile;
     }
 
     /**
@@ -264,6 +286,28 @@ public class FileUtils {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    /**
+     * Checks if a file is a video and is not larger than size limit
+     *
+     * @param file    file to check to see if it is a video
+     * @param maxSize max allowed file size (bytes)
+     * @return null if the file passed the check, otherwise a error message
+     */
+    private static String validateVideoChoice(File file, long maxSize) {
+        try {
+            String contentType = Files.probeContentType(Paths.get(file.toURI()));
+            if (contentType == null || !contentType.startsWith(VIDEO_FILE_FORMAT)) {
+                return "Invalid file type";
+            } else if (file.length() > maxSize) {
+                return "Too large";
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return "Could not read file";
         }
     }
 }

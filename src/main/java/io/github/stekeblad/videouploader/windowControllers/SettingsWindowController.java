@@ -1,8 +1,10 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
+import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
@@ -11,12 +13,14 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsMeta;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,18 +30,21 @@ import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
 
 public class SettingsWindowController implements IWindowController {
     public GridPane settingsWindow;
+    public ChoiceBox<String> choice_languages;
     public Label label_langSelect;
     public Label label_links;
+    public Label label_resetSettings;
+    public Label label_tools;
     public Button btn_gotoMainPage;
     public Button btn_gotoWiki;
     public Button btn_gotoDownload;
-    public ChoiceBox<String> choice_languages;
     public Button btn_translationDetails;
-    public Label label_resetSettings;
     public Button btn_clearStoredData;
+    public Button btn_metaDataTool;
 
     private TranslationsMeta translationsMeta;
     private Translations settingsTrans;
+    private Translations basicTrans;
     private ConfigManager configManager;
     private boolean hasDoneChanges = false;
 
@@ -47,6 +54,7 @@ public class SettingsWindowController implements IWindowController {
     public void myInit() {
         configManager = ConfigManager.INSTANCE;
         translationsMeta = new TranslationsMeta();
+        basicTrans = TranslationsManager.getTranslation(TranslationBundles.BASE);
         settingsTrans = TranslationsManager.getTranslation(TranslationBundles.WINDOW_SETTINGS);
         settingsTrans.autoTranslate(settingsWindow);
 
@@ -97,10 +105,27 @@ public class SettingsWindowController implements IWindowController {
                 translationsMeta.getMetaForLanguage(selectedLanguage, "translationName") +
                 "\nTranslation made by: " +
                 translationsMeta.getMetaForLanguage(selectedLanguage, "authors") +
-                "\nLast updated for version: " +
-                translationsMeta.getMetaForLanguage(selectedLanguage, "lastUpdate");
+                "\nLast updated: " +
+                translationsMeta.getMetaForLanguage(selectedLanguage, "lastUpdate") +
+                "\nUpdated for version: " +
+                translationsMeta.getMetaForLanguage(selectedLanguage, "lastAppVersionReview");
 
         AlertUtils.simpleClose_longContent("Translation Details", translationDetails);
+        actionEvent.consume();
+    }
+
+    public void onMetaDataToolClicked(ActionEvent actionEvent) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(SettingsWindowController.class.getClassLoader().getResource("fxml/MetaDataToolWindow.fxml"));
+            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.META_TOOL);
+            stage.makeScene(fxmlLoader.load(), Constants.META_TOOL_WINDOW_DIMENSIONS_RESTRICTION);
+            stage.setTitle(basicTrans.getString("app_metaToolWindowTitle"));
+            stage.initModality(Modality.NONE);
+            stage.prepareControllerAndShow(fxmlLoader.getController());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         actionEvent.consume();
     }
 

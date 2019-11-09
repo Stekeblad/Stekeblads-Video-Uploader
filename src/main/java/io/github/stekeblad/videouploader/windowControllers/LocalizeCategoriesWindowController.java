@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
+import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
@@ -14,12 +15,13 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.zip.DataFormatException;
 
-public class LocalizeCategoriesWindowController {
+public class LocalizeCategoriesWindowController implements IWindowController {
     public AnchorPane window;
     public TextField txt_country;
     public TextField txt_lang;
@@ -76,6 +78,10 @@ public class LocalizeCategoriesWindowController {
                 event.consume();
             }
         });
+    }
+
+    public boolean onWindowClose() {
+        return true;
     }
 
     /**
@@ -151,11 +157,15 @@ public class LocalizeCategoriesWindowController {
 
     /**
      * Called when the cancel button is clicked.
-     * Closes the window.
+     * Raises the same event that the close window button does
      * @param actionEvent the click event
      */
     public void onCancelClicked(ActionEvent actionEvent) {
-        ((Stage) btn_cancel.getScene().getWindow()).close();
+        Stage stage = (Stage) btn_cancel.getScene().getWindow();
+        stage.fireEvent(
+                new WindowEvent(
+                        stage,
+                        WindowEvent.WINDOW_CLOSE_REQUEST));
         actionEvent.consume();
     }
 

@@ -33,6 +33,7 @@ public enum PlaylistUtils {
      * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
      */
     public void refreshPlaylist() {
+        HashMap<String, LocalPlaylist> oldCache = new HashMap<>();
         try {
             // Authenticate user and create Youtube object
             Credential creds = Auth.authUser();
@@ -45,7 +46,7 @@ public enum PlaylistUtils {
             userPlaylists.setMaxResults(25L);
 
             // Backup old data
-            HashMap<String, LocalPlaylist> oldCache = playlistCache;
+            oldCache = playlistCache;
             playlistCache = new HashMap<>();
 
             // Get playlists
@@ -69,6 +70,7 @@ public enum PlaylistUtils {
             }while(response.getNextPageToken() != null);
             saveCache();
         } catch (IOException e) {
+            playlistCache = oldCache;
             e.printStackTrace();
         }
     }

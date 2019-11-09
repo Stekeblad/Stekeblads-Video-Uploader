@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane fx:id="MetaDataToolWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="io.github.stekeblad.videouploader.windowControllers.MetaDataToolWindowController">
+    <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="14.0" prefHeight="42.0" prefWidth="594.0" spacing="5.0"
+          AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="3.0">
+        <Label fx:id="label_description" text="Pick a video to view its meta data" wrapText="true"/>
+        <Button fx:id="btn_pickFile" minWidth="-Infinity" mnemonicParsing="false" onAction="#onPickFile"
+                text="Pick Video File"/>
+        <Label fx:id="label_selectedFile" minWidth="-Infinity" text="No File Selected"/>
+    </HBox>
+    <TableView fx:id="table_metadata" layoutX="14.0" layoutY="73.0" prefHeight="350.0" prefWidth="594.0"
+               AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="3.0" AnchorPane.rightAnchor="3.0"
+               AnchorPane.topAnchor="45.0">
+    </TableView>
+    <ProgressIndicator fx:id="prog_readingFile" maxHeight="75.0" maxWidth="75.0" prefHeight="75.0" prefWidth="75.0"
+                       visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="100.0"
+                       AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="145.0"/>
+</AnchorPane>

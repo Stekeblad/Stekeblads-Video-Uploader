@@ -104,12 +104,14 @@ public enum ConfigManager {
             setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "50x50");
             setIfMissing(WIN_SIZE + WindowPropertyNames.PRESETS, "725x700");
             setIfMissing(WIN_LOC + WindowPropertyNames.PRESETS, "150x100");
-            setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "600x450");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "500x500");
             setIfMissing(WIN_LOC + WindowPropertyNames.SETTINGS, "200x150");
             setIfMissing(WIN_SIZE + WindowPropertyNames.LOCALIZE, "400x450");
             setIfMissing(WIN_LOC + WindowPropertyNames.LOCALIZE, "275x250");
             setIfMissing(WIN_SIZE + WindowPropertyNames.PLAYLISTS, "400x500");
             setIfMissing(WIN_LOC + WindowPropertyNames.PLAYLISTS, "250x200");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.META_TOOL, "400x550");
+            setIfMissing(WIN_LOC + WindowPropertyNames.META_TOOL, "250x200");
 
         }
     }
@@ -191,6 +193,7 @@ public enum ConfigManager {
         public static final String SETTINGS = "settings";
         public static final String LOCALIZE = "localize";
         public static final String PLAYLISTS = "playlist";
+        public static final String META_TOOL = "meta-tool";
     }
 
     public void setWindowRectangle(String window, WindowFrame rect) {

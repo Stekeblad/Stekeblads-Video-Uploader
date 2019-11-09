@@ -18,14 +18,12 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.File;
@@ -119,7 +117,7 @@ public class PresetsWindowController {
                     continue;
                 }
                 videoPreset.setThumbnailCursorEventHandler(this::updateCursor);
-                videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty()); // Auto Resize width
+                videoPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty().subtract(35)); // Auto Resize width
                 transPreset.autoTranslate(videoPreset.getPane(), videoPreset.getPaneId());
                 buttonStates.setLocked(videoPreset);
                 videoPresets.add(videoPreset);
@@ -197,7 +195,7 @@ public class PresetsWindowController {
                 null, null, false, null,
                 PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         // Make so the preset change its width together with the list and the window
-        newPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty());
+        newPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty().subtract(35));
         transPreset.autoTranslate(newPreset.getPane(), newPreset.getPaneId());
 
         newPreset.setThumbnailCursorEventHandler(this::updateCursor);
@@ -236,15 +234,11 @@ public class PresetsWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/LocalizeCategoriesWindow.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 400, 450);
-            Stage stage = new Stage();
-            stage.setResizable(false);
+            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.LOCALIZE);
+            stage.makeScene(fxmlLoader.load(), Constants.LOCALIZE_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_locCatWindowTitle"));
-            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
-            LocalizeCategoriesWindowController controller = fxmlLoader.getController();
-            controller.myInit();
-            stage.showAndWait();
+            stage.prepareControllerAndShowAndWait(fxmlLoader.getController());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -261,9 +255,7 @@ public class PresetsWindowController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/ManagePlaylistsWindow.fxml"));
             MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.PLAYLISTS);
-            stage.makeScene(fxmlLoader.load(), Constants.SETTINGS_WINDOW_DIMENSIONS_RESTRICTION);
-            stage.setMinWidth(350);
-            stage.setMinHeight(250);
+            stage.makeScene(fxmlLoader.load(), Constants.PLAYLISTS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_manPlayWindowTitle"));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.prepareControllerAndShowAndWait(fxmlLoader.getController());
@@ -486,7 +478,7 @@ public class PresetsWindowController {
         } else {
             // restore backup
             videoPresets.set(selected, presetBackups.get(videoPresets.get(selected).getPaneId()));
-            videoPresets.get(selected).getPane().prefWidthProperty().bind(listPresets.widthProperty());
+            videoPresets.get(selected).getPane().prefWidthProperty().bind(listPresets.widthProperty().subtract(35));
             presetBackups.remove(videoPresets.get(selected).getPaneId());
         }
 
@@ -539,7 +531,7 @@ public class PresetsWindowController {
         VideoPreset orig = videoPresets.get(selected);
         VideoPreset copy = orig.copy(PRESET_PANE_ID_PREFIX + presetCounter);
         copy.setPresetName(transPresetWin.getString("copyOf") + orig.getPresetName());
-        copy.getPane().prefWidthProperty().bind(listPresets.widthProperty());
+        copy.getPane().prefWidthProperty().bind(listPresets.widthProperty().subtract(35));
         copy.setThumbnailCursorEventHandler(this::updateCursor);
 
         transPreset.autoTranslate(copy.getPane(), copy.getPaneId());

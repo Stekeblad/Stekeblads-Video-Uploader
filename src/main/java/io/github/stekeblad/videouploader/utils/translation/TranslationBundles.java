@@ -9,4 +9,5 @@ public class TranslationBundles {
     public static final String WINDOW_PRESET = "presetWindow";
     public static final String WINDOW_SETTINGS = "settingsWindow";
     public static final String UPLOADER = "uploader";
+    public static final String WINDOW_TOOL_META = "toolMetaData";
 }

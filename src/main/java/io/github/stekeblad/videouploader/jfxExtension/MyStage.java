@@ -18,34 +18,14 @@ public class MyStage extends Stage {
     public void makeScene(Parent root, WindowDimensionsRestriction dimensions) {
         ConfigManager configManager = ConfigManager.INSTANCE;
         WindowFrame points = configManager.getWindowRectangle(myWindowPropertyName);
-        //ensureOnScreen();
-        //ensureValidDimensions();
-
-
-
-
-/*
-        // get information about how the saved window dimension and location map to the current screen setup
-        Screen currentScreen = Utils.getScreenForRectangle(
-                new Rectangle2D(points.getX(), points.getY(), points.getWidth(), points.getHeight()));
-        Rectangle2D windowBounds = currentScreen.getVisualBounds();
-        // Is window outside screen?
-        if (points.getX() < windowBounds.getMinX() || (points.getX() + points.getWidth()) > windowBounds.getMaxX()
-                || points.getY() < windowBounds.getMinY() || (points.getY() + points.getHeight()) > windowBounds.getMaxY()) {
-            points = new WindowFrame(windowBounds.getMinX(), windowBounds.getMinY(), points.getWidth(), points.getHeight());
-        }
-        // Is window larger than screen?
-        if ((points.getX() + points.getWidth()) > windowBounds.getMaxX()
-                || (points.getY() + points.getHeight()) > windowBounds.getMaxY()) {
-            // make it fit to screen
-            points = new WindowFrame(points.getX(), points.getY(),windowBounds.getWidth(), windowBounds.getHeight());
-        }
-*/
         Scene scene = new Scene(root, points.width, points.height);
         setScene(scene);
         setX(points.x);
         setY(points.y);
-
+        setMinHeight(dimensions.minH);
+        setMinWidth(dimensions.minW);
+        setMaxHeight(dimensions.maxH);
+        setMaxWidth(dimensions.maxW);
     }
 
     /**
@@ -78,15 +58,14 @@ public class MyStage extends Stage {
     private void triggerController(Object controller) {
         if (controller instanceof IWindowController) {
             IWindowController cont = (IWindowController) controller;
-            setOnCloseRequest(event -> { // true == close && false == doNotClose
-                if (cont.onWindowClose()) {
+            setOnCloseRequest(event -> {
+                if (cont.onWindowClose()) { // true == close && false == doNotClose
                     WindowFrame toSave = new WindowFrame(getX(), getY(), getWidth(), getHeight());
                     ConfigManager.INSTANCE.setWindowRectangle(myWindowPropertyName, toSave);
                 } else {
                     event.consume();
                 }
             });
-
             cont.myInit();
         }
     }
