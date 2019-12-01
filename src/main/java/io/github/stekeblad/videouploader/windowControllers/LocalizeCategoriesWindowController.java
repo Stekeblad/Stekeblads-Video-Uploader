@@ -116,7 +116,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         }
 
         // Visually indicate the program is working
-        btn_getCategories.setText(transLocCatWin.getString("downloading"));
+        btn_getCategories.setText(transBasic.getString("downloading"));
         btn_cancel.setDisable(true);
         btn_getCategories.setDisable(true);
 

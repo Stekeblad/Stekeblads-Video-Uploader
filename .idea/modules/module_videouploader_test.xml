@@ -18,7 +18,7 @@
   <path id="videouploader_test.module.production.classpath">
     <path refid="${module.jdk.classpath.videouploader_test}"/>
     <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
+    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev20190827-1.30.1.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
     <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
@@ -42,7 +42,7 @@
   
   <path id="videouploader_test.runtime.production.module.classpath">
     <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
+    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev20190827-1.30.1.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
     <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
@@ -67,7 +67,7 @@
   <path id="videouploader_test.module.classpath">
     <path refid="${module.jdk.classpath.videouploader_test}"/>
     <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
+    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev20190827-1.30.1.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
     <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
@@ -92,7 +92,7 @@
   <path id="videouploader_test.runtime.module.classpath">
     <pathelement location="${videouploader_test.testoutput.dir}"/>
     <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
+    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev20190827-1.30.1.classpath"/>
     <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
     <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
     <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>

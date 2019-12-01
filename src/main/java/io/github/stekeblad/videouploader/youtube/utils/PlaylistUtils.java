@@ -32,13 +32,13 @@ public enum PlaylistUtils {
      * Gets playlists from Youtube. Does not check if permission has been given or not. If you want to display a warning
      * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
      */
-    public void refreshPlaylist() {
+    public void refreshPlaylist() throws IOException {
         HashMap<String, LocalPlaylist> oldCache = new HashMap<>();
         try {
             // Authenticate user and create Youtube object
             Credential creds = Auth.authUser();
             YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Youtube Uploader").build();
+                    "Stekeblads Video Uploader").build();
 
             // Prepare request
             YouTube.Playlists.List userPlaylists = youtube.playlists().list("snippet,contentDetails");
@@ -71,7 +71,7 @@ public enum PlaylistUtils {
             saveCache();
         } catch (IOException e) {
             playlistCache = oldCache;
-            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -80,9 +80,9 @@ public enum PlaylistUtils {
      */
     private void getUserPlaylists() {
         loadCache();
-        if (playlistCache.isEmpty()) {
+        /*if (playlistCache.isEmpty()) {
             refreshPlaylist();
-        }
+        }*/
     }
 
     /**
@@ -163,7 +163,7 @@ public enum PlaylistUtils {
             // Authenticate user and create Youtube object
             Credential creds = Auth.authUser();
             YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Youtube Uploader").build();
+                    "Stekeblads Video Uploader").build();
 
             // prepare playlist
             PlaylistSnippet snippet = new PlaylistSnippet();

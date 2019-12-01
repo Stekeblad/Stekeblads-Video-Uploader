@@ -119,13 +119,17 @@ public class ManagePlaylistsWindowController implements IWindowController {
         // Auth done or user is ready to allow it
         // Do not allow the button to be clicked again until the window is closed and reopened
         btn_refreshPlaylists.setDisable(true);
+        btn_refreshPlaylists.setText(transBasic.getString("downloading"));
 
         // Send the request in the background
         Task<Void> backgroundTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 playlistUtils.refreshPlaylist(); // Get playlists from Youtube on background thread
-                Platform.runLater(() -> updatePlaylistList()); // update list in window on UI thread
+                Platform.runLater(() -> {
+                    updatePlaylistList(); // update list in window on UI thread
+                    transPlaylistWindow.getString("btn_refreshPlaylists");
+                });
                 return null;
             }
         };

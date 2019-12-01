@@ -343,11 +343,20 @@ public enum ConfigManager {
     public ArrayList<String> loadPlaylistCache() {
         ArrayList<String> playlistString = null;
         try {
-            playlistString = FileUtils.readAllLines(PLAYLIST_FILE);
-        } catch (FileNotFoundException e) {
-            System.err.println("Could not find playlist cache file");
+            // if cache file does not exist, try create it and return null
+            if (!Files.exists(Paths.get(PLAYLIST_FILE))) {
+                Files.createFile(Paths.get(PLAYLIST_FILE));
+                return null;
+            }
         } catch (IOException e) {
             System.err.println("Could not create playlists cache file");
+            return null;
+        }
+        // cache exists, try load it
+        try {
+            playlistString = FileUtils.readAllLines(PLAYLIST_FILE);
+        } catch (IOException e) {
+            System.err.println("Could not find playlist cache file");
         }
         return playlistString;
     }

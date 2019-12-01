@@ -1,154 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="module_videouploader_main" default="compile.module.videouploader_main">
-  <dirname property="module.videouploader_main.basedir" file="${ant.file.module_videouploader_main}"/>
-  
-  <property name="module.jdk.home.videouploader_main" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.videouploader_main" value="${project.jdk.bin}"/>
-  <property name="module.jdk.classpath.videouploader_main" value="${project.jdk.classpath}"/>
-  
-  <property name="compiler.args.videouploader_main" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
-  
-  <property name="videouploader_main.output.dir" value="${module.videouploader_main.basedir}/../../build/classes/java/main"/>
-  <property name="videouploader_main.testoutput.dir" value="${module.videouploader_main.basedir}/../../build/classes/java/main"/>
-  
-  <path id="videouploader_main.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="videouploader_main.module.production.classpath">
-    <path refid="${module.jdk.classpath.videouploader_main}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
-    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.guava:guava-jdk5:17.0.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.code.findbugs:jsr305:1.3.9.classpath"/>
-    <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.1.3.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.0.1.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.0.1.classpath"/>
-    <path refid="library.gradle:_commons-logging:commons-logging:1.1.1.classpath"/>
-    <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
-  </path>
-  
-  <path id="videouploader_main.runtime.production.module.classpath">
-    <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
-    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.guava:guava-jdk5:17.0.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.code.findbugs:jsr305:1.3.9.classpath"/>
-    <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.1.3.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.0.1.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.0.1.classpath"/>
-    <path refid="library.gradle:_commons-logging:commons-logging:1.1.1.classpath"/>
-    <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
-  </path>
-  
-  <path id="videouploader_main.module.classpath">
-    <path refid="${module.jdk.classpath.videouploader_main}"/>
-    <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
-    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.guava:guava-jdk5:17.0.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.code.findbugs:jsr305:1.3.9.classpath"/>
-    <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.1.3.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.0.1.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.0.1.classpath"/>
-    <path refid="library.gradle:_commons-logging:commons-logging:1.1.1.classpath"/>
-    <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
-  </path>
-  
-  <path id="videouploader_main.runtime.module.classpath">
-    <pathelement location="${videouploader_main.output.dir}"/>
-    <path refid="library.gradle:_com.google.apis:google-api-services-youtube:v3-rev189-1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.api-client:google-api-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-jetty:1.23.0.classpath"/>
-    <path refid="library.gradle:_org.jcodec:jcodec:0.2.5.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client-java6:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.oauth-client:google-oauth-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client-jackson2:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.guava:guava-jdk5:17.0.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty:6.1.26.classpath"/>
-    <path refid="library.gradle:_com.google.http-client:google-http-client:1.23.0.classpath"/>
-    <path refid="library.gradle:_com.google.code.findbugs:jsr305:1.3.9.classpath"/>
-    <path refid="library.gradle:_com.fasterxml.jackson.core:jackson-core:2.1.3.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:jetty-util:6.1.26.classpath"/>
-    <path refid="library.gradle:_org.mortbay.jetty:servlet-api:2.5-20081211.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpclient:4.0.1.classpath"/>
-    <path refid="library.gradle:_org.apache.httpcomponents:httpcore:4.0.1.classpath"/>
-    <path refid="library.gradle:_commons-logging:commons-logging:1.1.1.classpath"/>
-    <path refid="library.gradle:_commons-codec:commons-codec:1.3.classpath"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.videouploader_main">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.videouploader_main">
-    <patternset refid="excluded.from.module.videouploader_main"/>
-  </patternset>
-  
-  <path id="videouploader_main.module.sourcepath">
-    <dirset dir="${module.videouploader_main.basedir}/../../src/main">
-      <include name="java"/>
-      <include name="resources"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.videouploader_main" depends="compile.module.videouploader_main.production,compile.module.videouploader_main.tests" description="Compile module videouploader_main"/>
-  
-  <target name="compile.module.videouploader_main.production" description="Compile module videouploader_main; production classes">
-    <mkdir dir="${videouploader_main.output.dir}"/>
-    <javac destdir="${videouploader_main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.videouploader_main}/javac">
-      <compilerarg line="${compiler.args.videouploader_main}"/>
-      <bootclasspath refid="videouploader_main.module.bootclasspath"/>
-      <classpath refid="videouploader_main.module.production.classpath"/>
-      <src refid="videouploader_main.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.videouploader_main"/>
-    </javac>
-    
-    <copy todir="${videouploader_main.output.dir}">
-      <fileset dir="${module.videouploader_main.basedir}/../../src/main/java">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-      <fileset dir="${module.videouploader_main.basedir}/../../src/main/resources">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.videouploader_main.tests" depends="compile.module.videouploader_main.production" description="compile module videouploader_main; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.videouploader_main" description="cleanup module">
-    <delete dir="${videouploader_main.output.dir}"/>
-    <delete dir="${videouploader_main.testoutput.dir}"/>
-  </target>
-</project>
+<module external.linked.project.id="videouploader:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.github.stekeblad" external.system.module.type="sourceSet" external.system.module.version="0.0.0.1" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/../../build/classes/java/main" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Gradle: com.google.apis:google-api-services-youtube:v3-rev20190827-1.30.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.api-client:google-api-client:1.30.5" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.oauth-client:google-oauth-client-jetty:1.30.4" level="project" />
+    <orderEntry type="library" name="Gradle: org.jcodec:jcodec:0.2.5" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.oauth-client:google-oauth-client-java6:1.30.4" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.oauth-client:google-oauth-client:1.30.4" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.http-client:google-http-client-jackson2:1.32.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.http-client:google-http-client:1.32.1" level="project" />
+    <orderEntry type="library" name="Gradle: io.opencensus:opencensus-contrib-http-util:0.24.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava:28.1-android" level="project" />
+    <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-server:8.2.0.v20160908" level="project" />
+    <orderEntry type="library" name="Gradle: org.eclipse.jetty.orbit:javax.servlet:3.0.0.v201112011016" level="project" />
+    <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-continuation:8.2.0.v20160908" level="project" />
+    <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-http:8.2.0.v20160908" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.code.findbugs:jsr305:3.0.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-io:8.2.0.v20160908" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.httpcomponents:httpclient:4.5.10" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.httpcomponents:httpcore:4.4.12" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.j2objc:j2objc-annotations:1.3" level="project" />
+    <orderEntry type="library" name="Gradle: io.opencensus:opencensus-api:0.24.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.eclipse.jetty:jetty-util:8.2.0.v20160908" level="project" />
+    <orderEntry type="library" name="Gradle: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.11" level="project" />
+    <orderEntry type="library" name="Gradle: io.grpc:grpc-context:1.22.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.9.9" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:failureaccess:1.0.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
+    <orderEntry type="library" name="Gradle: org.checkerframework:checker-compat-qual:2.5.5" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.errorprone:error_prone_annotations:2.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.codehaus.mojo:animal-sniffer-annotations:1.18" level="project" />
+  </component>
+</module>

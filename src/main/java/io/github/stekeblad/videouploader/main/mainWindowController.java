@@ -815,8 +815,8 @@ public class mainWindowController implements IWindowController {
             System.err.println("remove finished upload, button belongs to a invalid or non-existing parent");
             return;
         }
-        uploadQueueVideos.remove(selected);
         editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
+        uploadQueueVideos.remove(selected);
         updateUploadList();
     }
 
