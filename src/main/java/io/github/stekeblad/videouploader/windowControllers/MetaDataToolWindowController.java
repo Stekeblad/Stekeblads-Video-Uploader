@@ -32,6 +32,9 @@ public class MetaDataToolWindowController implements IWindowController {
 
     @Override
     public void myInit() {
+        // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
+
         prog_readingFile.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         prog_readingFile.setVisible(false);
         trans_metaDataTool = TranslationsManager.getTranslation(TranslationBundles.WINDOW_TOOL_META);

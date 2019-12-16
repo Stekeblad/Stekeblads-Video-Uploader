@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.utils;
 
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -170,5 +171,30 @@ public class AlertUtils {
                 "\n" + stackTrace;
         GridPane pane = makeLongMsgPane(fullContent, false);
         paneToWindow(pane, header);
+    }
+
+    /**
+     * Similar to the exceptionDialog method but used when little is known about the error and the context of where it happened.
+     * This method prints the stacktrace to the console and attempts to show the exception dialog using a generic
+     * window header and description text.
+     *
+     * @param exception the exception to print to the console and attempt to show in the exceptionDialog
+     */
+    public static void unhandledExceptionDialog(Throwable exception) {
+        if (exception == null)
+            return;
+
+        exception.printStackTrace();
+        try {
+            if (Platform.isFxApplicationThread()) {
+                exceptionDialog("Stekeblads Video Uploader",
+                        "Sorry, something went wrong!", exception);
+            } else {
+                Platform.runLater(() -> exceptionDialog("Stekeblads Video Uploader",
+                        "Sorry, something went wrong!", exception));
+            }
+        } catch (Exception e) {
+            // not much to do here, we tried showing the exception dialog but we failed
+        }
     }
 }

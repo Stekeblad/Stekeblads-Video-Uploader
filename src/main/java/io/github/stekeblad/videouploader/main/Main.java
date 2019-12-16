@@ -8,7 +8,6 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 
@@ -33,16 +32,7 @@ public class Main extends Application {
         Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
 
         // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
-        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
-            exception.printStackTrace();
-            if (Platform.isFxApplicationThread()) {
-                AlertUtils.exceptionDialog(trans.getString("app_name"),
-                        "Sorry, something went wrong!", exception);
-            } else {
-                Platform.runLater(() -> AlertUtils.exceptionDialog(trans.getString("app_name"),
-                        "Sorry, something went wrong!", exception));
-            }
-        });
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));

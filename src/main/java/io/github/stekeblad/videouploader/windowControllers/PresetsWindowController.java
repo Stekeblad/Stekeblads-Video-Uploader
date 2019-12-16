@@ -67,6 +67,9 @@ public class PresetsWindowController {
      * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
     public void myInit(boolean disableLocaleChange) {
+        // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
+
         configManager = ConfigManager.INSTANCE;
         categoryUtils = CategoryUtils.INSTANCE;
 

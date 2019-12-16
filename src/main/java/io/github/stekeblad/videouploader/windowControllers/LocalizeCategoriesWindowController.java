@@ -42,6 +42,9 @@ public class LocalizeCategoriesWindowController implements IWindowController {
      * Initialize things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
     public void myInit() {
+        // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
+        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
+
         // Filter what can be entered into the textFields
         txt_country.textProperty().addListener((observable, oldValue, newValue) -> {
             if(! newValue.matches("[A-Za-z]*") || newValue.length() > 2) {
