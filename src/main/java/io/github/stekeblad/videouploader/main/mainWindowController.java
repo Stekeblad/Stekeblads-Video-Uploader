@@ -37,6 +37,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +67,7 @@ public class mainWindowController implements IWindowController {
     public Label label_selectPreset;
     public Label label_numbering;
     public Label label_presetProgress;
+    public ProgressBar prog_presetProgress;
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
@@ -228,10 +230,8 @@ public class mainWindowController implements IWindowController {
     public void onPickFileClicked(ActionEvent actionEvent) {
         videosToAdd = FileUtils.pickVideos(Long.MAX_VALUE);
         ArrayList<String> filenames = new ArrayList<>();
-        if(videosToAdd != null) {
-            for (File file : videosToAdd) {
-                filenames.add(file.getName());
-            }
+        for (File file : videosToAdd) {
+            filenames.add(file.getName());
         }
         chosen_files.setItems(FXCollections.observableArrayList(filenames));
         actionEvent.consume();
@@ -275,7 +275,6 @@ public class mainWindowController implements IWindowController {
                 uploadPaneCounter++;
             }
         } else { // preset selected
-
             // Load details of the selected preset
             VideoPreset chosenPreset;
             try {
@@ -298,8 +297,14 @@ public class mainWindowController implements IWindowController {
             // update progress message
             updatePresetProgressIndicator(videosToAdd.size());
 
-            // Queue the videos and preset to be combined in a background thread
-            presetApplicator.applyPreset(videosToAdd, chosenPreset, autoNum);
+            try {
+                // Queue the videos and preset to be combined in a background thread
+                presetApplicator.applyPreset(videosToAdd, chosenPreset, autoNum);
+            } catch (Exception e) {
+                e.printStackTrace();
+                AlertUtils.exceptionDialog(transBasic.getString("app_name") + "Failed applying preset",
+                        "An unexpected error occurred while preparing to apply the selected preset to your videos", e);
+            }
 
             // update autoNum textField
             txt_autoNum.setText(String.valueOf(autoNum + videosToAdd.size()));
@@ -875,12 +880,34 @@ public class mainWindowController implements IWindowController {
      */
     private void onUploadErred(VideoUpload video, Throwable e) {
         String header = transBasic.getString("app_name") + " - Failed to upload video";
-        if (e != null && video != null) {
-            AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
-        } else {
+        if (e == null || video == null) {
             AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
+        } else if (e.getMessage() != null && e.getMessage().contains("dailyLimitExceeded")) {
+            // abort all scheduled uploads, they will all fail with this error
+            bypassAbortWarning = true;
+            for (String key : uploader.getUploadQueue()) {
+                uploader.abortUpload((key));
+                onAbort(key + "_fakeButton");
+            }
+            bypassAbortWarning = false;
+
+            // Find when midnight in the pacific timezone is in the user's timezone
+            ZoneOffset userUtcOffset = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()).getOffset();
+            ZoneOffset pacificOffset = ZoneId.of("UTC-8").getRules().getOffset(Instant.now());
+            Duration timeDiff = Duration.ofSeconds(pacificOffset.compareTo(userUtcOffset));
+            if (timeDiff.isNegative())
+                timeDiff = timeDiff.plusHours(24);
+            long minutes = timeDiff.minusHours(timeDiff.toHours()).toMinutes(); // example: 00:30 = 06:30 - 06:00
+            String userClockAtPacificMidnight = String.format("%02d", timeDiff.toHours()) + ":" + String.format("%02d", minutes);
+
+            AlertUtils.simpleClose(header, transBasic.getString("app_name") + " has reached its daily upload limit" +
+                    " in the YouTube API and can not continue the uploading. All scheduled uploads has been aborted.\n\n" +
+                    "The limit will be reset at midnight Pacific Time. (" + userClockAtPacificMidnight + " in your timezone.)").show();
+        } else { // exception and video parameter available and its not a dailyLimitExceeded error
+            AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
         }
-        //Switch to a reset upload button instead of abort
+
+        //Switch to a reset upload button instead of abort for the upload that threw the error
         if (video != null) {
             video.setProgressBarColor("red");
             video.setStatusLabelText(transUpload.getString("failed"));

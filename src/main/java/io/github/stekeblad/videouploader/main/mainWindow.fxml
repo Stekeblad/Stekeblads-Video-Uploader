@@ -20,7 +20,7 @@
                 <Insets left="20.0"/>
             </padding>
             <Label id="label_presetProgress" fx:id="label_presetProgress" text="Applying preset... (3 left)"/>
-            <ProgressBar prefHeight="18.0" prefWidth="47.0"/>
+            <ProgressBar fx:id="prog_presetProgress" prefHeight="18.0" prefWidth="47.0"/>
         </HBox>
     </ToolBar>
     <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" AnchorPane.bottomAnchor="15.0"

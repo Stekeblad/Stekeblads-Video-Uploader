@@ -92,7 +92,8 @@ public class PresetApplicator {
                 protected Void call() {
                     try {
                         //Apply
-                        successCallback.accept(apply(videoFile, preset, taskAutoNum));
+                        VideoUpload readyUpload = apply(videoFile, preset, taskAutoNum);
+                        Platform.runLater(() -> successCallback.accept(readyUpload));
                     } catch (Exception e) {
                         e.printStackTrace();
                         if (errorCallback != null) {
@@ -110,7 +111,7 @@ public class PresetApplicator {
                 }
             });
             Future futureTask = exec.submit(newTask);
-            tasks.put(cancelName, futureTask); // save the future to be able to abort upload
+            tasks.put(cancelName, futureTask); // save the future to be able to abort the task
             autoNum++;
         }
 
@@ -162,7 +163,7 @@ public class PresetApplicator {
                 .setSelectedPlaylist(preset.getSelectedPlaylist())
                 .setCategory(preset.getCategory())
                 .setTellSubs(preset.isTellSubs())
-                // assume two video in upload pane never will have the same number and use the same preset
+                // assume two videos in upload pane never will have the same number and use the same preset
                 .setPaneName("upload-" + preset.getPresetName() + "-" + autoNum)
                 .setVideoFile(videoFile);
         if (preset.getThumbNail() != null) {

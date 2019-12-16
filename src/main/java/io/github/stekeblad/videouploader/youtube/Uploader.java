@@ -107,9 +107,17 @@ public class Uploader {
     }
 
     /**
-     * Aborts all uploads. This method is intended to be used when the program is about to shut down and the safety for
-     * any following calls to the same instance of this class is untested.
-     * @return a Set with the cancelName of all unfinished uploads.
+     * @return a set with the given cancelName of all uploads currently in the queue
+     */
+    public Set<String> getUploadQueue() {
+        return tasks.keySet();
+    }
+
+    /**
+     * Aborts all uploads and shuts down the executor service that performs the background work.
+     * This method is intended to be used when the program is about to shut down and no new uploads should be added
+     * to this instance after this method has been called.
+     * @return a Set with the cancelName of all unfinished uploads that was aborted.
      */
     public Set<String> kill() {
         exec.shutdownNow();
@@ -128,11 +136,17 @@ public class Uploader {
             // Define what it does
             protected Void call() {
                 try {
-                    // Do the uploading
+                    // Do the uploading, but first a short wait between multiple uploads
+                    try {
+                        Thread.sleep(1000 * 2);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException("INTERRUPTED");
+                    }
+                    // now, upload!
                     upload(video);
                 } catch (Exception e) {
                     // if not interrupted by the user, print the error and call error handler if it is set
-                    if (! e.getMessage().equals("INTERRUPTED")) {
+                    if (e.getMessage() != null && !e.getMessage().equals("INTERRUPTED")) {
                         e.printStackTrace();
                         if (uploadErredCallback != null) {
                             Platform.runLater(() -> uploadErredCallback.accept(video, e));
@@ -177,10 +191,20 @@ public class Uploader {
             try {
                 Thread.sleep(1000 * 10);
             } catch (InterruptedException e) {
-                throw new RuntimeException("forced by filename");
+                throw new RuntimeException("forced by filename.\nThe filename used is reserved for testing, uploads with this " +
+                        "name will ALWAYS fail");
             }
             throw new RuntimeException("forced by filename.\nThe filename used is reserved for testing, uploads with this " +
                     "name will ALWAYS fail");
+        }
+
+        // Extra check if this upload has been aborted
+        if (!tasks.containsKey(video.getPaneId()))
+            throw new IOException("INTERRUPTED");
+
+        // debug for testing daily upload limit exceeded
+        if (video.getVideoName().equals("forceDailyLimit")) {
+            throw new RuntimeException("The daily upload limit has been reached. (dailyLimitExceeded)");
         }
 
         // Auth the user and create the Youtube object
