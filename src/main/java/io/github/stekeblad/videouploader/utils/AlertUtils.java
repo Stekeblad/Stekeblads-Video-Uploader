@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.utils;
 
+import io.github.stekeblad.videouploader.utils.exceptionHistory.ExceptionHistory;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -23,6 +24,8 @@ import java.util.Optional;
  * Several properties is already defined you just need to provide the text to be displayed.
  */
 public class AlertUtils {
+
+    private static ExceptionHistory exceptionHistory = new ExceptionHistory();
 
     /**
      * Creates an Alert, sets Modality, Header, Content and adjusts the minHeight
@@ -163,14 +166,16 @@ public class AlertUtils {
      */
     public static void exceptionDialog(String header, String content, Throwable exception) {
         String stackTrace = getStacktrace(exception);
-        String fullContent = content +
-                "\nHere is the error details:" +
-                "\n-----------------------------------------" +
-                "\n" + exception.getMessage() +
-                "\n-----------------------------------------" +
-                "\n" + stackTrace;
-        GridPane pane = makeLongMsgPane(fullContent, false);
-        paneToWindow(pane, header);
+        if (!exceptionHistory.isInHistory(stackTrace)) {
+            String fullContent = content +
+                    "\nHere is the error details:" +
+                    "\n-----------------------------------------" +
+                    "\n" + exception.getMessage() +
+                    "\n-----------------------------------------" +
+                    "\n" + stackTrace;
+            GridPane pane = makeLongMsgPane(fullContent, false);
+            paneToWindow(pane, header);
+        }
     }
 
     /**
