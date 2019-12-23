@@ -136,7 +136,8 @@ public class Uploader {
             // Define what it does
             protected Void call() {
                 try {
-                    // Do the uploading, but first a short wait between multiple uploads
+                    // Do the uploading, but first a short wait, if something goes wrong we want a chance to abort all
+                    // waiting uploads instead of all of them creating exception dialogs before we have a chance to react
                     try {
                         Thread.sleep(1000 * 2);
                     } catch (InterruptedException e) {

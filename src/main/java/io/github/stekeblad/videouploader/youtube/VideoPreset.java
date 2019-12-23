@@ -2,11 +2,9 @@ package io.github.stekeblad.videouploader.youtube;
 
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 
 import java.util.List;
@@ -199,18 +197,8 @@ public class VideoPreset extends VideoInformationBase {
         presetName.setText(name);
         presetName.setEditable(false);
 
-        Button ghostBtn1 = new Button("");
-        ghostBtn1.setVisible(false);
-        Button ghostBtn2 = new Button("");
-        ghostBtn2.setVisible(false);
-        Button ghostBtn3 = new Button("");
-        ghostBtn3.setVisible(false);
-        HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2, ghostBtn3);
-        buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
-
         // Add new Nodes on new row at the bottom
-        presetPane.add(presetName, 0, 3);
-        presetPane.add(buttonsBox, 1, 3);
+        presetPane.add(presetName, 1, 3);
 
         // Sizing
         RowConstraints newRow = new RowConstraints(30);

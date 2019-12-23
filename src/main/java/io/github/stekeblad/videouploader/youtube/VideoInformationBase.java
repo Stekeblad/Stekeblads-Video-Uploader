@@ -4,8 +4,10 @@ import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -41,7 +43,7 @@ public class VideoInformationBase {
     private static final String NODE_ID_TELLSUBS = "_tellSubs";
     private static final String NODE_ID_THUMBNAIL = "_thumbNail";
 
-    static final String NODE_ID_BUTTONSBOX = "_buttons";
+    private static final String NODE_ID_BUTTONSBOX = "_buttons";
 
     // Variables
     private GridPane videoBasePane;
@@ -58,21 +60,27 @@ public class VideoInformationBase {
      * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
      */
     public String getButton1Id() {
-        return ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(0).getId();
+        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        verifyButtonExistence(buttonBox, 1);
+        return ((HBox) buttonBox).getChildren().get(0).getId();
     }
 
     /**
      * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
      */
     public String getButton2Id() {
-        return ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(1).getId();
+        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        verifyButtonExistence(buttonBox, 2);
+        return ((HBox) buttonBox).getChildren().get(1).getId();
     }
 
     /**
      * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
      */
     public String getButton3Id() {
-        return ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().get(2).getId();
+        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        verifyButtonExistence(buttonBox, 3);
+        return ((HBox) buttonBox).getChildren().get(2).getId();
     }
 
     /**
@@ -177,7 +185,12 @@ public class VideoInformationBase {
      * @param btn1 A fully configured button
      */
     public void setButton1(Button btn1) {
-        ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(0, btn1);
+        if (btn1 == null)
+            throw new IllegalArgumentException("Button parameter can not be null");
+
+        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        verifyButtonExistence(buttonBox, 1);
+        ((HBox) buttonBox).getChildren().set(0, btn1);
     }
 
     /**
@@ -186,7 +199,12 @@ public class VideoInformationBase {
      * @param btn2 A fully configured button
      */
     public void setButton2(Button btn2) {
-        ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(1, btn2);
+        if (btn2 == null)
+            throw new IllegalArgumentException("Button parameter can not be null");
+
+        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        verifyButtonExistence(buttonBox, 2);
+        ((HBox) buttonBox).getChildren().set(1, btn2);
     }
 
     /**
@@ -195,7 +213,27 @@ public class VideoInformationBase {
      * @param btn3 A fully configured button
      */
     public void setButton3(Button btn3) {
-        ((HBox) videoBasePane.lookup("#" + getPaneId() + NODE_ID_BUTTONSBOX)).getChildren().set(2, btn3);
+        if (btn3 == null)
+            throw new IllegalArgumentException("Button parameter can not be null");
+
+        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        verifyButtonExistence(buttonBox, 3);
+        ((HBox) buttonBox).getChildren().set(2, btn3);
+    }
+
+    /**
+     * Inserts invisible ghost buttons to make sure the buttonBox contains at least minSize number of children.
+     *
+     * @param buttonBox The buttonBox yo verify.
+     * @param minSize   the minimum number of children's in the buttonBox required in the context of the caller.
+     */
+    private void verifyButtonExistence(Node buttonBox, int minSize) {
+        ObservableList<Node> children = ((HBox) buttonBox).getChildren();
+        while (children.size() < minSize) {
+            Button ghostBtn = new Button("");
+            ghostBtn.setVisible(false);
+            children.add(ghostBtn);
+        }
     }
 
     /**
@@ -451,7 +489,7 @@ public class VideoInformationBase {
      */
     public VideoInformationBase copy(String paneIdForCopy) {
         if (paneIdForCopy == null) {
-            paneIdForCopy = getPaneId();
+            paneIdForCopy = paneId;
         }
         return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
                 getSelectedPlaylist(), getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy);
@@ -683,11 +721,21 @@ public class VideoInformationBase {
                  thumbnailCursorEventHandler.accept(true);
              }
          });
-         thumbNailFrame.setOnMouseExited(event -> {
-             if (thumbnailCursorEventHandler != null && allowEdit) {
-                 thumbnailCursorEventHandler.accept(false);
-             }
-         });
+        thumbNailFrame.setOnMouseExited(event -> {
+            if (thumbnailCursorEventHandler != null && allowEdit) {
+                thumbnailCursorEventHandler.accept(false);
+            }
+        });
+
+        // Create empty buttons so setters/getters for the buttons do not throw NullPointerException
+        Button ghostBtn1 = new Button("");
+        ghostBtn1.setVisible(false);
+        Button ghostBtn2 = new Button("");
+        ghostBtn2.setVisible(false);
+        Button ghostBtn3 = new Button("");
+        ghostBtn3.setVisible(false);
+        HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2, ghostBtn3);
+        buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
 
          // Place the different nodes on the pane
          videoBasePane.add(title, 0, 0);
@@ -700,6 +748,8 @@ public class VideoInformationBase {
 
          videoBasePane.add(tellSubsChoiceBox, 1, 2);
          videoBasePane.add(visibilityChoiceBox, 2, 2);
+
+        videoBasePane.add(buttonsBox, 0, 3);
 
          // Sizing
          ColumnConstraints rightConstraint = new ColumnConstraints(170, 170, 170);
@@ -730,7 +780,7 @@ public class VideoInformationBase {
             try {
                 thumbnailSave = thumbNailFile.getCanonicalPath();
             } catch (IOException e) {
-                System.err.println("Failed getting the path of the thumbnail while creating a string of " + getPaneId() + " named " + getVideoName());
+                System.err.println("Failed getting the path of the thumbnail while creating a string of " + paneId + " named " + getVideoName());
                 thumbnailSave = "_";
             }
         }
@@ -740,7 +790,7 @@ public class VideoInformationBase {
                 .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
                 .append(NODE_ID_PLAYLIST).append(":").append(getSelectedPlaylist()).append("\n")
                 .append(NODE_ID_CATEGORY).append(":").append(getCategory()).append("\n")
-                .append(NODE_ID_TELLSUBS).append(":").append(Boolean.toString(isTellSubs())).append("\n")
+                .append(NODE_ID_TELLSUBS).append(":").append(isTellSubs()).append("\n")
                 .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave);
         return classString.toString();
 

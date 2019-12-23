@@ -2,11 +2,9 @@ package io.github.stekeblad.videouploader.youtube;
 
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 
 import java.io.File;
@@ -259,19 +257,9 @@ public class VideoUpload extends VideoInformationBase{
         Label uploadStatus = new Label("Upload not started");
         uploadStatus.setId(getPaneId() + NODE_ID_UPLOADSTATUS);
 
-        Button ghostBtn1 = new Button("");
-        ghostBtn1.setVisible(false);
-        Button ghostBtn2 = new Button("");
-        ghostBtn2.setVisible(false);
-        Button ghostBtn3 = new Button("");
-        ghostBtn3.setVisible(false);
-        HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2, ghostBtn3);
-        buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
-
         // Add the new Nodes on a new row at the bottom
         uploadPane.add(progressBar, 2, 3);
         uploadPane.add(uploadStatus, 1, 3);
-        uploadPane.add(buttonsBox, 0, 3);
 
         // Update sizing
         RowConstraints newRow = new RowConstraints(30);

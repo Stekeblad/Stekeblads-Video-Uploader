@@ -4,13 +4,14 @@
 - Bugs and small things (there is always bugs and small things...)
 
 #### Higher priority things to do
-
+- Updating with COPPA-changes
+- Making the program verified with YouTube
 #### Lower priority things to do
 - https://accounts.google.com/o/oauth2/revoke?token={token} withdraw YouTube auth via code
 - When updating playlist, use ID instead of name when looking at old
 playlists and deciding if they should be visible or not (playlists can
-be renamed, name is different but ID the same.)
-- If error happens during the uploading, check the Google error message to give better error msg to user
+be renamed, but ID is always the same.)
+- Applying for higher quota limit
 
 #### Thinking about
 - Keep even not started uploads on close?
@@ -28,3 +29,6 @@ and drop video files in the list of videos to add list?
   - selecting thumbnail
 - Collapsed mode for Presets and Uploads (takes up less height)
 - Setting for automatically moving successfully uploaded videos to the recycle bin
+- Saving the automatic numbering to the preset, remembering what number 
+the next episode will have and inserting it the next time the user selects 
+the preset in the select preset dropdown.
