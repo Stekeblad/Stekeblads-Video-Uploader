@@ -581,7 +581,7 @@ public class mainWindowController implements IWindowController {
                 try {
                     uploadQueueVideos.get(selected).setThumbNailFile(pickedThumbnail);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    AlertUtils.exceptionDialog(transBasic.getString("app_name"), "Could not set Thumbnail", e);
                 }
             }
         });
@@ -592,7 +592,7 @@ public class mainWindowController implements IWindowController {
             try {
                 uploadQueueVideos.get(selected).setThumbNailFile(null);
             } catch (Exception e) {
-                e.printStackTrace();
+                AlertUtils.exceptionDialog(transBasic.getString("app_name"), "Could not clear Thumbnail", e);
             }
             actionEvent.consume();
         });
@@ -886,7 +886,7 @@ public class mainWindowController implements IWindowController {
         String header = transBasic.getString("app_name") + " - Failed to upload video";
         if (e == null || video == null) {
             AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
-        } else if (e.getMessage() != null && e.getMessage().contains("dailyLimitExceeded")) {
+        } else if (e.getMessage() != null && e.getMessage().contains("quotaExceeded")) {
             // abort all scheduled uploads, they will all fail with this error
             bypassAbortWarning = true;
             for (String key : uploader.getUploadQueue()) {
