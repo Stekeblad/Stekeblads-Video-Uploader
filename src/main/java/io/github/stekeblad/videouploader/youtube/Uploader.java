@@ -87,15 +87,17 @@ public class Uploader {
      * false if it for some reason is not possible to abort it.
      */
     public boolean abortUpload(String cancelName) {
-        if (tasks.containsKey(cancelName)) {
-            boolean success;
-            success = tasks.get(cancelName).cancel(true);
-            if (success) {
-                tasks.remove(cancelName);
+        synchronized (tasks) {
+            if (tasks.containsKey(cancelName)) {
+                boolean success;
+                success = tasks.get(cancelName).cancel(true);
+                if (success) {
+                    tasks.remove(cancelName);
+                }
+                return success;
             }
-            return success;
+            return true;
         }
-        return true;
     }
 
     /**
@@ -103,14 +105,18 @@ public class Uploader {
      * @return true if a upload is in progress, false if not.
      */
     public boolean getIsActive() {
-        return !tasks.keySet().isEmpty();
+        synchronized (tasks) {
+            return !tasks.keySet().isEmpty();
+        }
     }
 
     /**
      * @return a set with the given cancelName of all uploads currently in the queue
      */
     public Set<String> getUploadQueue() {
-        return tasks.keySet();
+        synchronized (tasks) {
+            return tasks.keySet();
+        }
     }
 
     /**
@@ -121,7 +127,9 @@ public class Uploader {
      */
     public Set<String> kill() {
         exec.shutdownNow();
-        return tasks.keySet();
+        synchronized (tasks) {
+            return tasks.keySet();
+        }
     }
 
     /**
@@ -153,7 +161,9 @@ public class Uploader {
                             Platform.runLater(() -> uploadErredCallback.accept(video, e));
                         }
                     }
-                    tasks.remove(cancelName);
+                    synchronized (tasks) {
+                        tasks.remove(cancelName);
+                    }
                     return null;
                 }
                 // If upload finished without errors and callback is set, give the cancel name to the callback
@@ -161,7 +171,9 @@ public class Uploader {
                     uploadFinishedCallback.accept(cancelName);
                 }
                 // Remove the task from the list
-                tasks.remove(cancelName);
+                synchronized (tasks) {
+                    tasks.remove(cancelName);
+                }
                 return null;
             }
         };
@@ -171,7 +183,9 @@ public class Uploader {
             }
         });
         Future upload = exec.submit(newTask);
-        tasks.put(cancelName, upload); // save the future to be able to abort upload
+        synchronized (tasks) {
+            tasks.put(cancelName, upload); // save the future to be able to abort upload
+        }
     }
 
     /**
@@ -200,12 +214,13 @@ public class Uploader {
         }
 
         // Extra check if this upload has been aborted
-        if (!tasks.containsKey(video.getPaneId()))
-            throw new IOException("INTERRUPTED");
-
+        synchronized (tasks) {
+            if (!tasks.containsKey(video.getPaneId()))
+                throw new IOException("INTERRUPTED");
+        }
         // debug for testing daily upload limit exceeded
         if (video.getVideoName().equals("forceDailyLimit")) {
-            throw new RuntimeException("The daily upload limit has been reached. (dailyLimitExceeded)");
+            throw new RuntimeException("The daily upload limit has been reached. (quotaExceeded)");
         }
 
         // Auth the user and create the Youtube object

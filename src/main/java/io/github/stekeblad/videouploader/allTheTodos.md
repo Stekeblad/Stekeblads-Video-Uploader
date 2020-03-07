@@ -6,8 +6,9 @@
 #### Higher priority things to do
 - Updating with COPPA-changes
 - Making the program verified with YouTube
+
 #### Lower priority things to do
-- https://accounts.google.com/o/oauth2/revoke?token={token} withdraw YouTube auth via code
+- accounts.google.com/o/oauth2/revoke?token={token} withdraw YouTube auth via code
 - When updating playlist, use ID instead of name when looking at old
 playlists and deciding if they should be visible or not (playlists can
 be renamed, but ID is always the same.)
