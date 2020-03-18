@@ -33,7 +33,7 @@ public class Translations {
      *
      * @param bundleName name of the ResourceBundle file family
      * @param primaryLocale locale for primary language, DEFAULT_LOCALE will be used as fallback if any translation is missing
-     *                      if primayLocale is null, DEFAULT_LOCALE will be used as primary language
+     *                      if primaryLocale is null, DEFAULT_LOCALE will be used as primary language
      * @throws Exception if the default translations file could not be found with the given bundleName
      */
     public Translations(String bundleName, Locale primaryLocale) throws Exception {
@@ -50,7 +50,6 @@ public class Translations {
             try {
                 locStr = locStr.substring(0, separatorIndex).toLowerCase() + "_" + locStr.substring(separatorIndex + 1).toUpperCase();
                 locale = new Locale(locStr);
-                //localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locale.toString() + ".properties";
                 localizedPath = "strings/" + bundleName + "/" + bundleName + "_" + locStr + ".properties";
             } catch (IndexOutOfBoundsException e) {
                 // Could not properly detect locale or language set to default english
@@ -83,9 +82,6 @@ public class Translations {
                                     break;
                                 }
                             }
-                        }
-                        if (localized == null) {
-                            System.out.println("Could not find a matching or partially matching translation for " + bundleName + " and " + locale);
                         }
 
                     } catch (NullPointerException e1) {

@@ -12,6 +12,7 @@ import java.util.*;
  */
 public class TranslationsMeta {
     private final HashMap<String, ResourceBundle> transMeta;
+    private String fallbackLanguage;
 
     /**
      * The constructor for TranslationsMeta, loads all files in strings/meta as PropertyResourceBundle
@@ -26,6 +27,8 @@ public class TranslationsMeta {
                     try {
                         PropertyResourceBundle bundle = new PropertyResourceBundle(inputStream);
                         transMeta.put(bundle.getString("translationName"), bundle);
+                        if (resource.equals("meta.properties"))
+                            fallbackLanguage = bundle.getString("translationName");
                     } catch (IOException e) {
                         System.err.println("Could not load meta translation file: \"" + resource + "\"");
                     }
@@ -92,7 +95,7 @@ public class TranslationsMeta {
         if (optionalMatch.isPresent() && optionalMatch.get().getKey() != null && !optionalMatch.get().getKey().isEmpty()) {
             return optionalMatch.get().getKey();
         }
-        return "";
+        return fallbackLanguage; // return default locale
 
     }
 }
