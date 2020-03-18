@@ -2,10 +2,9 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
+- Making the program verified with YouTube
 
 #### Higher priority things to do
-- Updating with COPPA-changes
-- Making the program verified with YouTube
 
 #### Lower priority things to do
 - accounts.google.com/o/oauth2/revoke?token={token} withdraw YouTube auth via code

@@ -143,7 +143,7 @@ public class PresetApplicator {
             lastPreset = preset;
         }
 
-        // run the tag processors on the video file
+        // run the tag processors on the preset and video file
         String name = preset.getVideoName();
         String description = preset.getVideoDescription();
         List<String> videoTags = preset.getVideoTags();
@@ -163,6 +163,7 @@ public class PresetApplicator {
                 .setSelectedPlaylist(preset.getSelectedPlaylist())
                 .setCategory(preset.getCategory())
                 .setTellSubs(preset.isTellSubs())
+                .setMadeForKids(preset.isMadeForKids())
                 // assume two videos in upload pane never will have the same number and use the same preset
                 .setPaneName("upload-" + preset.getPresetName() + "-" + autoNum)
                 .setVideoFile(videoFile);

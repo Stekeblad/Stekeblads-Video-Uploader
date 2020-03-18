@@ -234,7 +234,9 @@ public class Uploader {
         // Start building the Youtube Video object
         Video videoObject = new Video();
 
-        videoObject.setStatus(new VideoStatus().setPrivacyStatus(video.getVisibility().getStatusName()));
+        videoObject.setStatus(
+                new VideoStatus().setPrivacyStatus(video.getVisibility().getStatusName())
+                        .setSelfDeclaredMadeForKids(video.isMadeForKids()));
 
         VideoSnippet videoMetaData = new VideoSnippet();
         videoMetaData.setTitle(video.getVideoName());

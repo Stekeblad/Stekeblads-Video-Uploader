@@ -5,7 +5,6 @@ import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
 
 import java.io.File;
 import java.net.URI;
@@ -119,10 +118,10 @@ public class VideoUpload extends VideoInformationBase{
      */
     public VideoUpload(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                        String selectedPlaylist, String category, boolean tellSubs,
-                       String thumbNailPath, String paneName, File videoFile) {
+                       String thumbNailPath, boolean madeForKids, String paneName, File videoFile) {
 
         super(videoName, videoDescription, visibility, videoTags, selectedPlaylist, category,
-                tellSubs, thumbNailPath, paneName);
+                tellSubs, thumbNailPath, madeForKids, paneName);
         this.videoFile = videoFile;
         makeUploadPane();
     }
@@ -170,7 +169,7 @@ public class VideoUpload extends VideoInformationBase{
             thumbnailPath = getThumbNail().getAbsolutePath();
         }
         return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getSelectedPlaylist(),
-                getCategory(), isTellSubs(), thumbnailPath, paneIdCopy, getVideoFile());
+                getCategory(), isTellSubs(), thumbnailPath, isMadeForKids(), paneIdCopy, getVideoFile());
     }
 
     /**
@@ -230,6 +229,11 @@ public class VideoUpload extends VideoInformationBase{
             return this;
         }
 
+        public VideoUpload.Builder setMadeForKids(boolean madeForKids) {
+            this.madeForKids = madeForKids;
+            return this;
+        }
+
         public VideoUpload.Builder setPaneName(String paneName) {
             this.paneName = paneName;
             return this;
@@ -238,7 +242,7 @@ public class VideoUpload extends VideoInformationBase{
         public VideoUpload build() {
             return new VideoUpload(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
                     getSelectedPlaylist(), getCategory(), isTellSubs(),
-                    getThumbNailPath(), getPaneName(), videoFile);
+                    getThumbNailPath(), isMadeForKids(), getPaneName(), videoFile);
         }
     }
 
@@ -258,12 +262,8 @@ public class VideoUpload extends VideoInformationBase{
         uploadStatus.setId(getPaneId() + NODE_ID_UPLOADSTATUS);
 
         // Add the new Nodes on a new row at the bottom
-        uploadPane.add(progressBar, 2, 3);
-        uploadPane.add(uploadStatus, 1, 3);
-
-        // Update sizing
-        RowConstraints newRow = new RowConstraints(30);
-        uploadPane.getRowConstraints().add(newRow);
+        uploadPane.add(progressBar, 2, 5);
+        uploadPane.add(uploadStatus, 1, 5);
     }
 
     /**

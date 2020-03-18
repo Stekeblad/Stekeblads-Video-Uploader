@@ -143,9 +143,10 @@ public class mainWindowController implements IWindowController {
                 txt_autoNum.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
+
+        // Connect events and callbacks
         uploader.setUploadFinishedCallback(s -> Platform.runLater(() -> onUploadFinished(s)));
         uploader.setUploadErredCallback((videoUpload, throwable) -> Platform.runLater(() -> onUploadErred(videoUpload, throwable)));
-
         presetApplicator.setSuccessCallback(upload -> Platform.runLater(() -> onPresetApplicationSuccess(upload)));
         presetApplicator.setErrorCallback((video, throwable) -> Platform.runLater(() -> onPresetApplicationError(video, throwable)));
 
@@ -155,6 +156,7 @@ public class mainWindowController implements IWindowController {
         // If any uploads was saved when the program was closed last time
         if(configManager.hasWaitingUploads()) {
             ArrayList<String> waitingUploads = configManager.getWaitingUploads();
+            boolean failedLoadingWaitingUpload = false;
             if (waitingUploads != null) {
                 for(String waitingUpload : waitingUploads) {
                     try {
@@ -168,9 +170,12 @@ public class mainWindowController implements IWindowController {
 
                         uploadQueueVideos.add(loadedUpload);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        failedLoadingWaitingUpload = true;
                     }
                 }
+                if (failedLoadingWaitingUpload)
+                    AlertUtils.simpleClose(transBasic.getString("app_name"),
+                            transMainWin.getString("diag_loadWaitingUploads")).show();
             }
             updateUploadList();
         }
@@ -253,13 +258,13 @@ public class mainWindowController implements IWindowController {
                     transMainWin.getString("diag_noFiles_full")).show();
             return;
         }
-        // Check what preset / if a preset is selected
+        // Check which preset / if a preset is selected
         if (choice_presets.getSelectionModel().getSelectedIndex() < 1) {
             // No preset, add videos to upload list with file name as title and blank/default values on the rest
             for(File videoFile : videosToAdd) {
                 VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
                         null, null, null, false,
-                        null, UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
+                        null, false, UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
 
                 newUpload.setThumbnailCursorEventHandler(this::updateCursor);
                 // make the upload change its width together with the uploads list and the window

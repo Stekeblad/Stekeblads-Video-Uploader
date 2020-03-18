@@ -1,5 +1,6 @@
 package io.github.stekeblad.videouploader.youtube;
 
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
@@ -40,8 +41,9 @@ public class VideoInformationBase {
     private static final String NODE_ID_TAGS = "_tags";
     private static final String NODE_ID_PLAYLIST = "_playlist";
     private static final String NODE_ID_VISIBILITY = "_visibility";
-    private static final String NODE_ID_TELLSUBS = "_tellSubs";
+    private static final String NODE_ID_TELL_SUBS = "_tellSubs";
     private static final String NODE_ID_THUMBNAIL = "_thumbNail";
+    private static final String NODE_ID_MADE_FOR_KIDS = "_madeForKids";
 
     private static final String NODE_ID_BUTTONSBOX = "_buttons";
 
@@ -149,7 +151,7 @@ public class VideoInformationBase {
      */
     @SuppressWarnings("unchecked")
     public boolean isTellSubs() { // only two choices, do notify subscribers is the second choice (index 1)
-        return (((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS)).getSelectionModel().isSelected(1));
+        return (((ChoiceBox<String>) videoBasePane.lookup("#" + paneId + NODE_ID_TELL_SUBS)).getSelectionModel().isSelected(1));
     }
 
     /**
@@ -161,6 +163,10 @@ public class VideoInformationBase {
         } else {
             return thumbNailFile;
         }
+    }
+
+    public boolean isMadeForKids() {
+        return ((CheckBox) videoBasePane.lookup("#" + paneId + NODE_ID_MADE_FOR_KIDS)).isSelected();
     }
 
     /**
@@ -249,7 +255,8 @@ public class VideoInformationBase {
         ((TextArea) videoBasePane.lookup("#" + paneId + NODE_ID_TAGS)).setEditable(newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_PLAYLIST).setDisable(!newEditStatus);
         videoBasePane.lookup("#" + paneId + NODE_ID_VISIBILITY).setDisable(!newEditStatus);
-        videoBasePane.lookup("#" + paneId + NODE_ID_TELLSUBS).setDisable(!newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_TELL_SUBS).setDisable(!newEditStatus);
+        videoBasePane.lookup("#" + paneId + NODE_ID_MADE_FOR_KIDS).setDisable(!newEditStatus);
         if (newEditStatus) {
             // check valid status of category and playlist, update available choices if needed
             List<String> playlistChoices = playlistUtils.getVisiblePlaylistNames();
@@ -363,6 +370,10 @@ public class VideoInformationBase {
         }
     }
 
+    public void setMadeForKids(boolean madeForKids) {
+        ((CheckBox) videoBasePane.lookup("#" + paneId + NODE_ID_MADE_FOR_KIDS)).setSelected(madeForKids);
+    }
+
     // other methods
 
     /**
@@ -379,7 +390,7 @@ public class VideoInformationBase {
      */
     VideoInformationBase(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                          String selectedPlaylist, String category, boolean tellSubs,
-                         String thumbNailPath, String paneId) {
+                         String thumbNailPath, boolean madeForKids, String paneId) {
 
         if (visibility == null) { // optional, default to public
             visibility = VisibilityStatus.PUBLIC;
@@ -391,7 +402,7 @@ public class VideoInformationBase {
             this.thumbNailFile = null;
         }
         makeVideoBasePane(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
-                category, tellSubs, thumbNailPath);
+                category, tellSubs, thumbNailPath, madeForKids);
         allowEdit = false;
     }
 
@@ -413,6 +424,7 @@ public class VideoInformationBase {
         String category = null;
         boolean tellSubs = false;
         String thumbnailPath = null;
+        boolean madeForKids = false;
 
         // Splitting up the data for easy reading, one thing per row -> on thing per array element
         String[] lines = fromString.split("\n");
@@ -459,7 +471,7 @@ public class VideoInformationBase {
                     case NODE_ID_CATEGORY:
                         category = line.substring(colonIndex + 1);
                         break;
-                    case NODE_ID_TELLSUBS:
+                    case NODE_ID_TELL_SUBS:
                         tellSubs = Boolean.parseBoolean(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_THUMBNAIL:
@@ -470,13 +482,15 @@ public class VideoInformationBase {
                             this.thumbNailFile = new File(thumbnailPath);
                         }
                         break;
+                    case NODE_ID_MADE_FOR_KIDS:
+                        madeForKids = Boolean.parseBoolean(line.substring(colonIndex + 1));
                     default:
                         //ignore, might be a child value
                 }
             }
         }
         makeVideoBasePane(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
-                category, tellSubs, thumbnailPath);
+                category, tellSubs, thumbnailPath, madeForKids);
     }
 
     /**
@@ -491,8 +505,9 @@ public class VideoInformationBase {
         if (paneIdForCopy == null) {
             paneIdForCopy = paneId;
         }
-        return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(),
-                getSelectedPlaylist(), getCategory(), isTellSubs(), getThumbNail().getAbsolutePath(), paneIdForCopy);
+        return new VideoInformationBase(getVideoName(), getVideoDescription(), getVisibility(),
+                getVideoTags(), getSelectedPlaylist(), getCategory(), isTellSubs(),
+                getThumbNail().getAbsolutePath(), isMadeForKids(), paneIdForCopy);
     }
 
     /**
@@ -509,6 +524,7 @@ public class VideoInformationBase {
         boolean tellSubs;
         String thumbNailPath;
         String paneName;
+        boolean madeForKids;
 
         // Getters
         public String getVideoName() {
@@ -541,6 +557,10 @@ public class VideoInformationBase {
 
         public String getThumbNailPath() {
             return thumbNailPath;
+        }
+
+        public boolean isMadeForKids() {
+            return madeForKids;
         }
 
         public String getPaneName() {
@@ -588,6 +608,11 @@ public class VideoInformationBase {
             return this;
         }
 
+        public VideoInformationBase.Builder setMadeForKids(boolean madeForKids) {
+            this.madeForKids = madeForKids;
+            return this;
+        }
+
         public VideoInformationBase.Builder setPaneName(String paneName) {
             this.paneName = paneName;
             return this;
@@ -595,7 +620,7 @@ public class VideoInformationBase {
 
         public VideoInformationBase build() {
             return new VideoInformationBase(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
-                    category, tellSubs, thumbNailPath, paneName);
+                    category, tellSubs, thumbNailPath, madeForKids, paneName);
         }
     }
 
@@ -612,7 +637,7 @@ public class VideoInformationBase {
      */
     private void makeVideoBasePane(String videoName, String videoDescription, VisibilityStatus visibility,
                                    List<String> videoTags, String selectedPlaylist,
-                                   String category, boolean tellSubs, String thumbNailPath) {
+                                   String category, boolean tellSubs, String thumbNailPath, boolean madeForKids) {
          // Creating the pane, id, size, border
          videoBasePane = new GridPane();
          videoBasePane.setId(paneId);
@@ -649,14 +674,11 @@ public class VideoInformationBase {
          tags.setPromptText("list, of, tags, separated, with, comma, and, space");
          StringBuilder tagsString = new StringBuilder();
          if(videoTags != null && videoTags.size() > 0) {
-             // Add the tags to the screen with a ", " separation between them ...
-            for (int i = 0; i < videoTags.size() - 1; i++) {
-                tagsString.append(videoTags.get(i)).append(", ");
-            }
-            // ... without ", " after the last one
-             tagsString.append(videoTags.get(videoTags.size() - 1));
+             // Add the tags to the screen with a ", " separation between them
+             tags.setText(String.join(", ", videoTags));
+         } else {
+             tags.setText("");
          }
-         tags.setText(tagsString.toString());
          tags.setEditable(false);
          tags.setWrapText(true);
          tags.textProperty().addListener((observable, oldValue, newValue) -> { //Prevent newlines, allow text wrap
@@ -693,7 +715,7 @@ public class VideoInformationBase {
          tellSubsOptions.add("Do not Notify Subscribers");
          tellSubsOptions.add("Notify Subscribers");
          ChoiceBox<String> tellSubsChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(tellSubsOptions));
-         tellSubsChoiceBox.setId(paneId + NODE_ID_TELLSUBS);
+        tellSubsChoiceBox.setId(paneId + NODE_ID_TELL_SUBS);
          if (tellSubs) {
             tellSubsChoiceBox.getSelectionModel().select(1);
          } else {
@@ -727,6 +749,16 @@ public class VideoInformationBase {
             }
         });
 
+        CheckBox checkBoxMFK = new CheckBox("Flag video as \"Made for kids\"");
+        checkBoxMFK.setId(paneId + NODE_ID_MADE_FOR_KIDS);
+        checkBoxMFK.setOnContextMenuRequested(event -> {
+            event.consume();
+            OpenInBrowser.openInBrowser("https://support.google.com/youtube/answer/9528076");
+        });
+        checkBoxMFK.setTooltip(new Tooltip("Left click to toggle selection, right click to open help about Made for kids"));
+        checkBoxMFK.setSelected(madeForKids);
+        checkBoxMFK.setDisable(true);
+
         // Create empty buttons so setters/getters for the buttons do not throw NullPointerException
         Button ghostBtn1 = new Button("");
         ghostBtn1.setVisible(false);
@@ -742,24 +774,25 @@ public class VideoInformationBase {
          videoBasePane.add(categoryChoiceBox, 1, 0);
          videoBasePane.add(playlistChoiceBox, 2, 0);
 
-         videoBasePane.add(description, 0, 1, 1, 2);
-         videoBasePane.add(tags, 1, 1, 1, 1);
-         videoBasePane.add(thumbNailFrame, 2, 1);
+        videoBasePane.add(description, 0, 1, 1, 4);
+        videoBasePane.add(tags, 1, 1, 1, 2);
+        videoBasePane.add(checkBoxMFK, 1, 3);
 
-         videoBasePane.add(tellSubsChoiceBox, 1, 2);
-         videoBasePane.add(visibilityChoiceBox, 2, 2);
+        videoBasePane.add(thumbNailFrame, 2, 1, 1, 3);
 
-        videoBasePane.add(buttonsBox, 0, 3);
+        videoBasePane.add(tellSubsChoiceBox, 1, 4);
+        videoBasePane.add(visibilityChoiceBox, 2, 4);
+
+        videoBasePane.add(buttonsBox, 0, 5);
 
          // Sizing
          ColumnConstraints rightConstraint = new ColumnConstraints(170, 170, 170);
          ColumnConstraints defaultConstraint = new ColumnConstraints(100, USE_COMPUTED_SIZE, MAX_VALUE);
          videoBasePane.getColumnConstraints().setAll(defaultConstraint, defaultConstraint, rightConstraint);
 
-         RowConstraints r1 = new RowConstraints(30);
-         RowConstraints r2 = new RowConstraints(90);
-         RowConstraints r3 = new RowConstraints(30);
-         videoBasePane.getRowConstraints().setAll(r1, r2, r3);
+        RowConstraints rowConstraint = new RowConstraints(30);
+        videoBasePane.getRowConstraints().setAll(rowConstraint, rowConstraint,
+                rowConstraint, rowConstraint, rowConstraint, rowConstraint);
     }
 
 
@@ -790,8 +823,9 @@ public class VideoInformationBase {
                 .append(NODE_ID_TAGS).append(":").append(getVideoTags().toString()).append("\n")
                 .append(NODE_ID_PLAYLIST).append(":").append(getSelectedPlaylist()).append("\n")
                 .append(NODE_ID_CATEGORY).append(":").append(getCategory()).append("\n")
-                .append(NODE_ID_TELLSUBS).append(":").append(isTellSubs()).append("\n")
-                .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave);
+                .append(NODE_ID_TELL_SUBS).append(":").append(isTellSubs()).append("\n")
+                .append(NODE_ID_THUMBNAIL).append(":").append(thumbnailSave).append("\n")
+                .append(NODE_ID_MADE_FOR_KIDS).append(":").append(isMadeForKids());
         return classString.toString();
 
     }

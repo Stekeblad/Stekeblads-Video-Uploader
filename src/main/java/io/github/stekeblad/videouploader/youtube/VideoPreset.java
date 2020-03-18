@@ -1,11 +1,8 @@
 package io.github.stekeblad.videouploader.youtube;
 
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
-import javafx.collections.ObservableList;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
 
 import java.util.List;
 
@@ -57,9 +54,10 @@ public class VideoPreset extends VideoInformationBase {
      */
     public VideoPreset(String videoName, String videoDescription, VisibilityStatus visibility, List<String> videoTags,
                        String selectedPlaylist, String category, boolean tellSubs,
-                       String thumbNailPath, String paneId, String presetName) {
+                       String thumbNailPath, boolean madeForKids, String paneId, String presetName) {
+
         super(videoName, videoDescription, visibility, videoTags, selectedPlaylist,
-                category, tellSubs, thumbNailPath, paneId);
+                category, tellSubs, thumbNailPath, madeForKids, paneId);
         makePresetPane(presetName);
     }
 
@@ -112,7 +110,7 @@ public class VideoPreset extends VideoInformationBase {
             thumbnailPath = getThumbNail().getAbsolutePath();
         }
         return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getSelectedPlaylist(),
-                getCategory(), isTellSubs(), thumbnailPath, paneIdForCopy, getPresetName());
+                getCategory(), isTellSubs(), thumbnailPath, isMadeForKids(), paneIdForCopy, getPresetName());
     }
 
     /**
@@ -172,6 +170,11 @@ public class VideoPreset extends VideoInformationBase {
             return this;
         }
 
+        public VideoPreset.Builder setMadeForKids(boolean madeForKids) {
+            this.madeForKids = madeForKids;
+            return this;
+        }
+
         public VideoPreset.Builder setPaneName(String paneName) {
             this.paneName = paneName;
             return this;
@@ -179,7 +182,7 @@ public class VideoPreset extends VideoInformationBase {
 
         public VideoPreset build() {
             return new VideoPreset(getVideoName(), getVideoDescription(), getVisibility(), getVideoTags(), getSelectedPlaylist(),
-                    getCategory(), isTellSubs(), getThumbNailPath(), getPresetName(), presetName);
+                    getCategory(), isTellSubs(), getThumbNailPath(), isMadeForKids(), getPresetName(), presetName);
         }
     }
 
@@ -198,17 +201,7 @@ public class VideoPreset extends VideoInformationBase {
         presetName.setEditable(false);
 
         // Add new Nodes on new row at the bottom
-        presetPane.add(presetName, 1, 3);
-
-        // Sizing
-        RowConstraints newRow = new RowConstraints(30);
-        presetPane.getRowConstraints().add(newRow);
-
-
-        ObservableList<ColumnConstraints> colconstr = presetPane.getColumnConstraints();
-        ColumnConstraints newRightColConstr = new ColumnConstraints(170, 170, 170);
-
-        presetPane.getColumnConstraints().setAll(colconstr.get(0), colconstr.get(1), newRightColConstr);
+        presetPane.add(presetName, 1, 5);
     }
 
     /**

@@ -63,11 +63,14 @@ public class MetaDataToolWindowController implements IWindowController {
 
         try {
             video = FileUtils.pickVideo(Long.MAX_VALUE);
-            if (video == null)
+            if (video == null) {
+                btn_pickFile.setDisable(false);
                 return;
+            }
         } catch (Exception e) {
             AlertUtils.simpleClose(trans_metaDataTool.getString("diag_invalidChoice_short"),
                     trans_metaDataTool.getString("diag_invalidChoice_full")).show();
+            btn_pickFile.setDisable(false);
             return;
         }
         // Do not show the progress indicator while the file chooser is open, make it visible first when a valid file is chosen

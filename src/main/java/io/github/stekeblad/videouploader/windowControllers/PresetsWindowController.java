@@ -195,7 +195,7 @@ public class PresetsWindowController {
 
         // Create the new preset, enable editing on it and scroll so it is in focus (in case the user has a lot of presets)
         VideoPreset newPreset = new VideoPreset("", "", VisibilityStatus.PUBLIC, null,
-                null, null, false, null,
+                null, null, false, null, false,
                 PRESET_PANE_ID_PREFIX + presetCounter, txt_nameNewPreset.getText());
         // Make so the preset change its width together with the list and the window
         newPreset.getPane().prefWidthProperty().bind(listPresets.widthProperty().subtract(35));
@@ -249,8 +249,8 @@ public class PresetsWindowController {
     }
 
     /**
-     * Called when the refresh playlist button is clicked.
-     * Downloads the user's playlist from youtube
+     * Called when the manage playlists button is clicked.
+     * Opens the manage playlists window
      * @param actionEvent the click event
      */
     public void onManagePlaylistsClicked(ActionEvent actionEvent) {
@@ -269,7 +269,7 @@ public class PresetsWindowController {
     }
 
     /**
-     * Defines the different states for buttonStates, this is made to make it much simpler to manage the butons
+     * Defines the different states for buttonStates, this is made to make it much simpler to manage the buttons
      * for the different states a preset can be in. Previously buttons was created all over the place and set
      * *  to call methods. Now there is sets of buttons defined here and this sets is then used when setting the
      * *  buttons to show.
@@ -333,7 +333,7 @@ public class PresetsWindowController {
     }
 
     /**
-     * Updates the enabled/disabled state for the localize categories button, categories should not be relocalized if
+     * Updates the enabled/disabled state for the localize categories button, categories should not be re-localized if
      * one or more videos/presets is in edit mode or an upload is in progress because updates WILL fail and preset/uploads
      * that was in edit mode will not be possible to save!
      */

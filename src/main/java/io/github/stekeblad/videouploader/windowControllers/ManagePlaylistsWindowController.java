@@ -131,7 +131,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
                 playlistUtils.refreshPlaylist(); // Get playlists from Youtube on background thread
                 Platform.runLater(() -> {
                     updatePlaylistList(); // update list in window on UI thread
-                    transPlaylistWindow.getString("btn_refreshPlaylists");
+                    btn_refreshPlaylists.setText(transPlaylistWindow.getString("btn_refreshPlaylists"));
                 });
                 return null;
             }

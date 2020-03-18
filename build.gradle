@@ -1,11 +1,12 @@
 group 'io.github.stekeblad'
-version '0.0.0.1'
+version '1.4.0'
 
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'application'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 sourceSets {
     main {
@@ -16,6 +17,19 @@ sourceSets {
     }
 }
 
+task makeMyJar(type: Jar) {
+    baseName = 'Stekeblads_Video_Uploader'
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    manifest {
+        attributes 'Main-Class': 'io.github.stekeblad.videouploader.main.Main'
+    }
+    with jar
+}
 
 repositories {
     mavenCentral()
@@ -24,7 +38,7 @@ repositories {
 dependencies {
     compile 'com.google.api-client:google-api-client:1.30.5'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.4'
-    compile 'com.google.apis:google-api-services-youtube:v3-rev20190827-1.30.1'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev20200213-1.30.9'
     compile 'org.jcodec:jcodec:0.2.5'
 }
 
