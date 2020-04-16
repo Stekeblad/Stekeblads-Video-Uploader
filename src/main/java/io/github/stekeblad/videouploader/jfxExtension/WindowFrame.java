@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.utils;
+package io.github.stekeblad.videouploader.jfxExtension;
 
 public class WindowFrame {
     public WindowFrame(double x, double y, double width, double height) {

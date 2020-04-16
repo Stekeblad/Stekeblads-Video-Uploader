@@ -1,5 +1,7 @@
 package io.github.stekeblad.videouploader.utils;
 
+import io.github.stekeblad.videouploader.jfxExtension.WindowFrame;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;

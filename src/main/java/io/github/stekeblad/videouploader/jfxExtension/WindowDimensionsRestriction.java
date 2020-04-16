@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.utils;
+package io.github.stekeblad.videouploader.jfxExtension;
 
 public class WindowDimensionsRestriction {
     public WindowDimensionsRestriction(double minW, double maxW, double minH, double maxH) {

@@ -1,5 +1,7 @@
 package io.github.stekeblad.videouploader.utils;
 
+import io.github.stekeblad.videouploader.jfxExtension.WindowDimensionsRestriction;
+
 public class Constants {
     public static final String DATA_DIR = "VideoUploader data";
     public static final String AUTH_DIR = DATA_DIR + "/.auth";

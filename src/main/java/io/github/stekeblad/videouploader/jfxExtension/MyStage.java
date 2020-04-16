@@ -1,8 +1,6 @@
 package io.github.stekeblad.videouploader.jfxExtension;
 
 import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.WindowDimensionsRestriction;
-import io.github.stekeblad.videouploader.utils.WindowFrame;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
