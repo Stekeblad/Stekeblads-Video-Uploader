@@ -19,7 +19,7 @@ video details for all videos one at a time on Youtube's upload page!
 
 ##### Help
 There are a few videos further down about how to use the program and
-a couple of pages on the [wiki](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki).
+a couple of pages on the [wiki](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/)<!-- @IGNORE PREVIOUS: link -->.
  For other problems or question please look under [issues](https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues)
  and create one if no one already asked about the same thing.
 

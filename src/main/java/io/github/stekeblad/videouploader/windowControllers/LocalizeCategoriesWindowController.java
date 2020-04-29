@@ -165,10 +165,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
      */
     public void onCancelClicked(ActionEvent actionEvent) {
         Stage stage = (Stage) btn_cancel.getScene().getWindow();
-        stage.fireEvent(
-                new WindowEvent(
-                        stage,
-                        WindowEvent.WINDOW_CLOSE_REQUEST));
+        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         actionEvent.consume();
     }
 

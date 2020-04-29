@@ -101,6 +101,8 @@ public enum ConfigManager {
             setIfMissing("category_country", "");
             setIfMissing("category_language", "");
             setIfMissing("ui_language", String.valueOf(Locale.getDefault()));
+            setIfMissing("checkForUpdates", "true");
+            setIfMissing("silentUpdates", "false");
 
             setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x825");
             setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "150x100");
@@ -184,6 +186,22 @@ public enum ConfigManager {
 
     public void setSelectedLanguage(String languageName) {
         mainProp.setProperty("ui_language", languageName);
+    }
+
+    public boolean getCheckForUpdates() {
+        return mainProp.getProperty("checkForUpdates").equals("true");
+    }
+
+    public void setCheckForUpdates(boolean checkForUpdates) {
+        mainProp.setProperty("checkForUpdates", checkForUpdates ? "true" : "false");
+    }
+
+    public boolean getSilentUpdates() {
+        return mainProp.getProperty("silentUpdates").equals("true");
+    }
+
+    public void setSilentUpdates(boolean silentUpdates) {
+        mainProp.setProperty("silentUpdates", silentUpdates ? "true" : "false");
     }
 
     private static final String WIN_LOC = "window_location_";

@@ -18,6 +18,7 @@ import java.util.Locale;
  * The program starts here, opens MainWindow and waits for all windows to close
  */
 public class Main extends Application {
+    private ConfigManager configManager;
 
     @Override
     public void start(Stage primaryStage) {
@@ -32,13 +33,16 @@ public class Main extends Application {
         Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
 
         // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
+
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
             MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.MAIN);
             stage.makeScene(loader.load(), Constants.MAIN_WINDOW_DIMENSIONS_RESTRICTION);
+
             stage.setTitle(trans.getString("app_name"));
+
             stage.prepareControllerAndShow(loader.getController());
         } catch (IOException e) {
             AlertUtils.exceptionDialog("Stekeblads Video Uploader",
@@ -47,7 +51,7 @@ public class Main extends Application {
     }
 
     private void loadTranslations() throws Exception {
-            ConfigManager configManager = ConfigManager.INSTANCE;
+        configManager = ConfigManager.INSTANCE;
             configManager.configManager();
             String localeString = configManager.getSelectedLanguage();
             Locale locale;

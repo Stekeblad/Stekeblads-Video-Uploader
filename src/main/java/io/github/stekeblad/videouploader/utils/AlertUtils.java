@@ -58,7 +58,7 @@ public class AlertUtils {
         textArea.setEditable(false);
         textArea.setWrapText(wrapText);
         Button closeButton = new Button("Close");
-        closeButton.setOnMouseClicked(event -> closeButton.getScene().getWindow().hide());
+        closeButton.setCancelButton(true);
 
         GridPane pane = new GridPane();
         GridPane.setMargin(textArea, new Insets(3, 0, 0, 0));

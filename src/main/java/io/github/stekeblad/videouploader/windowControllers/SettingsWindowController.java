@@ -7,6 +7,7 @@ import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
+import io.github.stekeblad.videouploader.utils.background.UpdaterUi;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
@@ -14,10 +15,7 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationsMeta;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -35,12 +33,18 @@ public class SettingsWindowController implements IWindowController {
     public Label label_links;
     public Label label_resetSettings;
     public Label label_tools;
+    public Label label_updater;
+    public Button btn_translationDetails;
+    public Button btn_metaDataTool;
+    public CheckBox check_checkForUpdates;
+    public CheckBox check_silentUpdates;
+    public Button btn_updateNow;
     public Button btn_gotoMainPage;
     public Button btn_gotoWiki;
     public Button btn_gotoDownload;
-    public Button btn_translationDetails;
+    public Button btn_reportBug;
+    public Button btn_privacy;
     public Button btn_clearStoredData;
-    public Button btn_metaDataTool;
 
     private TranslationsMeta translationsMeta;
     private Translations settingsTrans;
@@ -61,10 +65,13 @@ public class SettingsWindowController implements IWindowController {
         settingsTrans = TranslationsManager.getTranslation(TranslationBundles.WINDOW_SETTINGS);
         settingsTrans.autoTranslate(settingsWindow);
 
+        // set the options in the window to their state in the configuration file
         choice_languages.setItems(FXCollections.observableList(translationsMeta.getAllTranslationLocales()));
         choice_languages.getSelectionModel().select(translationsMeta.localeCodeToLangName(configManager.getSelectedLanguage()));
-
         choice_languages.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> hasDoneChanges = true);
+
+        check_checkForUpdates.setSelected(configManager.getCheckForUpdates());
+        check_silentUpdates.setSelected(configManager.getSilentUpdates());
 
         // F1 for wiki on this window
         settingsWindow.getScene().setOnKeyPressed(event -> {
@@ -81,23 +88,10 @@ public class SettingsWindowController implements IWindowController {
             AlertUtils.simpleClose("restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
         }
         configManager.setSelectedLanguage(translationsMeta.langNameToLocaleCode(choice_languages.getValue()));
+        configManager.setCheckForUpdates(check_checkForUpdates.isSelected());
+        configManager.setSilentUpdates(check_silentUpdates.isSelected());
         configManager.saveSettings();
         return true;
-    }
-
-    public void onGotoMainPageClicked(ActionEvent actionEvent) {
-        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader");
-        actionEvent.consume();
-    }
-
-    public void onGotoWikiClicked(ActionEvent actionEvent) {
-        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki");
-        actionEvent.consume();
-    }
-
-    public void onGotoDownloadClicked(ActionEvent actionEvent) {
-        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases");
-        actionEvent.consume();
     }
 
     public void onTranslationDetailsClicked(ActionEvent actionEvent) {
@@ -129,6 +123,42 @@ public class SettingsWindowController implements IWindowController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        actionEvent.consume();
+    }
+
+    public void onCheckForUpdatesChanged(ActionEvent actionEvent) {
+        check_silentUpdates.setDisable(!check_checkForUpdates.isSelected());
+        actionEvent.consume();
+    }
+
+    public void onUpdateNowClicked(ActionEvent actionEvent) {
+        UpdaterUi updater = new UpdaterUi();
+        updater.runUpdater(false);
+        actionEvent.consume();
+    }
+
+    public void onGotoMainPageClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader");
+        actionEvent.consume();
+    }
+
+    public void onGotoWikiClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki");
+        actionEvent.consume();
+    }
+
+    public void onGotoDownloadClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases");
+        actionEvent.consume();
+    }
+
+    public void onReportBugClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues");
+        actionEvent.consume();
+    }
+
+    public void onPrivacyClicked(ActionEvent actionEvent) {
+        OpenInBrowser.openInBrowser("https://stekeblad.se/Projects/Video-uploader/uploader-privacy");
         actionEvent.consume();
     }
 

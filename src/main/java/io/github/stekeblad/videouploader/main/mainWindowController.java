@@ -8,6 +8,7 @@ import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.PresetApplicator;
+import io.github.stekeblad.videouploader.utils.background.UpdaterUi;
 import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
 import io.github.stekeblad.videouploader.utils.state.VideoUploadState;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
@@ -92,7 +93,7 @@ public class mainWindowController implements IWindowController {
      * Initialize things when the window is opened, used instead of initialize as that one does not have access to the scene
      */
     public void myInit() {
-        // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
+        // Set the default exception handler to catch the exceptions that is not already caught
         // Is this needed in every window or only in the Main.java file?
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
 
@@ -187,6 +188,10 @@ public class mainWindowController implements IWindowController {
                 event.consume();
             }
         });
+
+        // Start a background check for updates
+        UpdaterUi updater = new UpdaterUi();
+        updater.runUpdater(true);
     }
 
     /**

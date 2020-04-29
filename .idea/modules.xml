@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader.iml" group="videouploader" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader_main.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader_main.iml" group="videouploader" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader_test.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader_test.iml" group="videouploader" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/youtubeuploader.iml" filepath="$PROJECT_DIR$/.idea/youtubeuploader.iml" />
     </modules>
   </component>
 </project>

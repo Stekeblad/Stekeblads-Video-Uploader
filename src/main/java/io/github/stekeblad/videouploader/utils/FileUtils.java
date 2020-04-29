@@ -7,14 +7,12 @@ import javafx.util.Pair;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
+import java.nio.file.FileSystem;
+import java.nio.file.*;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -132,6 +130,17 @@ public class FileUtils {
         return chosenFile;
     }
 
+    public static boolean isProductionMode() {
+        File isThisJar;
+        try {
+            isThisJar = new File(FileUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException ignored) {
+            // assume its production mode
+            return true;
+        }
+        return isThisJar.isFile();
+    }
+
     /**
      * Returns a list of names of all files and directories in a resource directory (not recursive)
      * Most important part of this method is that it needs to be done in different ways if the program is executed
@@ -205,7 +214,7 @@ public class FileUtils {
      *
      * @param path path of the file to read
      * @return An ArrayList with strings where each item in the list represents one line in the file
-     * @throws IOException          If the file at the given path does not exist or if an IO Exception occurrs
+     * @throws IOException          If the file at the given path does not exist or if an IO Exception occurs
      * @throws NullPointerException if path is null
      */
     public static ArrayList<String> readAllLines(String path) throws IOException {
@@ -236,7 +245,7 @@ public class FileUtils {
      *
      * @param path path of the file to read
      * @return A string with the entire content of the file at the given path
-     * @throws IOException          If the file at the given path does not exist or if an IO Exception occurrs
+     * @throws IOException          If the file at the given path does not exist or if an IO Exception occurs
      * @throws NullPointerException if path is null
      */
     public static String readAll(String path) throws IOException {
@@ -265,7 +274,7 @@ public class FileUtils {
     }
 
     /**
-     * Writes data to a file. This method makes sure the file stream is closed even if an IO Excecption occurrs
+     * Writes data to a file. This method makes sure the file stream is closed even if an IO Exception occurs
      *
      * @param path path of the file to write
      * @param data the data to write to the file
@@ -309,5 +318,28 @@ public class FileUtils {
         } catch (Exception e) {
             return "Could not read file";
         }
+    }
+
+    /**
+     * Reads all lines from a files, works even for resources inside a jar!
+     *
+     * @param uri The URI to the file to read
+     * @return a list with all lines of the targeted file
+     * @throws IOException for all types of IO Exception :P (failed to access jar and file not found for example)
+     */
+    public static List<String> getAllResourceLines(URI uri) throws IOException {
+        try {
+            // Try reading it normally
+            Path path = Paths.get(uri);
+            return Files.readAllLines(path);
+        } catch (FileSystemNotFoundException ex) {
+            // Failed, file is most likely inside a jar
+            try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+                Path path = fs.provider().getPath(uri);
+                // Read file first and then auto-close the jar-file-system (try-with-resource)
+                return Files.readAllLines(path);
+            }
+        }
+
     }
 }

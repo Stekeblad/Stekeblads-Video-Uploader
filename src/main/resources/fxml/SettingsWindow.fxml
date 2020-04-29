@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <GridPane fx:id="settingsWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-          prefHeight="450.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
+          prefHeight="534.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111"
           xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="io.github.stekeblad.videouploader.windowControllers.SettingsWindowController">
     <columnConstraints>
@@ -16,15 +16,16 @@
     <rowConstraints>
         <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
         <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
         <RowConstraints maxHeight="150.0" minHeight="0.0" prefHeight="150.0" vgrow="SOMETIMES"/>
         <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="SOMETIMES"/>
         <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES"/>
     </rowConstraints>
     <Label fx:id="label_langSelect" text="Language settings" wrapText="true" GridPane.columnIndex="1"/>
-    <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-    <VBox alignment="CENTER_LEFT" prefHeight="168.0" prefWidth="180.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+    <Label fx:id="label_links" text="Links" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    <VBox alignment="CENTER_LEFT" prefHeight="168.0" prefWidth="196.0" GridPane.columnIndex="2" GridPane.rowIndex="3">
         <Button fx:id="btn_gotoMainPage" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                onAction="#onGotoMainPageClicked" text="Home page"/>
+                onAction="#onGotoMainPageClicked" text="Project page"/>
         <Button fx:id="btn_gotoWiki" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                 onAction="#onGotoWikiClicked" text="Wiki"/>
         <Button fx:id="btn_gotoDownload" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
@@ -34,12 +35,26 @@
     <Button fx:id="btn_translationDetails" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
             onAction="#onTranslationDetailsClicked" text="About this translation" GridPane.columnIndex="3"/>
     <Label fx:id="label_resetSettings" text="Reset application settings" GridPane.columnIndex="1"
-           GridPane.rowIndex="3"/>
+           GridPane.rowIndex="4"/>
     <Button fx:id="btn_clearStoredData" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
             onAction="#onClearStoredDataClicked" text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2"
-            GridPane.rowIndex="3"/>
+            GridPane.rowIndex="4"/>
     <Label fx:id="label_tools" text="Tools" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     <Button fx:id="btn_metaDataTool" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
             onAction="#onMetaDataToolClicked" prefHeight="25.0" prefWidth="0.0" text="Meta data tool"
             GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+    <VBox alignment="CENTER_LEFT" prefHeight="168.0" prefWidth="196.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
+        <Button fx:id="btn_reportBug" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#onReportBugClicked" text="Report a bug"/>
+        <Button fx:id="btn_privacy" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#onPrivacyClicked" text="Privacy Policy"/>
+    </VBox>
+    <Label fx:id="label_updater" text="Updater Settings" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    <VBox prefHeight="200.0" prefWidth="262.0" spacing="3.0" GridPane.columnIndex="2" GridPane.columnSpan="2"
+          GridPane.rowIndex="2">
+        <CheckBox fx:id="check_checkForUpdates" mnemonicParsing="false" onAction="#onCheckForUpdatesChanged"
+                  text="Automatically check for updates"/>
+        <CheckBox fx:id="check_silentUpdates" mnemonicParsing="false" text="Update silently"/>
+        <Button fx:id="btn_updateNow" mnemonicParsing="false" onAction="#onUpdateNowClicked" text="Check now"/>
+    </VBox>
 </GridPane>
