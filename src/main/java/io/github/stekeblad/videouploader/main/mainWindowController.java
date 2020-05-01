@@ -394,12 +394,9 @@ public class mainWindowController implements IWindowController {
         if(configManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
-            if (userChoice == ButtonType.YES) {
-                configManager.setNeverAuthed(false);
-                configManager.saveSettings();
-            } else { // ButtonType.NO or closed [X]
+
+            if (userChoice == ButtonType.NO)
                 return;
-            }
         }
         // Permission given, start uploads
         for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
@@ -737,12 +734,10 @@ public class mainWindowController implements IWindowController {
         if(configManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
-            if (userChoice == ButtonType.YES) {
-                configManager.setNeverAuthed(false);
-                configManager.saveSettings();
-            } else { // ButtonType.NO or closed [X]
+
+            if (userChoice == ButtonType.NO)
                 return;
-            }
+
 
         }
         // User is authenticated or is warned about the upcoming prompt to do so.

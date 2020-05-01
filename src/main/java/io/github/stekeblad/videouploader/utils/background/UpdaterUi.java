@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -142,6 +143,14 @@ public class UpdaterUi {
 
         // abort if [X] is clicked
         dialogStage.setOnCloseRequest(event -> updater.abort());
+
+        // F1 for wiki on this window
+        dialogStage.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F1) {
+                OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Update-dialog");
+                event.consume();
+            }
+        });
     }
 
     /**

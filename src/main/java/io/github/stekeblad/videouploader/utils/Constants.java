@@ -23,13 +23,13 @@ public class Constants {
     public static final String DEFAULT_LOCALE = "default (english)";
 
     public static final WindowDimensionsRestriction MAIN_WINDOW_DIMENSIONS_RESTRICTION =
-            new WindowDimensionsRestriction(800, 1500, 400, 3000);
+            new WindowDimensionsRestriction(800, 2000, 400, 3000);
     public static final WindowDimensionsRestriction SETTINGS_WINDOW_DIMENSIONS_RESTRICTION =
-            new WindowDimensionsRestriction(550, 550, 450, 450);
+            new WindowDimensionsRestriction(450, 850, 350, 850);
     public static final WindowDimensionsRestriction PLAYLISTS_WINDOW_DIMENSIONS_RESTRICTION =
-            new WindowDimensionsRestriction(350, 500, 250, 1000);
+            new WindowDimensionsRestriction(350, 700, 250, 1000);
     public static final WindowDimensionsRestriction LOCALIZE_WINDOW_DIMENSIONS_RESTRICTION =
-            new WindowDimensionsRestriction(400, 400, 450, 450);
+            new WindowDimensionsRestriction(300, 600, 350, 650);
     public static final WindowDimensionsRestriction META_TOOL_WINDOW_DIMENSIONS_RESTRICTION =
             new WindowDimensionsRestriction(350, 1500, 350, 1000);
 }

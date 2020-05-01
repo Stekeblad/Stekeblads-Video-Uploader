@@ -10,7 +10,10 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
+import com.google.api.services.youtube.model.Channel;
+import com.google.api.services.youtube.model.ChannelListResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,5 +47,32 @@ public class Auth {
 
         LocalServerReceiver localReceiver = new LocalServerReceiver.Builder().setPort(7835).build();
         return new AuthorizationCodeInstalledApp(authFlow, localReceiver).authorize("user");
+    }
+
+    /**
+     * @return the YouTube access token
+     * @throws IOException if the auth flow throws an IOException
+     */
+    public static String getToken() throws IOException {
+        return authUser().getAccessToken();
+    }
+
+    /**
+     * @return the name of the authenticated channel, or null if the channel name could not be retrieved
+     */
+    public static String getChannelName() {
+        try {
+            Credential creds = Auth.authUser();
+            YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
+                    "Stekeblads Video Uploader").build();
+            YouTube.Channels.List myChannel = youtube.channels().list("snippet");
+            myChannel.setMine(true);
+            ChannelListResponse channelListResponse = myChannel.execute();
+            List<Channel> channelList = channelListResponse.getItems();
+            return channelList.get(0).getSnippet().getTitle();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

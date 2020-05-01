@@ -6,10 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 import java.util.zip.DataFormatException;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
@@ -97,18 +94,18 @@ public enum ConfigManager {
 
             // Set missing properties
             setIfMissing("noSettings", "true");
-            setIfMissing("neverAuthed", "true");
             setIfMissing("category_country", "");
             setIfMissing("category_language", "");
             setIfMissing("ui_language", String.valueOf(Locale.getDefault()));
             setIfMissing("checkForUpdates", "true");
             setIfMissing("silentUpdates", "false");
 
-            setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x825");
+            // width x height
+            setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x750");
             setIfMissing(WIN_LOC + WindowPropertyNames.MAIN, "150x100");
             setIfMissing(WIN_SIZE + WindowPropertyNames.PRESETS, "725x700");
             setIfMissing(WIN_LOC + WindowPropertyNames.PRESETS, "150x100");
-            setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "500x500");
+            setIfMissing(WIN_SIZE + WindowPropertyNames.SETTINGS, "600x500");
             setIfMissing(WIN_LOC + WindowPropertyNames.SETTINGS, "200x150");
             setIfMissing(WIN_SIZE + WindowPropertyNames.LOCALIZE, "400x450");
             setIfMissing(WIN_LOC + WindowPropertyNames.LOCALIZE, "275x250");
@@ -151,11 +148,17 @@ public enum ConfigManager {
     // Properties (Set/Get)
 
     public boolean getNeverAuthed() {
-        return mainProp.getProperty("neverAuthed").equals("true");
-    }
+        // The user has successfully authenticated with YouTube if there is a file in AUTH_DIR.
+        // Nothing should break horribly if someone place a random file there
+        File authDir = new File(Paths.get(AUTH_DIR).toUri());
+        try {
+            if (authDir.exists() && authDir.isDirectory() && Objects.requireNonNull(authDir.list()).length > 0)
+                return false;
+        } catch (NullPointerException ignored) {
+            return true;
+        }
+        return true;
 
-    public void setNeverAuthed(boolean neverAuthed) {
-        mainProp.setProperty("neverAuthed", neverAuthed ? "true" : "false");
     }
 
     public String getCategoryCountry() {

@@ -6,6 +6,8 @@
 - accounts.google.com/o/oauth2/revoke?token={token} withdraw YouTube auth via code
 
 #### Higher priority things to do
+- Overload TextField and TextArea to pass through function key events.
+On Java 8 you can not open the wiki with F1 if focus is on a node of that type.
 
 #### Lower priority things to do
 - When updating playlist, use ID instead of name when looking at old
@@ -15,6 +17,10 @@ be renamed, but ID is always the same.)
 - Setting for start folder when:
   - selecting video files
   - selecting thumbnail
+- Make the preset pane and upload pane not focusable (without affecting
+their child nodes) if possible, it looks really bad when they turn blue.
+Maybe try this <https://a-hackers-craic.blogspot.com/2012/11/disabling-focus-in-javafx.html>
+or alternatively fixing it with custom styling.
 
 #### Thinking about
 - Keep even not started uploads on close?

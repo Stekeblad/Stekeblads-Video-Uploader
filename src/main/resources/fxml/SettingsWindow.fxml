@@ -34,11 +34,10 @@
     <ChoiceBox fx:id="choice_languages" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2"/>
     <Button fx:id="btn_translationDetails" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
             onAction="#onTranslationDetailsClicked" text="About this translation" GridPane.columnIndex="3"/>
-    <Label fx:id="label_resetSettings" text="Reset application settings" GridPane.columnIndex="1"
-           GridPane.rowIndex="4"/>
     <Button fx:id="btn_clearStoredData" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-            onAction="#onClearStoredDataClicked" text="CLEAR STORED DATA" textFill="#ee0101" GridPane.columnIndex="2"
-            GridPane.rowIndex="4"/>
+            onAction="#onClearStoredDataClicked" text="Log out from YouTube and clear stored data"
+            textAlignment="CENTER" textFill="#ee0101" GridPane.columnIndex="1" GridPane.columnSpan="3"
+            GridPane.rowIndex="5"/>
     <Label fx:id="label_tools" text="Tools" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     <Button fx:id="btn_metaDataTool" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
             onAction="#onMetaDataToolClicked" prefHeight="25.0" prefWidth="0.0" text="Meta data tool"

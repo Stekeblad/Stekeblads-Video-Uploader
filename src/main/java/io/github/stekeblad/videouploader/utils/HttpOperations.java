@@ -77,10 +77,12 @@ public class HttpOperations {
         Response response = client.newCall(request).execute();
         boolean success = response.isSuccessful();
 
-        ResponseBody body = response.body();
+        // For debugging or returning in some way in the future:
+        /*ResponseBody body = response.body();
         if (body != null) {
             String tempResponseBody = body.string();
-        }
+            System.err.println(tempResponseBody);
+        }*/
         response.close();
         return success;
 

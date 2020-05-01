@@ -111,10 +111,8 @@ public class ManagePlaylistsWindowController implements IWindowController {
         if (configManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
-            if (userChoice == ButtonType.YES) {
-                configManager.setNeverAuthed(false);
-                configManager.saveSettings();
-            } else { // ButtonType.NO or closed [X]
+
+            if (userChoice == ButtonType.NO) { // or closed [X]
                 actionEvent.consume();
                 return;
             }
@@ -164,10 +162,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
         if (configManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
-            if (userChoice == ButtonType.YES) {
-                configManager.setNeverAuthed(false);
-                configManager.saveSettings();
-            } else { // ButtonType.NO or closed [X]
+            if (userChoice == ButtonType.NO) { // or closed [X]
                 actionEvent.consume();
                 return;
             }

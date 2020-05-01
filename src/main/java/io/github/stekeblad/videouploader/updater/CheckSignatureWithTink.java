@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.utils;
+package io.github.stekeblad.videouploader.updater;
 
 import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;

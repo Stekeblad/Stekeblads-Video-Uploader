@@ -7,11 +7,17 @@ import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
+import io.github.stekeblad.videouploader.youtube.Auth;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -33,7 +39,6 @@ public class Main extends Application {
         Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
 
         // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
-
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
 
         try {
@@ -41,7 +46,18 @@ public class Main extends Application {
             MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.MAIN);
             stage.makeScene(loader.load(), Constants.MAIN_WINDOW_DIMENSIONS_RESTRICTION);
 
-            stage.setTitle(trans.getString("app_name"));
+            // Show channel name in window title.
+            if (configManager.getNeverAuthed()) {
+                stage.setTitle(trans.getString("app_name"));
+            } else {
+                String channelName = Auth.getChannelName();
+                if (channelName != null)
+                    stage.setTitle(trans.getString("app_name") + " - (" + channelName + ")");
+                else
+                    stage.setTitle(trans.getString("app_name"));
+            }
+
+            customizeTooltip();
 
             stage.prepareControllerAndShow(loader.getController());
         } catch (IOException e) {
@@ -63,6 +79,29 @@ public class Main extends Application {
             TranslationsManager.loadAllTranslations(locale);
     }
 
+    /**
+     * Configures all tooltips to show for a longer time than that is default (now 10 seconds)
+     * <p>
+     * Maybe a little hacky. Code taken from the following StackOverflow answer:
+     * https://stackoverflow.com/a/27739605
+     */
+    private void customizeTooltip() {
+        try {
+            Tooltip tooltip = new Tooltip();
+            Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
+            fieldBehavior.setAccessible(true);
+            Object objBehavior = fieldBehavior.get(tooltip);
+
+            Field fieldTimer = objBehavior.getClass().getDeclaredField("hideTimer");
+            fieldTimer.setAccessible(true);
+            Timeline objTimer = (Timeline) fieldTimer.get(objBehavior);
+
+            objTimer.getKeyFrames().clear();
+            objTimer.getKeyFrames().add(new KeyFrame(new Duration(10000)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         launch(args);

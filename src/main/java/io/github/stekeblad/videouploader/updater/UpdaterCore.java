@@ -1,6 +1,5 @@
 package io.github.stekeblad.videouploader.updater;
 
-import io.github.stekeblad.videouploader.utils.CheckSignatureWithTink;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.HttpOperations;
 import javafx.concurrent.Task;
@@ -154,7 +153,7 @@ public class UpdaterCore {
             // Define what it does
             protected Boolean call() {
                 try {
-                    acceptStatusFeed("Downloading update...");
+                    acceptStatusFeed(System.lineSeparator() + "Downloading update...");
 
                     byte[] updateBytes = HttpOperations.getBytes(_info.getUpdateUrl());
                     if (Thread.interrupted()) {

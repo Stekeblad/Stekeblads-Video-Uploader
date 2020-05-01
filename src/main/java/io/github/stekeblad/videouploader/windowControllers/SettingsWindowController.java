@@ -5,9 +5,9 @@ import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
-import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.UpdaterUi;
+import io.github.stekeblad.videouploader.utils.background.YouTubeRevoke;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
@@ -15,23 +15,21 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationsMeta;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-
-import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
 
 public class SettingsWindowController implements IWindowController {
     public GridPane settingsWindow;
     public ChoiceBox<String> choice_languages;
     public Label label_langSelect;
     public Label label_links;
-    public Label label_resetSettings;
     public Label label_tools;
     public Label label_updater;
     public Button btn_translationDetails;
@@ -163,21 +161,7 @@ public class SettingsWindowController implements IWindowController {
     }
 
     public void onClearStoredDataClicked(ActionEvent actionEvent) {
-        ButtonType buttonChoice = AlertUtils.yesNo(settingsTrans.getString("diag_clearStoredData_short"),
-                settingsTrans.getString("diag_clearStoredData_full"), ButtonType.NO);
-        if (buttonChoice == ButtonType.NO)
-            return;
-
-        AlertUtils.simpleClose(settingsTrans.getString("diag_delAfterExit_short"),
-                settingsTrans.getString("diag_delAfterExit_full")).show();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Files.walkFileTree(new File(DATA_DIR).toPath(), new RecursiveDirectoryDeleter());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
+        YouTubeRevoke.show();
         actionEvent.consume();
     }
 }

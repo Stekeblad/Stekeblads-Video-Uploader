@@ -114,8 +114,6 @@ public class LocalizeCategoriesWindowController implements IWindowController {
                 actionEvent.consume();
                 return;
             }
-            configManager.setNeverAuthed(false);
-            configManager.saveSettings();
         }
 
         // Visually indicate the program is working
