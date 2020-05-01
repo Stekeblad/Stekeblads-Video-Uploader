@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.youtube;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -19,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +73,18 @@ public class Auth {
             ChannelListResponse channelListResponse = myChannel.execute();
             List<Channel> channelList = channelListResponse.getItems();
             return channelList.get(0).getSnippet().getTitle();
+        } catch (TokenResponseException tre) {
+            // This can occur if the "Token has been expired or revoked." (quoting an error message)
+            // Delete the token and on next attempt try authenticate again.
+            // Thrown from Channels.List.execute() and not from Auth.authUser()
+            try {
+                if (Files.deleteIfExists(Paths.get(AUTH_DIR, "StoredCredential")))
+                    System.err.println("deleted invalid token");
+                else
+                    System.err.println("Failed to delete invalid token");
+            } catch (Exception ignored) {
+            }
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
