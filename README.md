@@ -4,10 +4,6 @@ Helps people who upload a lot of videos to YouTube by automatically
 setting video title, description, tags, playlist,
 category, ... the user saves a lot of monotone work.
 
-**Currently no new users can start using the program but its being worked on.
-Follow the progress here:
-[https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues/12](https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues/12)**
-
 With Stekeblad's Video Uploader you can first create a "preset"
 that is a predefined and reusable set of video details, like the default
 tags/description feature on youtube, but with more settings and you can create several of them.
@@ -47,5 +43,6 @@ Managing playlists:
 
 
 ### Videos
-I have made a few short videos introducing the program and how to use it:
+I have made a few short videos introducing the program and how to use it 
+(some parts are out of date but most of it is still correct):
 [Playlist](https://www.youtube.com/playlist?list=PLAA2832YwTI9mddiWDeZ_RDnIjaBa8dP-)
