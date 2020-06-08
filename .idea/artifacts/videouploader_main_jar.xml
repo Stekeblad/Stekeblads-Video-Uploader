@@ -22,7 +22,7 @@
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-jdk5/17.0/463f8378feba44df7ba7cd9272d01837dad62b36/guava-jdk5-17.0.jar" path-in-jar="/" />
       <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
       <element id="directory" name="META-INF">
-        <element id="dir-copy" path="$PROJECT_DIR$/src/main/java/META-INF" />
+        <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources/META-INF" />
       </element>
     </root>
   </artifact>
