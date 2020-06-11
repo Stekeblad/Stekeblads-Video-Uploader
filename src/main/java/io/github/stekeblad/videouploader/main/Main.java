@@ -29,6 +29,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            configManager = ConfigManager.INSTANCE;
+            configManager.configManager();
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.exceptionDialog("ERROR",
+                    "Failed to load settings or other configurations file, unable to launch.", e);
+        }
+        try {
             loadTranslations();
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,16 +98,15 @@ public class Main extends Application {
     }
 
     private void loadTranslations() throws Exception {
-        configManager = ConfigManager.INSTANCE;
-            configManager.configManager();
-            String localeString = configManager.getSelectedLanguage();
-            Locale locale;
-            if (localeString != null && !localeString.isEmpty()) {
-                locale = new Locale(localeString);
-            } else {
-                locale = Locale.getDefault();
-            }
-            TranslationsManager.loadAllTranslations(locale);
+
+        String localeString = configManager.getSelectedLanguage();
+        Locale locale;
+        if (localeString != null && !localeString.isEmpty()) {
+            locale = new Locale(localeString);
+        } else {
+            locale = Locale.getDefault();
+        }
+        TranslationsManager.loadAllTranslations(locale);
     }
 
     /**

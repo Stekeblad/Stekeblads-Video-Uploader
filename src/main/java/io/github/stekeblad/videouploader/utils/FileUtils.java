@@ -10,6 +10,7 @@ import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.util.*;
@@ -218,10 +219,29 @@ public class FileUtils {
      * @throws NullPointerException if path is null
      */
     public static ArrayList<String> readAllLines(String path) throws IOException {
+        // Attempt to read file as UTF-8 (added in version 1.4.1)
+        ArrayList<String> result = null;
+        try {
+            result = innerReadAllLines(path, true);
+        } catch (IOException e) {
+            // But that may not work for old files that uses characters outside ASCII, so try again with old format
+            if (e.getMessage().equals("Bad character encoding!"))
+                result = innerReadAllLines(path, false);
+        }
+        return result;
+    }
+
+    private static ArrayList<String> innerReadAllLines(String path, boolean useUtf8) throws IOException {
         BufferedReader reader = null;
         ArrayList<String> lines = new ArrayList<>();
         try {
-            reader = new BufferedReader(new FileReader(new File(path)));
+            if (useUtf8) {
+                reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(new File(path)), StandardCharsets.UTF_8));
+            } else {
+                reader = reader = new BufferedReader(new FileReader(new File(path)));
+            }
+
             String line = reader.readLine();
             while (line != null) { // while not end of file
                 lines.add(line);
@@ -234,6 +254,12 @@ public class FileUtils {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        }
+        if (useUtf8) {
+            for (String l : lines) {
+                if (l.contains("\ufffd"))
+                    throw new IOException("Bad character encoding!");
             }
         }
         return lines;
@@ -249,10 +275,29 @@ public class FileUtils {
      * @throws NullPointerException if path is null
      */
     public static String readAll(String path) throws IOException {
+        // Attempt to read file as UTF-8 (added in version 1.4.1)
+        String result = null;
+        try {
+            result = innerReadAll(path, true);
+        } catch (IOException e) {
+            // But that may not work for old files that uses characters outside ASCII, so try again with old format
+            if (e.getMessage().equals("Bad character encoding!"))
+                result = innerReadAll(path, false);
+        }
+        return result;
+    }
+
+    private static String innerReadAll(String path, boolean useUtf8) throws IOException {
         BufferedReader reader = null;
         StringBuilder builder = new StringBuilder();
         try {
-            reader = new BufferedReader(new FileReader(new File(path)));
+            if (useUtf8) {
+                reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(new File(path)), StandardCharsets.UTF_8));
+            } else {
+                reader = reader = new BufferedReader(new FileReader(new File(path)));
+            }
+
             String line = reader.readLine();
             while (line != null) { // while not end of file
                 builder.append(line);
@@ -270,6 +315,10 @@ public class FileUtils {
                 }
             }
         }
+
+        if (useUtf8 && builder.toString().contains("\ufffd"))
+            throw new IOException("Bad character encoding!");
+
         return builder.toString();
     }
 
@@ -285,7 +334,8 @@ public class FileUtils {
     public static void writeAll(String path, String data) throws IOException {
         BufferedWriter writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(new File(path)));
+            writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(new File(path)), StandardCharsets.UTF_8));
             writer.write(data);
         } finally {
             if (writer != null) {
