@@ -36,7 +36,6 @@ public class Main extends Application {
                     "Failed to load translations, unable to launch. Your detected language: " + Locale.getDefault(), e);
             return;
         }
-        Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
 
         // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
@@ -46,16 +45,8 @@ public class Main extends Application {
             MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.MAIN);
             stage.makeScene(loader.load(), Constants.MAIN_WINDOW_DIMENSIONS_RESTRICTION);
 
-            // Show channel name in window title.
-            if (configManager.getNeverAuthed()) {
-                stage.setTitle(trans.getString("app_name"));
-            } else {
-                String channelName = Auth.getChannelName();
-                if (channelName != null)
-                    stage.setTitle(trans.getString("app_name") + " - (" + channelName + ")");
-                else
-                    stage.setTitle(trans.getString("app_name"));
-            }
+            // Show channel name in window title, if authenticated.
+            stage.setTitle(getWindowTitle());
 
             customizeTooltip();
 
@@ -63,6 +54,38 @@ public class Main extends Application {
         } catch (IOException e) {
             AlertUtils.exceptionDialog("Stekeblads Video Uploader",
                     "Unable to load main window, the program will exit", e);
+        }
+    }
+
+    /**
+     * If the user has authenticated with YouTube, then an attempt is made
+     * to show the name of the user's channel in the window title. In order to save time and quota
+     * may the channel name already be saved in the settings file and loaded from there instead of
+     * requested from YouTube.
+     *
+     * @return A string to show in the window title
+     */
+    private String getWindowTitle() {
+        Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
+        // If the user has never authed, only use program name
+        if (configManager.getNeverAuthed()) {
+            return trans.getString("app_name");
+        }
+        // then check the settings
+        else if (configManager.getChannelName() == null || configManager.getChannelName().equals("")) {
+            // Not there, get from YouTube
+            String channelName = Auth.getChannelName();
+            if (channelName != null) {
+                // success, save and return program name + channel name
+                configManager.setChannelName(channelName);
+                return trans.getString("app_name") + " - (" + channelName + ")";
+            } else {
+                // failure, only return program name
+                return trans.getString("app_name");
+            }
+        } else {
+            // return program name and saved channel name
+            return trans.getString("app_name") + " - (" + configManager.getChannelName() + ")";
         }
     }
 

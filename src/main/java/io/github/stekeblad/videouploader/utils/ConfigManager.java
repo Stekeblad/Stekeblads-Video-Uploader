@@ -99,6 +99,7 @@ public enum ConfigManager {
             setIfMissing("ui_language", String.valueOf(Locale.getDefault()));
             setIfMissing("checkForUpdates", "true");
             setIfMissing("silentUpdates", "false");
+            setIfMissing("channelName", "");
 
             // width x height
             setIfMissing(WIN_SIZE + WindowPropertyNames.MAIN, "900x750");
@@ -205,6 +206,14 @@ public enum ConfigManager {
 
     public void setSilentUpdates(boolean silentUpdates) {
         mainProp.setProperty("silentUpdates", silentUpdates ? "true" : "false");
+    }
+
+    public String getChannelName() {
+        return mainProp.getProperty("channelName");
+    }
+
+    public void setChannelName(String channelName) {
+        mainProp.setProperty("channelName", channelName);
     }
 
     private static final String WIN_LOC = "window_location_";
