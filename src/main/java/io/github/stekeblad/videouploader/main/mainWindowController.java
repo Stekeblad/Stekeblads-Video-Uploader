@@ -912,9 +912,24 @@ public class mainWindowController implements IWindowController {
             AlertUtils.simpleClose(header, transBasic.getString("app_name") + " has reached its daily upload limit" +
                     " in the YouTube API and can not continue the uploading. All scheduled uploads has been aborted.\n\n" +
                     "The limit will be reset at midnight Pacific Time. (" + userClockAtPacificMidnight + " in your timezone.)").show();
-        } else { // exception and video parameter available and its not a dailyLimitExceeded error
+        } else if (e.getMessage() != null && e.getMessage().contains("uploadLimitExceeded")) {
+            // abort all scheduled uploads, they will all fail with this error
+            bypassAbortWarning = true;
+            for (String key : uploader.getUploadQueue()) {
+                uploader.abortUpload((key));
+                onAbort(key + "_fakeButton");
+            }
+            bypassAbortWarning = false;
+            AlertUtils.simpleClose(header, "You have reached your personal upload limit on YouTube" +
+                    " and you can not upload more videos right now. All scheduled uploads has been aborted.\n\n" +
+                    "Wait a few hours or retry again tomorrow").show();
+        } else { // exception and video parameter available but it does not match one of the above cases
             AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
         }
+
+
+        // handle more errors: https://developers.google.com/youtube/v3/docs/errors
+
 
         //Switch to a reset upload button instead of abort for the upload that threw the error
         if (video != null) {
