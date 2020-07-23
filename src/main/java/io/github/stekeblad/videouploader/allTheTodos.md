@@ -2,15 +2,16 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-
-#### Higher priority things to do
-- Overload TextField and TextArea to pass through function key events.
-On Java 8 you can not open the wiki with F1 if focus is on a node of that type.
 - YouTube data layer class for collecting logic related to the API and performing better error handling
   - Catch and show or handle token revoked exceptions that happen after log out
   - When updating playlist, use ID instead of name when looking at old
-playlists and deciding if they should be visible or not (playlists can
-be renamed, but ID is always the same.)
+    playlists and deciding if they should be visible or not (playlists can
+    be renamed, but ID is always the same.)
+- Both playlists and categories should internally be referenced by ID.
+  The IDs should also be saved in preset save files etc. instead of the name.
+
+#### Higher priority things to do
+
 
 #### Lower priority things to do
 - Applying for higher quota limit
@@ -37,3 +38,9 @@ and drop video files in the list of videos to add list?
 - Saving the automatic numbering to the preset, remembering what number 
 the next episode will have and inserting it the next time the user selects 
 the preset in the select preset dropdown.
+- Support for scheduled publishing and/or configuring ads and/or end
+  cards and/or tips. Game name? Other properties??
+  - How to fit this into a preset or videoUpload? It would take to much
+    height... Grouping in pop-ups hidden under buttons? Having a
+    full-size version and a collapsed version as mentioned already in this
+    file?

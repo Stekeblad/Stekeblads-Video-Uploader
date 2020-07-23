@@ -114,7 +114,6 @@ public class MetaDataTagProcessor implements ITagProcessor {
         ArrayList<Pair<String, String>> matches = new ArrayList<>();
         Matcher matcher = METADATA_TAG.matcher(source);
         while (matcher.find()) {
-            tagFoundInTitle = true;
             String first = matcher.group(1);
             String second = matcher.group(2);
             if (second != null)
