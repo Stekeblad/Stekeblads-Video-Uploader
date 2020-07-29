@@ -2,10 +2,7 @@ package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
-import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.utils.Constants;
-import io.github.stekeblad.videouploader.utils.FileUtils;
+import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.PresetApplicator;
 import io.github.stekeblad.videouploader.utils.background.UpdaterUi;
@@ -18,6 +15,7 @@ import io.github.stekeblad.videouploader.windowControllers.PresetsWindowControll
 import io.github.stekeblad.videouploader.youtube.Uploader;
 import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import io.github.stekeblad.videouploader.youtube.VideoUpload;
+import io.github.stekeblad.videouploader.youtube.exceptions.*;
 import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
@@ -38,7 +36,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -889,47 +886,67 @@ public class mainWindowController implements IWindowController {
      */
     private void onUploadErred(VideoUpload video, Throwable e) {
         String header = transBasic.getString("app_name") + " - Failed to upload video";
-        if (e == null || video == null) {
+        if (e == null && video == null) {
             AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
-        } else if (e.getMessage() != null && e.getMessage().contains("quotaExceeded")) {
-            // abort all scheduled uploads, they will all fail with this error
-            bypassAbortWarning = true;
-            for (String key : uploader.getUploadQueue()) {
-                uploader.abortUpload((key));
-                onAbort(key + "_fakeButton");
-            }
-            bypassAbortWarning = false;
-
-            // Find when midnight in the pacific timezone is in the user's timezone
-            ZoneOffset userUtcOffset = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()).getOffset();
-            ZoneOffset pacificOffset = ZoneId.of("UTC-8").getRules().getOffset(Instant.now());
-            Duration timeDiff = Duration.ofSeconds(pacificOffset.compareTo(userUtcOffset));
-            if (timeDiff.isNegative())
-                timeDiff = timeDiff.plusHours(24);
-            long minutes = timeDiff.minusHours(timeDiff.toHours()).toMinutes(); // example: 00:30 = 06:30 - 06:00
-            String userClockAtPacificMidnight = String.format("%02d", timeDiff.toHours()) + ":" + String.format("%02d", minutes);
-
-            AlertUtils.simpleClose(header, transBasic.getString("app_name") + " has reached its daily upload limit" +
-                    " in the YouTube API and can not continue the uploading. All scheduled uploads has been aborted.\n\n" +
-                    "The limit will be reset at midnight Pacific Time. (" + userClockAtPacificMidnight + " in your timezone.)").show();
-        } else if (e.getMessage() != null && e.getMessage().contains("uploadLimitExceeded")) {
-            // abort all scheduled uploads, they will all fail with this error
-            bypassAbortWarning = true;
-            for (String key : uploader.getUploadQueue()) {
-                uploader.abortUpload((key));
-                onAbort(key + "_fakeButton");
-            }
-            bypassAbortWarning = false;
-            AlertUtils.simpleClose(header, "You have reached your personal upload limit on YouTube" +
-                    " and you can not upload more videos right now. All scheduled uploads has been aborted.\n\n" +
-                    "Wait a few hours or retry again tomorrow").show();
-        } else { // exception and video parameter available but it does not match one of the above cases
-            AlertUtils.exceptionDialog(header, "Failed to upload the video \"" + video.getVideoName() + "\"", e);
         }
 
+        if (e == null && video != null) {
+            AlertUtils.simpleClose(header, "An unknown error occurred while uploading the video " +
+                    video.getVideoName()).show();
+        }
 
-        // handle more errors: https://developers.google.com/youtube/v3/docs/errors
+        if (e != null) {
+            String onVideoWithName = "";
+            if (video != null)
+                onVideoWithName = "\n\nThis happened on the video named " + video.getVideoName();
+            if (e instanceof QuotaLimitExceededException) {
+                // abort all scheduled uploads, they will all fail with this error
+                bypassAbortWarning = true;
+                for (String key : uploader.getUploadQueue()) {
+                    uploader.abortUpload((key));
+                    onAbort(key + "_fakeButton");
+                }
+                bypassAbortWarning = false;
 
+                // Find when midnight in the pacific timezone is in the user's timezone
+                String userClockAtPacificMidnight = TimeUtils.fromMidnightPacificToUserTimeZone();
+                AlertUtils.simpleClose(header, transBasic.getString("app_name") + " has reached its daily upload limit" +
+                        " in the YouTube API and can not continue the uploading. All scheduled uploads has been aborted.\n\n" +
+                        "The limit will be reset at midnight Pacific Time. (" + userClockAtPacificMidnight + " in your timezone.)").show();
+            } else if (e instanceof UploadLimitExceededException) {
+                // abort all scheduled uploads, they will all fail with this error
+                bypassAbortWarning = true;
+                for (String key : uploader.getUploadQueue()) {
+                    uploader.abortUpload((key));
+                    onAbort(key + "_fakeButton");
+                }
+                bypassAbortWarning = false;
+                AlertUtils.simpleClose(header, "You have reached your personal upload limit on YouTube" +
+                        " and you can not upload more videos right now. All scheduled uploads has been aborted.\n\n" +
+                        "Wait a few hours or retry again tomorrow").show();
+            } else if (e instanceof InvalidVideoDetailsException) {
+                AlertUtils.simpleClose(header, "YouTube reported a video property contains invalid content: " +
+                        e.getMessage() + onVideoWithName).show();
+            } else if (e instanceof InvalidMissingImageException) {
+                AlertUtils.simpleClose(transBasic.getString("app_name") + " - Failed to set thumbnail",
+                        "The video has been uploaded, but the selected image file could not be used as " +
+                                "thumbnail.\n\n" + e.getMessage() + onVideoWithName).show();
+            } else if (e instanceof PlaylistNotFoundException) {
+                AlertUtils.simpleClose(transBasic.getString("app_name") + " - Failed to add to playlist",
+                        "The video has been uploaded, but it could not be added to the selected playlist, " +
+                                "YouTube says the playlist could not be found." + onVideoWithName).show();
+            } else if (e instanceof PlaylistFullException) {
+                AlertUtils.simpleClose(transBasic.getString("app_name") + " - Failed to add to playlist",
+                        "The video has been uploaded but it could not be added to the selected playlist, " +
+                                "the playlist is full and no more videos can be added to it." + onVideoWithName).show();
+            } else if (e instanceof OtherYouTubeException) {
+                AlertUtils.exceptionDialog(transBasic.getString("app_name"),
+                        "An error was returned from YouTube: ",
+                        e);
+            } else {
+                AlertUtils.unhandledExceptionDialog(e);
+            }
+        }
 
         //Switch to a reset upload button instead of abort for the upload that threw the error
         if (video != null) {

@@ -1,21 +1,22 @@
 package io.github.stekeblad.videouploader.youtube.utils;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Playlist;
-import com.google.api.services.youtube.model.PlaylistListResponse;
-import com.google.api.services.youtube.model.PlaylistSnippet;
-import com.google.api.services.youtube.model.PlaylistStatus;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.TimeUtils;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.Auth;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
+import io.github.stekeblad.videouploader.youtube.YouTubeApiLayer;
+import io.github.stekeblad.videouploader.youtube.exceptions.OtherYouTubeException;
+import io.github.stekeblad.videouploader.youtube.exceptions.QuotaLimitExceededException;
+import io.github.stekeblad.videouploader.youtube.exceptions.YouTubeException;
+import javafx.application.Platform;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Enum-Singleton class for handling playlists. Initialize ConfigManager with the configManager() method before using
@@ -26,53 +27,72 @@ public enum PlaylistUtils {
 
     private final ConfigManager configManager = ConfigManager.INSTANCE;
     private String noPlaylistName = "";
-    private HashMap<String, LocalPlaylist> playlistCache = null;
+    private Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
+    private ArrayList<LocalPlaylist> playlists = null;
 
     /**
      * Gets playlists from Youtube. Does not check if permission has been given or not. If you want to display a warning
      * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
      */
-    public void refreshPlaylist() throws IOException {
-        HashMap<String, LocalPlaylist> oldCache = new HashMap<>();
+    public void refreshPlaylist() {
+        ArrayList<Playlist> remotePlaylists = null;
         try {
-            // Authenticate user and create Youtube object
-            Credential creds = Auth.authUser();
-            YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Video Uploader").build();
-
-            // Prepare request
-            YouTube.Playlists.List userPlaylists = youtube.playlists().list("snippet,contentDetails");
-            userPlaylists.setMine(true);
-            userPlaylists.setMaxResults(25L);
-
-            // Backup old data
-            oldCache = playlistCache;
-            playlistCache = new HashMap<>();
-
-            // Get playlists
-            PlaylistListResponse response;
-            do {
-                response = userPlaylists.execute();
-                List<Playlist> playlists = response.getItems();
-                for (Playlist aPlaylist : playlists) {
-                    String title = aPlaylist.getSnippet().getTitle();
-                    LocalPlaylist newPlaylist;
-                    if (oldCache != null && oldCache.get(title) != null) {
-                        newPlaylist = new LocalPlaylist(oldCache.get(title).isVisible(), aPlaylist.getId(), title);
-                    } else {
-                        newPlaylist = new LocalPlaylist(true, aPlaylist.getId(), title);
-                    }
-                    playlistCache.put(title, newPlaylist);
-                }
-                if(response.getNextPageToken() != null) {
-                    userPlaylists.setPageToken(response.getNextPageToken());
-                }
-            }while(response.getNextPageToken() != null);
-            saveCache();
-        } catch (IOException e) {
-            playlistCache = oldCache;
-            throw e;
+            // Get a list of playlists from YouTube
+            remotePlaylists = YouTubeApiLayer.requestPlaylists();
+            // Handle some of the errors that may be returned
+        } catch (QuotaLimitExceededException quotaException) {
+            String userClockAtPacificMidnight = TimeUtils.fromMidnightPacificToUserTimeZone();
+            Platform.runLater(() ->
+                    AlertUtils.simpleClose(transBasic.getString("app_name"), "Playlist refresh failed because " +
+                            transBasic.getString("app_name") + " has reached its daily limit in the YouTube API. The limit " +
+                            "will be reset at midnight pacific time (" + userClockAtPacificMidnight + " in your timezone.)" +
+                            " Please retry after when.").show()
+            );
+        } catch (OtherYouTubeException otherException) {
+            Platform.runLater(() ->
+                    AlertUtils.exceptionDialog(transBasic.getString("app_name"),
+                            "An error was returned from YouTube: ",
+                            otherException)
+            );
+        } catch (YouTubeException e) {
+            Platform.runLater(() ->
+                    AlertUtils.unhandledExceptionDialog(e)
+            );
         }
+
+        if (remotePlaylists == null)
+            return;
+
+        HashMap<String, LocalPlaylist> comparisionMap = new HashMap<>();
+        for (LocalPlaylist currentPlaylist : playlists) {
+            comparisionMap.put(currentPlaylist.getId(), currentPlaylist);
+        }
+
+        ArrayList<LocalPlaylist> updatedPlaylists = new ArrayList<>();
+        // loop over all playlists returned by YouTube and check if there are any new, deleted or renamed playlists
+        for (Playlist remotePlaylist : remotePlaylists) {
+            String remoteName = remotePlaylist.getSnippet().getTitle();
+            // check if it is new or exists since earlier (false if new)
+            if (comparisionMap.containsKey(remotePlaylist.getId())) {
+                LocalPlaylist foundPlaylist = comparisionMap.get(remotePlaylist.getId());
+                // check if name has changed (true if same as earlier)
+                if (foundPlaylist.getName().equals(remoteName)) {
+                    // keep without changing anything
+                    updatedPlaylists.add(foundPlaylist);
+                } else {
+                    // The playlist name has been changed and needs to be updated
+                    foundPlaylist.setName(remoteName);
+                    updatedPlaylists.add(foundPlaylist);
+                }
+            } else {
+                // It is a new playlist
+                updatedPlaylists.add(new LocalPlaylist(true, remotePlaylist.getId(), remoteName));
+            }
+        }
+
+        // Done, overwrite old list of playlists with the updated list
+        playlists = updatedPlaylists;
+        saveCache();
     }
 
     /**
@@ -80,19 +100,16 @@ public enum PlaylistUtils {
      */
     private void getUserPlaylists() {
         loadCache();
-        /*if (playlistCache.isEmpty()) {
-            refreshPlaylist();
-        }*/
     }
 
     /**
      * @return a list of all playlists (name, id, visible)
      */
     public ArrayList<LocalPlaylist> getAllPlaylists() {
-        if (playlistCache == null) {
+        if (playlists == null) {
             return null;
         }
-        return new ArrayList<>(playlistCache.values());
+        return playlists;
     }
 
     /**
@@ -100,10 +117,12 @@ public enum PlaylistUtils {
      * @return a list with the names of all playlists
      */
     public ArrayList<String> getPlaylistNames() {
-        if(playlistCache == null) {
+        if (playlists == null) {
             getUserPlaylists();
         }
-        return new ArrayList<>(playlistCache.keySet());
+        return (ArrayList<String>) playlists.stream()
+                .map(LocalPlaylist::getName)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -116,11 +135,12 @@ public enum PlaylistUtils {
             noPlaylistName = TranslationsManager.getTranslation(TranslationBundles.BASE).getString("noSelected");
         }
         visiblePlaylists.add(noPlaylistName);
-        playlistCache.forEach((k, v) -> {
-            if (v.isVisible()) {
-                visiblePlaylists.add(k);
-            }
-        });
+
+        visiblePlaylists.addAll(playlists.stream()
+                .filter(LocalPlaylist::isVisible)
+                .map(LocalPlaylist::getName)
+                .collect(Collectors.toList()));
+
         return visiblePlaylists;
     }
 
@@ -133,10 +153,13 @@ public enum PlaylistUtils {
         if (playlistName == null) {
             return null;
         }
-        if (playlistCache.get(playlistName) == null) {
-            return null;
+
+        for (LocalPlaylist playlist : playlists) {
+            if (playlist.getName().equals(playlistName))
+                return playlist.getId();
         }
-        return playlistCache.get(playlistName).getId();
+
+        return null;
     }
 
     /**
@@ -159,33 +182,38 @@ public enum PlaylistUtils {
      * @return a localPlaylist with the new playlist or null if the creation of a new playlist failed
      */
     public LocalPlaylist addPlaylist(String name, String privacy) {
+        Playlist newPlaylist = null;
         try {
-            // Authenticate user and create Youtube object
-            Credential creds = Auth.authUser();
-            YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Video Uploader").build();
-
-            // prepare playlist
-            PlaylistSnippet snippet = new PlaylistSnippet();
-            snippet.setTitle(name);
-            PlaylistStatus status = new PlaylistStatus();
-            status.setPrivacyStatus(privacy);
-
-            Playlist unsyncedPlaylist = new Playlist();
-            unsyncedPlaylist.setSnippet(snippet);
-            unsyncedPlaylist.setStatus(status);
-
-            YouTube.Playlists.Insert playlistInserter = youtube.playlists().insert("snippet,status", unsyncedPlaylist);
-            Playlist syncedPlaylist = playlistInserter.execute();
-
-            LocalPlaylist localPlaylist = new LocalPlaylist(
-                    true, syncedPlaylist.getId(), syncedPlaylist.getSnippet().getTitle());
-            playlistCache.put(syncedPlaylist.getSnippet().getTitle(), localPlaylist);
-            return localPlaylist;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            // Send request to create new playlist
+            newPlaylist = YouTubeApiLayer.createPlaylist(name, privacy);
+            // Handle different errors
+        } catch (QuotaLimitExceededException quotaException) {
+            String userClockAtPacificMidnight = TimeUtils.fromMidnightPacificToUserTimeZone();
+            Platform.runLater(() ->
+                    AlertUtils.simpleClose(transBasic.getString("app_name"), "Playlist could not be created because " +
+                            transBasic.getString("app_name") + " has reached its daily limit in the YouTube API. The limit " +
+                            "will be reset at midnight pacific time (" + userClockAtPacificMidnight + " in your timezone.)" +
+                            " Please retry after when.").show()
+            );
+        } catch (OtherYouTubeException otherException) {
+            Platform.runLater(() ->
+                    AlertUtils.exceptionDialog(transBasic.getString("app_name"),
+                            "An error was returned from YouTube: ",
+                            otherException)
+            );
+        } catch (YouTubeException e) {
+            Platform.runLater(() ->
+                    AlertUtils.unhandledExceptionDialog(e)
+            );
         }
+
+        if (newPlaylist == null)
+            return null;
+
+        LocalPlaylist localPlaylist = new LocalPlaylist(
+                true, newPlaylist.getId(), newPlaylist.getSnippet().getTitle());
+        playlists.add(localPlaylist);
+        return localPlaylist;
     }
 
     /**
@@ -194,12 +222,14 @@ public enum PlaylistUtils {
      * @param visibleStatus the new value of the visible variable
      */
     public void setVisible(String playlistName, boolean visibleStatus) {
-        LocalPlaylist lp = playlistCache.get(playlistName);
-        if (lp == null) {
-            return;
+        for (int i = 0; i < playlists.size(); i++) {
+            if (playlists.get(i).getName().equals(playlistName)) {
+                LocalPlaylist playlistToModify = playlists.get(i);
+                playlistToModify.setVisible(visibleStatus);
+                playlists.set(i, playlistToModify);
+                return;
+            }
         }
-        lp.setVisible(visibleStatus);
-        playlistCache.put(playlistName, lp);
     }
 
     /**
@@ -207,8 +237,11 @@ public enum PlaylistUtils {
      */
     public void saveCache() {
         StringBuilder saveString = new StringBuilder();
-        playlistCache.forEach((k, v) -> saveString.append(Boolean.toString(v.isVisible())).append(":")
-                .append(v.getId()).append(":").append(v.getName()).append("\n"));
+        playlists.forEach((playlist) -> saveString
+                .append(playlist.isVisible()).append(":")
+                .append(playlist.getId()).append(":")
+                .append(playlist.getName()).append("\n"));
+        // Delete last newline
         saveString.deleteCharAt(saveString.length() - 1);
         configManager.savePlaylistCache(saveString.toString());
     }
@@ -217,7 +250,7 @@ public enum PlaylistUtils {
      * Loads playlists from disc
      */
     public void loadCache() {
-        playlistCache = new HashMap<>();
+        playlists = new ArrayList<>();
         // Add default "no playlist" item
         ArrayList<String> loadedPlaylists = configManager.loadPlaylistCache();
         // If no playlists could be loaded
@@ -232,7 +265,7 @@ public enum PlaylistUtils {
                 // Locate first colon that separates if the playlist should be visible from playlists ChoiceBox or not
                 int colonIndex = loadedPlaylist.indexOf(':');
                 // Read if it should be visible or not
-                boolean visible = Boolean.valueOf(loadedPlaylist.substring(0, colonIndex));
+                boolean visible = Boolean.parseBoolean(loadedPlaylist.substring(0, colonIndex));
                 // throw away used data and locate next colon that separates playlist Id and name
                 loadedPlaylist = loadedPlaylist.substring(colonIndex + 1);
                 colonIndex = loadedPlaylist.indexOf(':');
@@ -240,14 +273,14 @@ public enum PlaylistUtils {
                 String id = loadedPlaylist.substring(0, colonIndex);
                 String name = loadedPlaylist.substring(colonIndex + 1);
                 // save
-                playlistCache.put(name, new LocalPlaylist(visible, id, name));
+                playlists.add(new LocalPlaylist(visible, id, name));
             }
         } else {
             // Older version, for release 1.0
             for (String loadedPlaylist : loadedPlaylists) {
                 String id = loadedPlaylist.substring(0, loadedPlaylist.indexOf(':'));
                 String name = loadedPlaylist.substring(loadedPlaylist.indexOf(':') + 1);
-                playlistCache.put(name, new LocalPlaylist(true, id, name));
+                playlists.add(new LocalPlaylist(true, id, name));
             }
         }
 

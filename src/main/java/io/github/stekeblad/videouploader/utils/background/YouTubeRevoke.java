@@ -7,7 +7,7 @@ import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.Auth;
+import io.github.stekeblad.videouploader.youtube.YouTubeApiLayer;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.ButtonType;
@@ -89,11 +89,15 @@ public class YouTubeRevoke {
                     boolean revokeSuccess = true;
                     if (logOut) {
                         try {
-                            String youtubeToken = Auth.getToken();
-                            RequestBody form = new FormBody.Builder()
-                                    .add("token", youtubeToken)
-                                    .build();
-                            revokeSuccess = HttpOperations.postForm("https://oauth2.googleapis.com/revoke", form);
+                            String youtubeToken = YouTubeApiLayer.getToken();
+                            if (youtubeToken == null) {
+                                revokeSuccess = false;
+                            } else {
+                                RequestBody form = new FormBody.Builder()
+                                        .add("token", youtubeToken)
+                                        .build();
+                                revokeSuccess = HttpOperations.postForm("https://oauth2.googleapis.com/revoke", form);
+                            }
                         } catch (Exception ignored) {
                             revokeSuccess = false;
                         }
@@ -116,6 +120,8 @@ public class YouTubeRevoke {
                                     shouldDeleteFiles = true;
                                 }
                             }
+                            if (shouldDeleteFiles)
+                                YouTubeApiLayer.tryDeleteToken();
                         }
 
                         // Registering the hook is fast enough to be done on the UI thread

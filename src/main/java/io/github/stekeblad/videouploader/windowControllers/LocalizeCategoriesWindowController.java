@@ -19,7 +19,6 @@ import javafx.stage.WindowEvent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.zip.DataFormatException;
 
 public class LocalizeCategoriesWindowController implements IWindowController {
     public AnchorPane window;
@@ -95,11 +94,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
     public void onGetCategoriesClicked(ActionEvent actionEvent) {
 
         // test if the codes is of the correct length
-        try {
-            configManager.setCategoryCountry(txt_country.getText());
-            configManager.setCategoryLanguage(txt_lang.getText());
-            configManager.saveSettings();
-        } catch (DataFormatException e) {
+        if (txt_country.getText().length() != 2 || txt_country.getText().length() != 2) {
             AlertUtils.simpleClose(transLocCatWin.getString("diag_invalidCodes_short"),
                     transLocCatWin.getString("diag_invalidCodes_full")).show();
             actionEvent.consume();
@@ -126,16 +121,19 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         Task<Void> backgroundTask = new Task<Void>() {
             @Override
             protected Void call() {
-                categoryUtils.downloadCategories();
+                final boolean result = categoryUtils.downloadCategories();
                 Platform.runLater(() -> {
-                    if (categoryUtils.getCategoryNames().size() < 2) { // < 2 because of default "no categories" category
-                        AlertUtils.simpleClose(transBasic.getString("error"),
-                                transLocCatWin.getString("diag_invalidCodeResp")).showAndWait();
+                    if (!result) {
                         btn_getCategories.setText(transLocCatWin.getString("btn_getCategories"));
                         btn_cancel.setDisable(false);
                         btn_getCategories.setDisable(false);
                         return;
                     }
+
+                    // Save the language and country code in the config file after successful update
+                    configManager.setCategoryCountry(txt_country.getText());
+                    configManager.setCategoryLanguage(txt_lang.getText());
+                    configManager.saveSettings();
                     onCancelClicked(new ActionEvent());
                 });
                 return null;
@@ -145,9 +143,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         Thread backgroundThread = new Thread(backgroundTask);
         // Define a handler for exceptions
         backgroundThread.setUncaughtExceptionHandler((t, e) -> Platform.runLater(() -> {
-            AlertUtils.simpleClose(transBasic.getString("error"),
-                    transLocCatWin.getString("diag_catReqFailed")).showAndWait();
-            e.printStackTrace();
+            AlertUtils.unhandledExceptionDialog(e);
             onCancelClicked(new ActionEvent());
         }));
 

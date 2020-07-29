@@ -1,13 +1,16 @@
 package io.github.stekeblad.videouploader.youtube.utils;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.VideoCategory;
-import com.google.api.services.youtube.model.VideoCategoryListResponse;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
-import io.github.stekeblad.videouploader.youtube.Auth;
+import io.github.stekeblad.videouploader.utils.TimeUtils;
+import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
+import io.github.stekeblad.videouploader.utils.translation.Translations;
+import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
+import io.github.stekeblad.videouploader.youtube.YouTubeApiLayer;
+import io.github.stekeblad.videouploader.youtube.exceptions.*;
+import javafx.application.Platform;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,14 +23,14 @@ public enum CategoryUtils {
     INSTANCE;
 
     private final ConfigManager configManager = ConfigManager.INSTANCE;
-
+    private Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
     private HashMap<String, String> categories = null;
 
     /**
      * Gets Categories from Youtube. Does not check if permission has been given or not. If you want to display a warning
      * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
      */
-    public void downloadCategories() {
+    public boolean downloadCategories() {
         // Get stored language and country settings
         String lang = configManager.getCategoryLanguage();
         String region = configManager.getCategoryCountry();
@@ -35,39 +38,61 @@ public enum CategoryUtils {
         // quick check of stored settings
         if(lang.length() != 2 || region.length() != 2) {
             System.err.println("Invalid length of lang or region \nlang: " + lang + "\nregion: " + region);
-            return;
+            return false;
         }
 
+        List<VideoCategory> receivedCategories = null;
         try {
-            // Authenticate user and create Youtube object
-            Credential creds = Auth.authUser();
-            YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
-                    "Stekeblads Video Uploader").build();
+            // Perform the request
+            receivedCategories = YouTubeApiLayer.requestVideoCategories(region, lang);
+            // Handle different types of errors
+        } catch (InvalidRegionCodeException regionException) {
+            Platform.runLater(() ->
+                    AlertUtils.simpleClose("Bad region code - " + transBasic.getString("app_name"),
+                            regionException.getReason()).show()
+            );
+        } catch (InvalidLanguageException languageException) {
+            Platform.runLater(() ->
+                    AlertUtils.simpleClose("Bad language code - " + transBasic.getString("app_name"),
+                            languageException.getReason()).show()
+            );
+        } catch (QuotaLimitExceededException quotaException) {
+            String userClockAtPacificMidnight = TimeUtils.fromMidnightPacificToUserTimeZone();
+            Platform.runLater(() ->
+                    AlertUtils.simpleClose(transBasic.getString("app_name"), "Get categories failed because " +
+                            transBasic.getString("app_name") + " has reached its daily limit in the YouTube API. The limit " +
+                            "will be reset at midnight pacific time (" + userClockAtPacificMidnight + " in your timezone.)" +
+                            " Please retry after when.").show()
+            );
+        } catch (OtherYouTubeException otherException) {
+            Platform.runLater(() ->
+                    AlertUtils.exceptionDialog(transBasic.getString("app_name"),
+                            "An error was returned from YouTube: ",
+                            otherException)
+            );
+        } catch (YouTubeException e) {
+            Platform.runLater(() ->
+                    AlertUtils.unhandledExceptionDialog(e)
+            );
+        }
 
-            // Prepare and send request
-            YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list("snippet");
-            videoCategoriesListForRegionRequest.setHl(lang);
-            videoCategoriesListForRegionRequest.setRegionCode(region);
-            VideoCategoryListResponse response = videoCategoriesListForRegionRequest.execute();
+        if (receivedCategories == null)
+            return false;
 
-            // Process result
-            List<VideoCategory> vidCat = response.getItems();
-            categories = new HashMap<>();
-            for(VideoCategory cat : vidCat) {
-                if(cat.getSnippet().getAssignable()) { // Check if category is allowed to be used
-                    categories.put(cat.getSnippet().getTitle(), cat.getId());
-                }
+        // Update categories
+        categories = new HashMap<>();
+        for (VideoCategory cat : receivedCategories) {
+            if (cat.getSnippet().getAssignable()) { // Check if category is allowed to be used
+                categories.put(cat.getSnippet().getTitle(), cat.getId());
             }
-            // Set default category if no results was returned
-            if (categories.isEmpty()) {
-                categories.put("Categories not localized", "-1");
-            }
-            saveCategories();
+        }
 
-        } catch (IOException e) { // invalid country or language
-            categories = new HashMap<>();
+        // Set default category if no results was returned
+        if (categories.isEmpty()) {
             categories.put("Categories not localized", "-1");
         }
+        saveCategories();
+        return true;
     }
 
     /**

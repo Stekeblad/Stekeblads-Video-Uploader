@@ -27,9 +27,12 @@ public class PresetApplicator {
     private VideoPreset lastPreset;
     private List<ITagProcessor> tagProcessors = null;
 
+    private Random random;
+
     public PresetApplicator() {
         exec = Executors.newSingleThreadExecutor(Thread::new);
         tasks = Collections.synchronizedMap(new HashMap<>());
+        random = new Random();
     }
 
     /**
@@ -58,7 +61,7 @@ public class PresetApplicator {
      */
     public void setErrorCallback(BiConsumer<File, Throwable> presetApplicatorErrorCallback) throws NotSupportedException {
         if (!tasks.keySet().isEmpty())
-            throw new NotSupportedException("Success callback can not be changed while the PresetApplicator is working");
+            throw new NotSupportedException("Error callback can not be changed while the PresetApplicator is working");
         else
             errorCallback = presetApplicatorErrorCallback;
     }
@@ -164,8 +167,7 @@ public class PresetApplicator {
                 .setCategory(preset.getCategory())
                 .setTellSubs(preset.isTellSubs())
                 .setMadeForKids(preset.isMadeForKids())
-                // assume two videos in upload pane never will have the same number and use the same preset
-                .setPaneName("upload-" + preset.getPresetName() + "-" + autoNum)
+                .setPaneName("upload-" + Integer.toHexString(random.nextInt()))
                 .setVideoFile(videoFile);
         if (preset.getThumbNail() != null) {
             newUploadBuilder.setThumbNailPath(preset.getThumbNail().getAbsolutePath());

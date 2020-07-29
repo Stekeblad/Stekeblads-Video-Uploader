@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.zip.DataFormatException;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 
@@ -166,10 +165,7 @@ public enum ConfigManager {
         return mainProp.getProperty("category_country");
     }
 
-    public void setCategoryCountry(String twoCharCode) throws DataFormatException {
-        if(twoCharCode.length() != 2) {
-            throw new DataFormatException("Invalid country code format");
-        }
+    public void setCategoryCountry(String twoCharCode) {
         mainProp.setProperty("category_country", twoCharCode.toUpperCase());
     }
 
@@ -177,10 +173,7 @@ public enum ConfigManager {
         return mainProp.getProperty("category_language");
     }
 
-    public void setCategoryLanguage(String twoCharCode) throws DataFormatException {
-        if(twoCharCode.length() != 2) {
-            throw new DataFormatException("Invalid country code format");
-        }
+    public void setCategoryLanguage(String twoCharCode) {
         mainProp.setProperty("category_language", twoCharCode.toLowerCase());
     }
 

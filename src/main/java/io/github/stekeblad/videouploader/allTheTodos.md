@@ -2,11 +2,6 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- YouTube data layer class for collecting logic related to the API and performing better error handling
-  - Catch and show or handle token revoked exceptions that happen after log out
-  - When updating playlist, use ID instead of name when looking at old
-    playlists and deciding if they should be visible or not (playlists can
-    be renamed, but ID is always the same.)
 - Both playlists and categories should internally be referenced by ID.
   The IDs should also be saved in preset save files etc. instead of the name.
 

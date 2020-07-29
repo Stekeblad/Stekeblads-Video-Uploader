@@ -224,8 +224,8 @@ public class Uploader {
         }
 
         // Auth the user and create the Youtube object
-        Credential creds = Auth.authUser();
-        YouTube myTube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, request -> {
+        Credential creds = YouTubeApiLayer.authUser();
+        YouTube myTube = new YouTube.Builder(YouTubeApiLayer.HTTP_TRANSPORT, YouTubeApiLayer.JSON_FACTORY, request -> {
             creds.initialize(request);
             // Tell Youtube to attempt resume upload if a network error occur.
             request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(new ExponentialBackOff()));

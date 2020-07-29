@@ -7,7 +7,8 @@ import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.Auth;
+import io.github.stekeblad.videouploader.youtube.YouTubeApiLayer;
+import io.github.stekeblad.videouploader.youtube.exceptions.YouTubeException;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -82,7 +83,13 @@ public class Main extends Application {
         // then check the settings
         else if (configManager.getChannelName() == null || configManager.getChannelName().equals("")) {
             // Not there, get from YouTube
-            String channelName = Auth.getChannelName();
+            String channelName;
+            try {
+                channelName = YouTubeApiLayer.requestChannelName();
+            } catch (YouTubeException e) {
+                // Should probably not show errors from this, the program is starting at this point
+                return trans.getString("app_name");
+            }
             if (channelName != null) {
                 // success, save and return program name + channel name
                 configManager.setChannelName(channelName);
