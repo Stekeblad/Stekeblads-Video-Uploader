@@ -1,4 +1,9 @@
 # Stekeblad's Video Uploader
+In July 2020 Stekeblads Video Uploader past 20 000 uploaded videos in a
+single month for the first time! Not only that, it past a total of 400
+downloads since the release of version 1.0 in february 2018! Thank you
+all past, current and future users!
+
 ## Easier bulk uploads to YouTube
 Helps people who upload a lot of videos to YouTube by automatically
 setting video title, description, tags, playlist,
@@ -13,20 +18,30 @@ video details for all videos one at a time on Youtube's upload page!
 
 (You can still edit the videos one at a time if you want to)
 
-##### Help
-There are a few videos further down about how to use the program and
-a couple of pages on the [wiki](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/)<!-- @IGNORE PREVIOUS: link -->.
- For other problems or question please look under [issues](https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues)
- and create one if no one already asked about the same thing.
+### Help
+There are a few videos further down about how to use the program and a
+detailed
+[wiki](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki)<!-- @IGNORE PREVIOUS: link -->.
+For other problems or question please look under
+[issues](https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues)
+and create one if no one already asked about the same thing.
 
+### Privacy
+Stekeblad thinks privacy is important and therefore does Stekeblads
+Video Uploader not collect any information about its users. The full
+privacy policy can be found here:
+[https://stekeblad.se/Projects/Video-uploader/uploader-privacy](https://stekeblad.se/Projects/Video-uploader/uploader-privacy)
 
 ### Download
-Downloads can be found under "Releases" tab close to the top of this page
+Downloads can be found under "Releases" in the right sidebar
 [or by clicking here](https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases)
 
 Note that you need Java 8 to use Stekeblads Video Uploader.
 
 ### Images
+Images are taken from the 1.1 release, several things have changed since
+then.
+
 Thanks to [IsosceleTriangle](https://www.twitch.tv/isosceletriangle) for the Images!
 
 Main window, example of uploading videos:
@@ -43,6 +58,6 @@ Managing playlists:
 
 
 ### Videos
-I have made a few short videos introducing the program and how to use it 
-(some parts are out of date but most of it is still correct):
+I have made a few short videos introducing the program and how to use it
+(The videos are pretty outdated, a updated series is in planning phase):
 [Playlist](https://www.youtube.com/playlist?list=PLAA2832YwTI9mddiWDeZ_RDnIjaBa8dP-)
