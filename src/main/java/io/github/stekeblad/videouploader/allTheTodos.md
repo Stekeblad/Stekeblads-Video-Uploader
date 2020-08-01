@@ -4,12 +4,12 @@
 - Bugs and small things (there is always bugs and small things...)
 - Both playlists and categories should internally be referenced by ID.
   The IDs should also be saved in preset save files etc. instead of the name.
+- Convert all save files to a JSON-based format
 
 #### Higher priority things to do
 
 
 #### Lower priority things to do
-- Applying for higher quota limit
 - Setting for start folder when:
   - selecting video files
   - selecting thumbnail

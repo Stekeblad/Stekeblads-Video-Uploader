@@ -18,6 +18,9 @@ public interface ITagProcessor {
      * reduce the amount of work needed in the process methods. For example if the tag this TagProcessor is looking for
      * does not exist in the preset it can set a boolean so it returns directly in the process methods.
      *
+     * IMPORTANT: TagProcessors must support init(...) being called multiple times and reset all internal variables
+     * so nothing set from the first call incorrectly remain after a second call.
+     *
      * @param preset        the selected VideoPreset
      * @param initialAutoNum the value in the auto num field when the apply preset button was pressed
      */
