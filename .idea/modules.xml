@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader.iml" group="videouploader" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader_main.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader_main.iml" group="videouploader" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader_test.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader_test.iml" group="videouploader" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader.main.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videouploader.test.iml" filepath="$PROJECT_DIR$/.idea/modules/videouploader.test.iml" />
     </modules>
   </component>
 </project>
