@@ -123,7 +123,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
         btn_refreshPlaylists.setText(transBasic.getString("downloading"));
 
         // Send the request in the background
-        Task<Void> backgroundTask = new Task<Void>() {
+        Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
                 playlistUtils.refreshPlaylist(); // Get playlists from Youtube on background thread
@@ -175,7 +175,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
         final String privacyLevel = choice_privacyStatus.getSelectionModel().getSelectedItem();
 
         // Perform the request in a background thread
-        Task<Void> backgroundTask = new Task<Void>() {
+        Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() {
                 LocalPlaylist localPlaylist = playlistUtils.addPlaylist(listName, privacyLevel);

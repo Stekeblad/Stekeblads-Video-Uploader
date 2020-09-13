@@ -10,8 +10,8 @@ import java.time.Instant;
  * been caught and prevent multiple error dialogs from displaying the same error message in rapid succession.
  */
 class ExceptionHistoryPost {
-    private String Stacktrace;
-    private Instant TimeAdded;
+    private final String Stacktrace;
+    private final Instant TimeAdded;
 
     ExceptionHistoryPost(String stacktrace) {
         Stacktrace = stacktrace;

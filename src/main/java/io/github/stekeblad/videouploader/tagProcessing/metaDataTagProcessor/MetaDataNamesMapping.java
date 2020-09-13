@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * Class for trying to translating the codes in the iTunes metadata format to user friendly names
  */
 public class MetaDataNamesMapping {
-    private static ArrayList<Pair<String, String>> namesMap = new ArrayList<>();
+    private static final ArrayList<Pair<String, String>> namesMap = new ArrayList<>();
 
     // The copyright symbol created from a code, directly using the character did not work properly in the pairs
     private static final char COPY = (char) 169;

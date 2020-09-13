@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 public class Uploader {
     private final String VIDEO_FILE_FORMAT = "video/";
 
-    private final Map<String, Future> tasks;
+    private final Map<String, Future<?>> tasks;
     private final CategoryUtils categoryUtils;
     private final PlaylistUtils playlistUtils;
     private Consumer<String> uploadFinishedCallback = null;
@@ -136,7 +136,7 @@ public class Uploader {
      */
     public void add(VideoUpload video, String cancelName) {
         // Create the task
-        Task newTask = new Task<Void>() {
+        Task<Void> newTask = new Task<>() {
             @Override
             // Define what it does
             protected Void call() {
@@ -179,7 +179,7 @@ public class Uploader {
                 Platform.runLater(() -> uploadErredCallback.accept(video, newTask.getException()));
             }
         });
-        Future upload = exec.submit(newTask);
+        Future<?> upload = exec.submit(newTask);
         synchronized (tasks) {
             tasks.put(cancelName, upload); // save the future to be able to abort upload
         }

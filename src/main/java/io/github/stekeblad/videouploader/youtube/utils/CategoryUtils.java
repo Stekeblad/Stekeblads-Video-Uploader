@@ -23,7 +23,7 @@ public enum CategoryUtils {
     INSTANCE;
 
     private final ConfigManager configManager = ConfigManager.INSTANCE;
-    private Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
+    private final Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
     private HashMap<String, String> categories = null;
 
     /**

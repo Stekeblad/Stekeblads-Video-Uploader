@@ -31,7 +31,7 @@ import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
  * the public key embedded in the program (resources/crypto). See {@link CheckSignatureWithTink}
  */
 public class UpdaterCore {
-    private Consumer<String> _statusFeed;
+    private final Consumer<String> _statusFeed;
     private UpdateInfo _info;
     private Thread checkThread;
     private Thread updateThread;
@@ -77,7 +77,7 @@ public class UpdaterCore {
             return;
         }
 
-        Task<UpdateInfo> newTask = new Task<UpdateInfo>() {
+        Task<UpdateInfo> newTask = new Task<>() {
             @Override
             // Define what it does
             protected UpdateInfo call() {
@@ -148,7 +148,7 @@ public class UpdaterCore {
     public void installUpdate(Consumer<Boolean> callback) {
         if (_info == null)
             throw new IllegalStateException("No update available");
-        Task<Boolean> newTask = new Task<Boolean>() {
+        Task<Boolean> newTask = new Task<>() {
             @Override
             // Define what it does
             protected Boolean call() {

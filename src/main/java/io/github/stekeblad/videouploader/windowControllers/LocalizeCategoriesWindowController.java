@@ -118,7 +118,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
 
         // Send the request in the background
         // Tell it what to do
-        Task<Void> backgroundTask = new Task<Void>() {
+        Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() {
                 final boolean result = categoryUtils.downloadCategories();

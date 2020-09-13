@@ -79,7 +79,7 @@ public class MetaDataToolWindowController implements IWindowController {
     }
 
     private void getMetaDataOfFile(File file) {
-        Task<Void> newTask = new Task<Void>() {
+        Task<Void> newTask = new Task<>() {
             @Override
             protected Void call() {
                 MetaDataReader metaDataReader = new MetaDataReader(file);

@@ -179,7 +179,7 @@ public class FileUtils {
                     } catch (StringIndexOutOfBoundsException e) {
                         // The entry that exactly matches path will throw a StringOutOfBoundsException
                         // This entry should not be returned so lets just continue
-                        continue;
+                        // continue;
                     }
 
                 }
@@ -239,7 +239,7 @@ public class FileUtils {
                 reader = new BufferedReader(new InputStreamReader(
                         new FileInputStream(new File(path)), StandardCharsets.UTF_8));
             } else {
-                reader = reader = new BufferedReader(new FileReader(new File(path)));
+                reader = new BufferedReader(new FileReader(new File(path)));
             }
 
             String line = reader.readLine();
@@ -295,7 +295,7 @@ public class FileUtils {
                 reader = new BufferedReader(new InputStreamReader(
                         new FileInputStream(new File(path)), StandardCharsets.UTF_8));
             } else {
-                reader = reader = new BufferedReader(new FileReader(new File(path)));
+                reader = new BufferedReader(new FileReader(new File(path)));
             }
 
             String line = reader.readLine();

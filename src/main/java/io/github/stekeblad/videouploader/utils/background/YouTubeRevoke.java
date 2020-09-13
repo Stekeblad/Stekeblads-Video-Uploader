@@ -25,7 +25,7 @@ import static io.github.stekeblad.videouploader.utils.Constants.DATA_DIR;
  */
 public class YouTubeRevoke {
 
-    private Translations settingsTrans;
+    private final Translations settingsTrans;
     private boolean logOut;
     private boolean delete;
 
@@ -80,7 +80,7 @@ public class YouTubeRevoke {
         if (!logOut && !delete)
             return;
 
-        Task<Void> newTask = new Task<Void>() {
+        Task<Void> newTask = new Task<>() {
             @Override
             // Define what it does
             protected Void call() {

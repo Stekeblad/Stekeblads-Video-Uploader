@@ -21,7 +21,7 @@ import java.util.*;
 public class Translations {
 
     private ResourceBundle localized;
-    private ResourceBundle fallback;
+    private final ResourceBundle fallback;
     private Locale locale;
     private final String translationFamily;
 
@@ -120,8 +120,8 @@ public class Translations {
             try {
                 return localized.getString(key);
             } catch (Exception e) {
-                System.err.println(String.format("Missing translation for key \"%s\" in locale \"%s\" of translation " +
-                        "family \"%s\"", key, locale, translationFamily));
+                System.err.printf("Missing translation for key \"%s\" in locale \"%s\" of translation " +
+                        "family \"%s\"%n", key, locale, translationFamily);
             }
         }
         return fallback.getString(key); // if typo in key or translation is missing for default language I WANT AN EXCEPTION!

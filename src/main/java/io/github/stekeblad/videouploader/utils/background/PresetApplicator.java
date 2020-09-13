@@ -19,7 +19,7 @@ import java.util.function.Consumer;
  * Can apply a preset to a set of video files in a background thread and return VideoUpload objects.
  */
 public class PresetApplicator {
-    private final Map<String, Future> tasks;
+    private final Map<String, Future<?>> tasks;
     private Consumer<VideoUpload> successCallback = null;
     private BiConsumer<File, Throwable> errorCallback = null;
     private final ExecutorService exec;
@@ -27,7 +27,7 @@ public class PresetApplicator {
     private VideoPreset lastPreset;
     private List<ITagProcessor> tagProcessors = null;
 
-    private Random random;
+    private final Random random;
 
     public PresetApplicator() {
         exec = Executors.newSingleThreadExecutor(Thread::new);
@@ -89,7 +89,7 @@ public class PresetApplicator {
             String cancelName = videoFile.getAbsolutePath();
             int taskAutoNum = autoNum; // variable used inside task "needs to be final or effectively final"
             // Create a task
-            Task newTask = new Task<Void>() {
+            Task<Void> newTask = new Task<>() {
                 @Override
                 // Define what it does
                 protected Void call() {
@@ -113,7 +113,7 @@ public class PresetApplicator {
                     Platform.runLater(() -> errorCallback.accept(videoFile, newTask.getException()));
                 }
             });
-            Future futureTask = exec.submit(newTask);
+            Future<?> futureTask = exec.submit(newTask);
             tasks.put(cancelName, futureTask); // save the future to be able to abort the task
             autoNum++;
         }

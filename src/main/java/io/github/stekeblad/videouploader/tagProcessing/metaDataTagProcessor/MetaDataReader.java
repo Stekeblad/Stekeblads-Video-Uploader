@@ -18,7 +18,7 @@ import java.util.Map;
  * Individual tags can be queried for with getTagValueByName() and all found tags can be retrieved with getAllTagsAndValues()
  */
 public class MetaDataReader {
-    private ArrayList<Pair<String, String>> _tags;
+    private final ArrayList<Pair<String, String>> _tags;
     private boolean _isFileSupported;
 
     /**

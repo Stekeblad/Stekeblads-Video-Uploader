@@ -27,7 +27,7 @@ public enum PlaylistUtils {
 
     private final ConfigManager configManager = ConfigManager.INSTANCE;
     private String noPlaylistName = "";
-    private Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
+    private final Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
     private ArrayList<LocalPlaylist> playlists = null;
 
     /**
@@ -69,21 +69,19 @@ public enum PlaylistUtils {
         }
 
         ArrayList<LocalPlaylist> updatedPlaylists = new ArrayList<>();
-        // loop over all playlists returned by YouTube and check if there are any new, deleted or renamed playlists
+        // Loop over all playlists returned by YouTube and check if there are any new, deleted or renamed playlists
         for (Playlist remotePlaylist : remotePlaylists) {
             String remoteName = remotePlaylist.getSnippet().getTitle();
-            // check if it is new or exists since earlier (false if new)
+            // Check if it is new or exists since earlier (false if new)
             if (comparisionMap.containsKey(remotePlaylist.getId())) {
                 LocalPlaylist foundPlaylist = comparisionMap.get(remotePlaylist.getId());
-                // check if name has changed (true if same as earlier)
-                if (foundPlaylist.getName().equals(remoteName)) {
-                    // keep without changing anything
-                    updatedPlaylists.add(foundPlaylist);
-                } else {
+                // Check if name has changed (false if same as earlier)
+                if (!foundPlaylist.getName().equals(remoteName)) {
                     // The playlist name has been changed and needs to be updated
                     foundPlaylist.setName(remoteName);
-                    updatedPlaylists.add(foundPlaylist);
                 }
+                // Save the playlist (that maybe changed name)
+                updatedPlaylists.add(foundPlaylist);
             } else {
                 // It is a new playlist
                 updatedPlaylists.add(new LocalPlaylist(true, remotePlaylist.getId(), remoteName));

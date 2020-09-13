@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 
 public class MyStage extends Stage {
 
-    private String myWindowPropertyName;
+    private final String myWindowPropertyName;
 
     public MyStage(String windowPropertyName) {
         myWindowPropertyName = windowPropertyName;

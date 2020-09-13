@@ -25,7 +25,7 @@ import java.util.Optional;
  */
 public class AlertUtils {
 
-    private static ExceptionHistory exceptionHistory = new ExceptionHistory();
+    private static final ExceptionHistory exceptionHistory = new ExceptionHistory();
 
     /**
      * Creates an Alert, sets Modality, Header, Content and adjusts the minHeight
