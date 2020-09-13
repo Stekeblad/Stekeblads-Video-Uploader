@@ -121,7 +121,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() {
-                final boolean result = categoryUtils.downloadCategories();
+                final boolean result = categoryUtils.downloadCategories(txt_lang.getText(), txt_country.getText());
                 Platform.runLater(() -> {
                     if (!result) {
                         btn_getCategories.setText(transLocCatWin.getString("btn_getCategories"));

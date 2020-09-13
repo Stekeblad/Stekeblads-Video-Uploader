@@ -9,16 +9,11 @@ import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.YouTubeApiLayer;
 import io.github.stekeblad.videouploader.youtube.exceptions.YouTubeException;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -56,8 +51,6 @@ public class Main extends Application {
 
             // Show channel name in window title, if authenticated.
             stage.setTitle(getWindowTitle());
-
-            customizeTooltip();
 
             stage.prepareControllerAndShow(loader.getController());
         } catch (IOException e) {
@@ -114,30 +107,6 @@ public class Main extends Application {
             locale = Locale.getDefault();
         }
         TranslationsManager.loadAllTranslations(locale);
-    }
-
-    /**
-     * Configures all tooltips to show for a longer time than that is default (now 10 seconds)
-     * <p>
-     * Maybe a little hacky. Code taken from the following StackOverflow answer:
-     * https://stackoverflow.com/a/27739605
-     */
-    private void customizeTooltip() {
-        try {
-            Tooltip tooltip = new Tooltip();
-            Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
-            fieldBehavior.setAccessible(true);
-            Object objBehavior = fieldBehavior.get(tooltip);
-
-            Field fieldTimer = objBehavior.getClass().getDeclaredField("hideTimer");
-            fieldTimer.setAccessible(true);
-            Timeline objTimer = (Timeline) fieldTimer.get(objBehavior);
-
-            objTimer.getKeyFrames().clear();
-            objTimer.getKeyFrames().add(new KeyFrame(new Duration(10000)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public static void main(String[] args) {

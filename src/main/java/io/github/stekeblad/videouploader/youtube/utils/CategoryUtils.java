@@ -30,13 +30,10 @@ public enum CategoryUtils {
      * Gets Categories from Youtube. Does not check if permission has been given or not. If you want to display a warning
      * to the user that they will be sent to youtube for granting permission or similar, do it before calling this method
      */
-    public boolean downloadCategories() {
-        // Get stored language and country settings
-        String lang = configManager.getCategoryLanguage();
-        String region = configManager.getCategoryCountry();
+    public boolean downloadCategories(String lang, String region) {
 
         // quick check of stored settings
-        if(lang.length() != 2 || region.length() != 2) {
+        if (lang.length() != 2 || region.length() != 2) {
             System.err.println("Invalid length of lang or region \nlang: " + lang + "\nregion: " + region);
             return false;
         }

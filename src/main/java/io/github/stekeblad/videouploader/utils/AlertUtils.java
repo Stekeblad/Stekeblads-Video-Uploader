@@ -58,6 +58,7 @@ public class AlertUtils {
         textArea.setEditable(false);
         textArea.setWrapText(wrapText);
         Button closeButton = new Button("Close");
+        closeButton.setId("closeButton");
         closeButton.setCancelButton(true);
 
         GridPane pane = new GridPane();
@@ -84,6 +85,12 @@ public class AlertUtils {
         stage.setAlwaysOnTop(true);
         stage.setResizable(false);
         stage.show();
+        if (alertDialog.lookup("#closeButton") != null) {
+            alertDialog.lookup("#closeButton").setOnMouseClicked(event -> {
+                stage.close();
+                event.consume();
+            });
+        }
     }
 
     /**
