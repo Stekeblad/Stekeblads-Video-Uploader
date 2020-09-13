@@ -56,7 +56,10 @@ public class YouTubeApiLayer {
             unsyncedPlaylist.setSnippet(snippet);
             unsyncedPlaylist.setStatus(status);
 
-            YouTube.Playlists.Insert createPlaylistRequest = youtube.playlists().insert("snippet,status", unsyncedPlaylist);
+            ArrayList<String> playlistParts = new ArrayList<>();
+            playlistParts.add("snippet");
+            playlistParts.add("status");
+            YouTube.Playlists.Insert createPlaylistRequest = youtube.playlists().insert(playlistParts, unsyncedPlaylist);
             return createPlaylistRequest.execute();
         } catch (IOException e) {
             WhatIsWrong.classifyException(e);
@@ -90,7 +93,9 @@ public class YouTubeApiLayer {
         try {
             YouTube youtube = buildYouTube();
 
-            YouTube.Channels.List myChannel = youtube.channels().list("snippet");
+            ArrayList<String> channelParts = new ArrayList<>();
+            channelParts.add("snippet");
+            YouTube.Channels.List myChannel = youtube.channels().list(channelParts);
             myChannel.setMine(true);
             ChannelListResponse channelListResponse = myChannel.execute();
             List<Channel> channelList = channelListResponse.getItems();
@@ -117,7 +122,10 @@ public class YouTubeApiLayer {
             YouTube youtube = buildYouTube();
 
             //  Prepare request for playlists
-            YouTube.Playlists.List playlistRequest = youtube.playlists().list("snippet,contentDetails");
+            ArrayList<String> playlistParts = new ArrayList<>();
+            playlistParts.add("snippet");
+            playlistParts.add("contentDetails");
+            YouTube.Playlists.List playlistRequest = youtube.playlists().list(playlistParts);
             playlistRequest.setMine(true);
             playlistRequest.setMaxResults(25L);
 
@@ -155,7 +163,9 @@ public class YouTubeApiLayer {
     public static List<VideoCategory> requestVideoCategories(String region, String language) throws YouTubeException {
         try {
             YouTube youtube = buildYouTube();
-            YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list("snippet");
+            ArrayList<String> categoryParts = new ArrayList<>();
+            categoryParts.add("snippet");
+            YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list(categoryParts);
             videoCategoriesListForRegionRequest.setHl(language);
             videoCategoriesListForRegionRequest.setRegionCode(region);
             VideoCategoryListResponse listResponse = videoCategoriesListForRegionRequest.execute();

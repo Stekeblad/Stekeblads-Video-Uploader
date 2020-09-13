@@ -65,7 +65,7 @@ public class mainWindowController implements IWindowController {
     public Label label_selectPreset;
     public Label label_numbering;
     public Label label_presetProgress;
-    public ProgressBar prog_presetProgress;
+    public ProgressBar progress_preset;
 
     private ConfigManager configManager;
     private PlaylistUtils playlistUtils;
@@ -780,7 +780,7 @@ public class mainWindowController implements IWindowController {
         if (abortSuccess) {
             // Set label text and reset progress bar
             uploadQueueVideos.get(selected).setProgressBarVisibility(false);
-            uploadQueueVideos.get(selected).setProgressBarProgress(INDETERMINATE_PROGRESS); // reset progBar to be animated
+            uploadQueueVideos.get(selected).setProgressBarProgress(INDETERMINATE_PROGRESS); // reset progressBar to be animated
             uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("aborted"));
         } else {
             AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason").show();

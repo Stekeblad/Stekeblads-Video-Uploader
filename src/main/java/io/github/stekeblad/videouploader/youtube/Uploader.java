@@ -19,10 +19,7 @@ import javafx.concurrent.Task;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -255,8 +252,12 @@ public class Uploader {
                     "\". It may have been deleted, moved or renamed since the upload was queued");
         }
 
+        ArrayList<String> videoParts = new ArrayList<>();
+        videoParts.add("snippet");
+        videoParts.add("statistics");
+        videoParts.add("status");
         YouTube.Videos.Insert videoInsert = myTube.videos()
-                .insert("snippet,statistics,status", videoObject, videoFileStream);
+                .insert(videoParts, videoObject, videoFileStream);
         videoInsert.setNotifySubscribers(video.isTellSubs());
 
         // getMediaHttpUploader for being able to report progress
@@ -333,7 +334,10 @@ public class Uploader {
 
             PlaylistItem playlistItem = new PlaylistItem();
             playlistItem.setSnippet(playlistSnippet);
-            YouTube.PlaylistItems.Insert playlistInsert = myTube.playlistItems().insert("snippet,contentDetails", playlistItem);
+            ArrayList<String> playlistParts = new ArrayList<>();
+            playlistParts.add("snippet");
+            playlistParts.add("contentDetails");
+            YouTube.PlaylistItems.Insert playlistInsert = myTube.playlistItems().insert(playlistParts, playlistItem);
             playlistInsert.execute();
         }
         String link = "https://youtu.be/" + uploadedVideo.getId();
