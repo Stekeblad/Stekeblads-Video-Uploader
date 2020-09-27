@@ -46,7 +46,7 @@ public class Main extends Application {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
-            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.MAIN);
+            MyStage stage = new MyStage(Constants.WindowPropertyNames.MAIN);
             stage.makeScene(loader.load(), Constants.MAIN_WINDOW_DIMENSIONS_RESTRICTION);
 
             // Show channel name in window title, if authenticated.

@@ -63,9 +63,9 @@ public enum PlaylistUtils {
         if (remotePlaylists == null)
             return;
 
-        HashMap<String, LocalPlaylist> comparisionMap = new HashMap<>();
+        HashMap<String, LocalPlaylist> comparisonMap = new HashMap<>();
         for (LocalPlaylist currentPlaylist : playlists) {
-            comparisionMap.put(currentPlaylist.getId(), currentPlaylist);
+            comparisonMap.put(currentPlaylist.getId(), currentPlaylist);
         }
 
         ArrayList<LocalPlaylist> updatedPlaylists = new ArrayList<>();
@@ -73,8 +73,8 @@ public enum PlaylistUtils {
         for (Playlist remotePlaylist : remotePlaylists) {
             String remoteName = remotePlaylist.getSnippet().getTitle();
             // Check if it is new or exists since earlier (false if new)
-            if (comparisionMap.containsKey(remotePlaylist.getId())) {
-                LocalPlaylist foundPlaylist = comparisionMap.get(remotePlaylist.getId());
+            if (comparisonMap.containsKey(remotePlaylist.getId())) {
+                LocalPlaylist foundPlaylist = comparisonMap.get(remotePlaylist.getId());
                 // Check if name has changed (false if same as earlier)
                 if (!foundPlaylist.getName().equals(remoteName)) {
                     // The playlist name has been changed and needs to be updated

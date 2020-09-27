@@ -370,7 +370,7 @@ public class mainWindowController implements IWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(mainWindowController.class.getClassLoader().getResource("fxml/SettingsWindow.fxml"));
-            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.SETTINGS);
+            MyStage stage = new MyStage(WindowPropertyNames.SETTINGS);
             stage.makeScene(fxmlLoader.load(), Constants.SETTINGS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow

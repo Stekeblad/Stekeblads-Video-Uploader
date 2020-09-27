@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.stekeblad'
-version '1.4.1'
+version '1.5.0'
 
 apply plugin: 'idea'
 apply plugin: 'java'
@@ -62,7 +62,6 @@ compileJava {
                 '--module-path', 'C:\\Program Files\\Java\\javafx-sdk-11\\lib',
                 '--add-modules', 'javafx.controls,javafx.fxml',
         ]
-        //classpath = files()
     }
 }
 
@@ -110,6 +109,9 @@ dependencies {
     // Java FX
     compile 'org.openjfx:javafx-controls:11.0.1'
     compile 'org.openjfx:javafx-fxml:11.0.1'
+
+    // Converting JSON representations of classes to class instances
+    compile 'com.google.code.gson:gson:2.8.6'
 }
 
 // https://developers.google.com/api-client-library/java/apis/youtube/v3

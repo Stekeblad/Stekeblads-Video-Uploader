@@ -237,7 +237,7 @@ public class PresetsWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/LocalizeCategoriesWindow.fxml"));
-            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.LOCALIZE);
+            MyStage stage = new MyStage(WindowPropertyNames.LOCALIZE);
             stage.makeScene(fxmlLoader.load(), Constants.LOCALIZE_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_locCatWindowTitle"));
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -257,7 +257,7 @@ public class PresetsWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(PresetsWindowController.class.getClassLoader().getResource("fxml/ManagePlaylistsWindow.fxml"));
-            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.PLAYLISTS);
+            MyStage stage = new MyStage(WindowPropertyNames.PLAYLISTS);
             stage.makeScene(fxmlLoader.load(), Constants.PLAYLISTS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_manPlayWindowTitle"));
             stage.initModality(Modality.APPLICATION_MODAL);

@@ -212,19 +212,10 @@ public enum ConfigManager {
     private static final String WIN_LOC = "window_location_";
     private static final String WIN_SIZE = "window_size_";
 
-    public static final class WindowPropertyNames {
-        public static final String MAIN = "main";
-        public static final String PRESETS = "preset";
-        public static final String SETTINGS = "settings";
-        public static final String LOCALIZE = "localize";
-        public static final String PLAYLISTS = "playlist";
-        public static final String META_TOOL = "meta-tool";
-    }
-
     public void setWindowRectangle(String window, WindowFrame rect) {
-        String data = rect.x + "x" + rect.y;
+        String data = rect.getX() + "x" + rect.getY();
         mainProp.setProperty(WIN_LOC + window, data);
-        data = rect.width + "x" + rect.height;
+        data = rect.getWidth() + "x" + rect.getHeight();
         mainProp.setProperty(WIN_SIZE + window, data);
     }
 

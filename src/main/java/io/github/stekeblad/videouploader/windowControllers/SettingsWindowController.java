@@ -113,7 +113,7 @@ public class SettingsWindowController implements IWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(SettingsWindowController.class.getClassLoader().getResource("fxml/MetaDataToolWindow.fxml"));
-            MyStage stage = new MyStage(ConfigManager.WindowPropertyNames.META_TOOL);
+            MyStage stage = new MyStage(Constants.WindowPropertyNames.META_TOOL);
             stage.makeScene(fxmlLoader.load(), Constants.META_TOOL_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(basicTrans.getString("app_metaToolWindowTitle"));
             stage.initModality(Modality.NONE);

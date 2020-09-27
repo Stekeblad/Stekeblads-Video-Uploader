@@ -18,6 +18,9 @@ public class TimeUtils {
             timeDiff = timeDiff.plusHours(24);
         long minutes = timeDiff.minusHours(timeDiff.toHours()).toMinutes(); // example: 00:30 = 06:30 - 06:00
         return String.format("%02d", timeDiff.toHours()) + ":" + String.format("%02d", minutes);
+    }
 
+    public static String currentTimeString() {
+        return LocalDateTime.now().toString();
     }
 }

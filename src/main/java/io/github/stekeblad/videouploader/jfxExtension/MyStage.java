@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.jfxExtension;
 
 import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.utils.Constants;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -16,14 +17,14 @@ public class MyStage extends Stage {
     public void makeScene(Parent root, WindowDimensionsRestriction dimensions) {
         ConfigManager configManager = ConfigManager.INSTANCE;
         WindowFrame points = configManager.getWindowRectangle(myWindowPropertyName);
-        Scene scene = new Scene(root, points.width, points.height);
+        Scene scene = new Scene(root, points.getWidth(), points.getHeight());
         setScene(scene);
-        setX(points.x);
-        setY(points.y);
-        setMinHeight(dimensions.minH);
-        setMinWidth(dimensions.minW);
-        setMaxHeight(dimensions.maxH);
-        setMaxWidth(dimensions.maxW);
+        setX(points.getX());
+        setY(points.getY());
+        setMinHeight(dimensions.getMinH());
+        setMinWidth(dimensions.getMinW());
+        setMaxHeight(dimensions.getMaxH());
+        setMaxWidth(dimensions.getMaxW());
     }
 
     /**
@@ -65,7 +66,7 @@ public class MyStage extends Stage {
                 }
 
                 // Make sure all settings is saved on exit do not save when not needed
-                if (myWindowPropertyName.equals(ConfigManager.WindowPropertyNames.MAIN)) {
+                if (myWindowPropertyName.equals(Constants.WindowPropertyNames.MAIN)) {
                     ConfigManager.INSTANCE.saveSettings();
                 }
             });
