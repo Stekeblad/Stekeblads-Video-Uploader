@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.Managers.SettingsMigrations;
+package io.github.stekeblad.videouploader.managers.settingsMigrations;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

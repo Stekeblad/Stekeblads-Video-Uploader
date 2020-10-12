@@ -1,8 +1,8 @@
-package io.github.stekeblad.videouploader.Managers;
+package io.github.stekeblad.videouploader.managers;
 
 import com.google.gson.JsonObject;
-import io.github.stekeblad.videouploader.Managers.SettingsMigrations.SettingsMigrator;
 import io.github.stekeblad.videouploader.jfxExtension.WindowFrame;
+import io.github.stekeblad.videouploader.managers.settingsMigrations.SettingsMigrator;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.TimeUtils;
 
@@ -97,7 +97,7 @@ public class SettingsManager extends ManagerBase {
                 propInputStream = new FileInputStream(oldSettingsFilePath);
                 prop.load(propInputStream);
                 config = settingsMigrator.migrate(prop);
-                writeConfigToFile(Paths.get(filesPath + "/settings.json"));
+                saveSettings();
                 Files.delete(Paths.get(oldSettingsFilePath));
             } catch (IOException ignored) {
             } finally {
@@ -123,7 +123,7 @@ public class SettingsManager extends ManagerBase {
                     final String backupFileName = "/settings-" + TimeUtils.currentTimeString() + ".json";
                     Files.copy(Paths.get(filesPath + "/settings.json"), Paths.get(CONFIG_BACKUP_DIR + backupFileName));
                     settingsMigrator.migrate(config);
-                    writeConfigToFile(Paths.get(filesPath + "/settings.json"));
+                    saveSettings();
                 }
             } catch (IOException e) {
                 AlertUtils.exceptionDialog("Failed to load or update settings file",
@@ -154,6 +154,10 @@ public class SettingsManager extends ManagerBase {
         set(WindowPropertyNames.META_TOOL, new WindowFrame(250, 200, 400, 500));
     }
 
+    public void saveSettings() throws IOException {
+        writeConfigToFile(Paths.get(filesPath + "/settings.json"));
+    }
+
     /**
      * Checks if there is any waiting uploads stored
      *
@@ -180,24 +184,34 @@ public class SettingsManager extends ManagerBase {
         }
     }
 
-    // ----------------------------------------------------
-    // Simple get and set methods for a bunch of settings
-    // ----------------------------------------------------
-
-    // Stores the country code used for the last successful retrieval of video categories
+    /**
+     * @deprecated since version 3, use {@link io.github.stekeblad.videouploader.managers.CategoryManager} instead
+     */
+    @Deprecated
     public String getCategoryCountry() {
         return getString("category_country");
     }
 
+    /**
+     * @deprecated since version 3, use {@link io.github.stekeblad.videouploader.managers.CategoryManager} instead
+     */
+    @Deprecated
     public void setCategoryCountry(String twoCharCode) {
         set("category_country", twoCharCode.toUpperCase());
     }
 
-    // Stores the language code used for the last successful retrieval of video categories
+    /**
+     * @deprecated since version 3, use {@link io.github.stekeblad.videouploader.managers.CategoryManager} instead
+     */
+    @Deprecated
     public String getCategoryLanguage() {
         return getString("category_language");
     }
 
+    /**
+     * @deprecated since version 3, use {@link io.github.stekeblad.videouploader.managers.CategoryManager} instead
+     */
+    @Deprecated
     public void setCategoryLanguage(String twoCharCode) {
         set("category_language", twoCharCode.toLowerCase());
     }
@@ -206,6 +220,10 @@ public class SettingsManager extends ManagerBase {
     public String getSelectedLanguage() {
         return getString("ui_language");
     }
+
+    // ----------------------------------------------------
+    // Simple get and set methods for a bunch of settings
+    // ----------------------------------------------------
 
     public void setSelectedLanguage(String languageName) {
         set("ui_language", languageName);

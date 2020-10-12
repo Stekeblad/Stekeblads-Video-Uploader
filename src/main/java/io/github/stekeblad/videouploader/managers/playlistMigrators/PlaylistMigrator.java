@@ -1,40 +1,25 @@
-package io.github.stekeblad.videouploader.Managers.SettingsMigrations;
+package io.github.stekeblad.videouploader.managers.playlistMigrators;
 
 import com.google.gson.JsonObject;
-import io.github.stekeblad.videouploader.Managers.ConfigurationVersionException;
+import io.github.stekeblad.videouploader.managers.ConfigurationVersionException;
 
-import java.util.Properties;
+import java.util.List;
 
 /**
- * This class looks at the content of a settings json object (or old Properties object),
- * checking if it is the latest format. The class also has methods for upgrading a old
- * settings object to the latest version.
+ * Convert old formats for storing playlist to the latest format.
  */
-public class SettingsMigrator {
+public class PlaylistMigrator {
     public static final int latestFormatVersion = 3;
 
-    /**
-     * Converts from the settings.properties format to the latest version of the newer settings.json format
-     *
-     * @param oldProps The loaded settings.properties file
-     * @return a json settings object using the latest format
-     */
-    public JsonObject migrate(Properties oldProps) {
-        JsonObject newJson = new SettingsNaNTo3Migration().migrate(oldProps);
+    public JsonObject migrate(List<String> oldFormat) {
+        JsonObject newJson = new PlaylistNaNTo3Migrator().migrate(oldFormat);
         return migrate(newJson);
     }
 
-    /**
-     * Returns an updated version of the given object after adding, removing or modifying values so it is
-     * using the latest configuration format
-     *
-     * @param oldJson An object using an older format
-     * @return the updated object
-     */
     public JsonObject migrate(JsonObject oldJson) {
         final int currentVersion = getVersion(oldJson);
         if (currentVersion > latestFormatVersion)
-            throw new ConfigurationVersionException("The settings file uses the version " + currentVersion +
+            throw new ConfigurationVersionException("The playlist file uses the version " + currentVersion +
                     " format, however the latest supported version is only " + latestFormatVersion +
                     ". The file may fail to load or you may run into other problems because of this");
 
@@ -52,11 +37,11 @@ public class SettingsMigrator {
     }
 
     /**
-     * Checks if the given object is using the latest settings format, it only checks the version
+     * Checks if the given object is using the latest format, it only checks the version
      * number field and do not perform a complete verification of the whole object
      *
      * @param json the object to check the version of
-     * @return true if the object is using the latest version format, false if the current version is <b>small or
+     * @return true if the object is using the latest version format, false if the current version is <b>smaller or
      * greater</b> than the latest
      */
     public boolean isLatestVersion(JsonObject json) {
@@ -73,3 +58,4 @@ public class SettingsMigrator {
         return json.get("versionFormat").getAsInt();
     }
 }
+

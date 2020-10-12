@@ -8,8 +8,8 @@ public class Constants {
     public static final String AUTH_DIR = DATA_DIR + "/.auth";
     public static final String PRESET_DIR = DATA_DIR + "/presets";
     public static final String UPLOAD_DIR = DATA_DIR + "/waiting uploads";
-    public static final String PLAYLIST_FILE = DATA_DIR + "/playlist";
-    public static final String CATEGORIES_FILE = DATA_DIR + "/categories";
+    public static final String PLAYLIST_FILE = DATA_DIR + "/playlist.json";
+    public static final String CATEGORIES_FILE = DATA_DIR + "/categories.json";
     public static final String CONFIG_BACKUP_DIR = DATA_DIR + "/backup";
 
     public static final String BUTTON_EDIT = "_buttonEdit";

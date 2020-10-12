@@ -1,5 +1,7 @@
 package io.github.stekeblad.videouploader.youtube;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A class for managing the details of a playlist that has been retrieved from YouTube.
  * visible is for filtering what playlist to show in the program, useful if the user has a lot of playlist and only
@@ -7,10 +9,16 @@ package io.github.stekeblad.videouploader.youtube;
  * id is the playlist id on YouTube.
  * name is the name of the playlist.
  */
-public class LocalPlaylist {
+public class LocalPlaylist implements Comparable<LocalPlaylist> {
     private boolean visible;
     private String id;
     private String name;
+
+    public LocalPlaylist(boolean visible, String playlistId, String playlistName) {
+        this.visible = visible;
+        this.id = playlistId;
+        this.name = playlistName;
+    }
 
     public boolean isVisible() {
         return visible;
@@ -36,9 +44,12 @@ public class LocalPlaylist {
         this.name = name;
     }
 
-    public LocalPlaylist(boolean visible, String playlistId, String playlistName) {
-        this.visible = visible;
-        this.id = playlistId;
-        this.name = playlistName;
+    public String playlistUrl() {
+        return "https://www.youtube.com/playlist?list=" + id;
+    }
+
+    @Override
+    public int compareTo(@NotNull LocalPlaylist other) {
+        return this.name.compareTo(other.getName());
     }
 }

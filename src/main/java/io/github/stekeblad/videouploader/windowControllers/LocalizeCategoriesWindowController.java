@@ -94,7 +94,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
     public void onGetCategoriesClicked(ActionEvent actionEvent) {
 
         // test if the codes is of the correct length
-        if (txt_country.getText().length() != 2 || txt_country.getText().length() != 2) {
+        if (txt_country.getText().length() != 2 || txt_lang.getText().length() != 2) {
             AlertUtils.simpleClose(transLocCatWin.getString("diag_invalidCodes_short"),
                     transLocCatWin.getString("diag_invalidCodes_full")).show();
             actionEvent.consume();
