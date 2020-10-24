@@ -20,13 +20,15 @@ public enum ConfigManager {
     private Properties mainProp;
     private HashMap<String, String> presetStringsMap;
 
+    private final String OLD_PRESET_DIR = DATA_DIR + "/presets";
+
     /**
      * Like a constructor, call this method once before calling any other method in this class anywhere in the project
      */
     public void configManager() {
         // Check for the existence of configuration files and create their directories if not found
         filesPath = Paths.get(DATA_DIR).toAbsolutePath();
-        Path presetsPath = Paths.get(PRESET_DIR).toAbsolutePath();
+        Path presetsPath = Paths.get(OLD_PRESET_DIR).toAbsolutePath();
         Path waitingUploadsPath = Paths.get(UPLOAD_DIR).toAbsolutePath();
         mainProp = new Properties();
 
@@ -234,7 +236,7 @@ public enum ConfigManager {
      */
     private ArrayList<String> loadSavedPresetNamesList() {
         ArrayList<String> presetNames = new ArrayList<>();
-        File dir = new File(PRESET_DIR);
+        File dir = new File(OLD_PRESET_DIR);
         File[] directoryListing = dir.listFiles();
         if (directoryListing != null) {
             for (File preset : directoryListing) {
@@ -267,9 +269,9 @@ public enum ConfigManager {
      * @throws IOException if presetName does not exist or could not be accessed
      */
     private String loadPreset(String presetName) throws IOException {
-        if (Files.exists(Paths.get(PRESET_DIR + "/" + presetName))) {
+        if (Files.exists(Paths.get(OLD_PRESET_DIR + "/" + presetName))) {
             try {
-                return FileUtils.readAll(PRESET_DIR + "/" + presetName);
+                return FileUtils.readAll(OLD_PRESET_DIR + "/" + presetName);
             } catch (IOException e) {
                 throw new IOException("Failed reading preset save file for preset \"" + presetName + "\"", e);
             }
@@ -285,7 +287,7 @@ public enum ConfigManager {
      */
     public void savePreset(String presetName, String stringRepresentation) {
         try {
-            FileUtils.writeAll(PRESET_DIR + "/" + presetName, stringRepresentation);
+            FileUtils.writeAll(OLD_PRESET_DIR + "/" + presetName, stringRepresentation);
         } catch (IOException e) {
             System.err.println("Can not save preset \"" + presetName + "\"");
             e.printStackTrace();
@@ -299,7 +301,7 @@ public enum ConfigManager {
      * @return true on success, false on failure.
      */
     public boolean deletePreset(String presetName) {
-        Path path = Paths.get(PRESET_DIR + "/" + presetName);
+        Path path = Paths.get(OLD_PRESET_DIR + "/" + presetName);
         if (!Files.exists(path)) {
             presetStringsMap.remove(presetName);
             return true; //does not exist, job already done

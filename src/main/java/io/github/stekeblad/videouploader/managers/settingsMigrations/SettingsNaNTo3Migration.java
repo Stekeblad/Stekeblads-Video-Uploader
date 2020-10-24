@@ -21,7 +21,7 @@ class SettingsNaNTo3Migration {
         newJson.addProperty("category_language", oldProps.getProperty("category_language"));
         newJson.addProperty("ui_language", oldProps.getProperty("ui_language"));
         newJson.addProperty("channelName", oldProps.getProperty("channelName"));
-        newJson.addProperty("versionFormat", 3);
+        newJson.addProperty(Constants.VERSION_FORMAT_KEY, 3);
 
         // Convert so boolean settings actually are stored as boolean values
         boolean tempBool = Boolean.getBoolean(oldProps.getProperty("checkForUpdates"));

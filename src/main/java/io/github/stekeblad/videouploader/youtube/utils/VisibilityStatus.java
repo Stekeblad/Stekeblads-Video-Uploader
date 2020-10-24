@@ -17,5 +17,9 @@ public enum VisibilityStatus {
     public String getStatusName() {
         return status;
     }
+
+    public boolean equals(/*VisibilityStatus status,*/ String str) {
+        return str.equals(this.status);
+    }
 }
 

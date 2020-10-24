@@ -4,6 +4,7 @@ import com.google.api.services.youtube.model.VideoCategory;
 import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.managers.categoryMigrators.CategoryMigrator;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.TimeUtils;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
@@ -21,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
@@ -51,22 +53,28 @@ public class CategoryManager extends ManagerBase {
         categoriesPath = Paths.get(CATEGORIES_FILE).toAbsolutePath();
         CategoryMigrator categoryMigrator = new CategoryMigrator();
 
+        // If no file in the json format exists
         if (!Files.exists(categoriesPath)) {
             final Path oldCategoryFilePath = Paths.get(DATA_DIR + "/categories");
             if (Files.exists(oldCategoryFilePath)) {
+                // Found data file in the oldest format. Back it up, migrate and delete original
                 try {
+                    Files.copy(oldCategoryFilePath, Paths.get(CONFIG_BACKUP_DIR + "/categories"));
                     List<String> categoryLines = Files.readAllLines(oldCategoryFilePath);
                     config = categoryMigrator.migrate(categoryLines);
+                    Files.delete(oldCategoryFilePath);
                 } catch (IOException ignored) {
                 }
             } else {
+                // No data found
                 config = new JsonObject();
-                set("versionFormat", CategoryMigrator.latestFormatVersion);
+                set(Constants.VERSION_FORMAT_KEY, CategoryMigrator.latestFormatVersion);
                 set("category_country", "");
                 set("category_language", "");
                 set("categories", new ArrayList<LocalCategory>());
             }
         } else {
+            // Data in json format found
             try {
                 loadConfigFromFile(categoriesPath);
                 if (!categoryMigrator.isLatestVersion(config)) {
@@ -104,6 +112,29 @@ public class CategoryManager extends ManagerBase {
      */
     public ObservableList<LocalCategory> getCategories() {
         return categories;
+    }
+
+    /**
+     * Looks for the first LocalCategory that have a categoryName exactly matching the parameter categoryName
+     *
+     * @param categoryName The name of the category to find
+     * @return An Optional&lt;LocalCategory&gt; that either contains the first matching LocalCategory or is empty if
+     * no LocalCategory matches
+     * @apiNote You should work with Ids instead of names then possible
+     */
+    public Optional<LocalCategory> findByName(String categoryName) {
+        return categories.stream().filter(lc -> lc.getName().equals(categoryName)).findFirst();
+    }
+
+    /**
+     * Looks for the first LocalCategory that have a categoryId exactly matching the parameter categoryId
+     *
+     * @param categoryId The id of the category to find
+     * @return An Optional&lt;LocalCategory&gt; that either contains the first matching LocalCategory or is empty if
+     * no LocalCategory matches
+     */
+    public Optional<LocalCategory> findById(String categoryId) {
+        return categories.stream().filter(lc -> lc.getId().equals(categoryId)).findFirst();
     }
 
     /**

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.jfxExtension.WindowFrame;
 import io.github.stekeblad.videouploader.managers.settingsMigrations.SettingsMigrator;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.TimeUtils;
 
 import java.io.FileInputStream;
@@ -37,14 +38,12 @@ public class SettingsManager extends ManagerBase {
     }
 
     private final Path filesPath;
-    private final Path presetsPath;
     private final Path waitingUploadsPath;
     private final Path backupPath;
     private final Path authPath;
 
     private SettingsManager() {
         filesPath = Paths.get(DATA_DIR).toAbsolutePath();
-        presetsPath = Paths.get(PRESET_DIR).toAbsolutePath();
         waitingUploadsPath = Paths.get(UPLOAD_DIR).toAbsolutePath();
         backupPath = Paths.get(CONFIG_BACKUP_DIR).toAbsolutePath();
         authPath = Paths.get(AUTH_DIR).toAbsolutePath();
@@ -60,8 +59,6 @@ public class SettingsManager extends ManagerBase {
         try {
             if (!Files.exists(filesPath))
                 Files.createDirectory(filesPath);
-            if (!Files.exists(presetsPath))
-                Files.createDirectory(presetsPath);
             if (!Files.exists(waitingUploadsPath))
                 Files.createDirectory(waitingUploadsPath);
             if (!Files.exists(backupPath))
@@ -98,6 +95,7 @@ public class SettingsManager extends ManagerBase {
                 prop.load(propInputStream);
                 config = settingsMigrator.migrate(prop);
                 saveSettings();
+                // Delete the file from config directory root, its backed up in the backup folder
                 Files.delete(Paths.get(oldSettingsFilePath));
             } catch (IOException ignored) {
             } finally {
@@ -143,7 +141,7 @@ public class SettingsManager extends ManagerBase {
         set("checkForUpdates", true);
         set("silentUpdates", false);
         set("channelName", "");
-        set("versionFormat", SettingsMigrator.latestFormatVersion);
+        set(Constants.VERSION_FORMAT_KEY, SettingsMigrator.latestFormatVersion);
 
         // Default window sizes and locations:
         set(WindowPropertyNames.MAIN, new WindowFrame(150, 100, 900, 750));

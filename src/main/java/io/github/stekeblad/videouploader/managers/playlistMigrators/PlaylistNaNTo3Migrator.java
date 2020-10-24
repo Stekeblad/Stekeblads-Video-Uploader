@@ -3,6 +3,7 @@ package io.github.stekeblad.videouploader.managers.playlistMigrators;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 
 import java.util.List;
@@ -12,7 +13,7 @@ class PlaylistNaNTo3Migrator {
     JsonObject migrate(List<String> oldFormat) {
         JsonObject newJson = new JsonObject();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        newJson.addProperty("versionFormat", 3);
+        newJson.addProperty(Constants.VERSION_FORMAT_KEY, 3);
 
         List<LocalPlaylist> playlists = oldFormat.stream()
                 .map((str) -> {

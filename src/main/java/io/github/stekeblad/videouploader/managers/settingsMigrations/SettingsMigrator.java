@@ -2,6 +2,7 @@ package io.github.stekeblad.videouploader.managers.settingsMigrations;
 
 import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.managers.ConfigurationVersionException;
+import io.github.stekeblad.videouploader.utils.Constants;
 
 import java.util.Properties;
 
@@ -70,6 +71,6 @@ public class SettingsMigrator {
      * @return its current version number
      */
     private int getVersion(JsonObject json) {
-        return json.get("versionFormat").getAsInt();
+        return json.get(Constants.VERSION_FORMAT_KEY).getAsInt();
     }
 }

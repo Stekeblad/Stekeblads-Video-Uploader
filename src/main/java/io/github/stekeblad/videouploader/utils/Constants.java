@@ -3,14 +3,15 @@ package io.github.stekeblad.videouploader.utils;
 import io.github.stekeblad.videouploader.jfxExtension.WindowDimensionsRestriction;
 
 public class Constants {
-    // Constants for directory names used to store settings and other configuration
+    // Constants for directory and file names used to store settings and other configuration
     public static final String DATA_DIR = "VideoUploader data";
     public static final String AUTH_DIR = DATA_DIR + "/.auth";
-    public static final String PRESET_DIR = DATA_DIR + "/presets";
+    public static final String PRESETS_FILE = DATA_DIR + "/presets.json";
     public static final String UPLOAD_DIR = DATA_DIR + "/waiting uploads";
     public static final String PLAYLIST_FILE = DATA_DIR + "/playlist.json";
     public static final String CATEGORIES_FILE = DATA_DIR + "/categories.json";
     public static final String CONFIG_BACKUP_DIR = DATA_DIR + "/backup";
+    public static final String VERSION_FORMAT_KEY = "versionFormat";
 
     public static final String BUTTON_EDIT = "_buttonEdit";
     public static final String BUTTON_SAVE = "_buttonSave";

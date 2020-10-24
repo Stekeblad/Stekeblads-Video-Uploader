@@ -4,6 +4,7 @@ import com.google.api.services.youtube.model.Playlist;
 import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.managers.playlistMigrators.PlaylistMigrator;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.TimeUtils;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
@@ -58,20 +60,27 @@ public class PlaylistManager extends ManagerBase {
         playlistPath = Paths.get(PLAYLIST_FILE).toAbsolutePath();
         PlaylistMigrator playlistMigrator = new PlaylistMigrator();
 
+        // Does a json data file exist?
         if (!Files.exists(playlistPath)) {
             final Path oldPlaylistFilePath = Paths.get(DATA_DIR + "/playlist");
+            // Does a file in the old pre-json format exist?
             if (Files.exists(oldPlaylistFilePath)) {
                 try {
+                    // back up, migrate, delete original (but keep copy)
+                    Files.copy(oldPlaylistFilePath, Paths.get(CONFIG_BACKUP_DIR + "/playlists-" + TimeUtils.currentTimeString()));
                     List<String> playlistLines = Files.readAllLines(oldPlaylistFilePath);
                     config = playlistMigrator.migrate(playlistLines);
+                    Files.delete(oldPlaylistFilePath);
                 } catch (IOException ignored) {
                 }
             } else {
+                // no file exists
                 config = new JsonObject();
-                set("versionFormat", PlaylistMigrator.latestFormatVersion);
+                set(Constants.VERSION_FORMAT_KEY, PlaylistMigrator.latestFormatVersion);
                 set("playlists", new ArrayList<LocalPlaylist>());
             }
         } else {
+            // File in json format found
             try {
                 loadConfigFromFile(playlistPath);
                 if (!playlistMigrator.isLatestVersion(config)) {
@@ -118,6 +127,29 @@ public class PlaylistManager extends ManagerBase {
      */
     public ObservableList<LocalPlaylist> getAllPlaylists() {
         return playlists;
+    }
+
+    /**
+     * Looks for the first LocalPlaylist that have a name exactly matching the parameter playlistName
+     *
+     * @param playlistName The name of the playlist to find
+     * @return An Optional&lt;LocalPlaylist&gt; that either contains the first matching LocalPlaylist or is empty if
+     * no LocalPlaylist matches
+     * @apiNote You should work with Ids instead of names then possible
+     */
+    public Optional<LocalPlaylist> findByName(String playlistName) {
+        return playlists.stream().filter(lp -> lp.getName().equals(playlistName)).findFirst();
+    }
+
+    /**
+     * Looks for the first LocalPlaylist that have a playlistId exactly matching the parameter playlistId
+     *
+     * @param playlistId The id of the playlist to find
+     * @return An Optional&lt;LocalPlaylist&gt; that either contains the first matching LocalPlaylist or is empty if
+     * no LocalPlaylist matches
+     */
+    public Optional<LocalPlaylist> findById(String playlistId) {
+        return playlists.stream().filter(lp -> lp.getId().equals(playlistId)).findFirst();
     }
 
     /**
@@ -175,6 +207,14 @@ public class PlaylistManager extends ManagerBase {
         playlists.addAll(remoteTransformedPlaylists);
     }
 
+    /**
+     * Creates a new playlist for the the user's channel with the given name and privacy status.
+     * YouTube-type exceptions will be caught and displayed in a alert window, other exceptions
+     * is not handled.
+     *
+     * @param name    the name of the playlist to create
+     * @param privacy the privacy status for the new playlist
+     */
     public void createPlaylist(String name, String privacy) {
         Playlist newPlaylist = null;
         try {
