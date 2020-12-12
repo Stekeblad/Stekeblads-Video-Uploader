@@ -2,6 +2,7 @@ package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
+import io.github.stekeblad.videouploader.jfxExtension.NoneSelectionModel;
 import io.github.stekeblad.videouploader.utils.*;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.PresetApplicator;
@@ -151,12 +152,15 @@ public class mainWindowController implements IWindowController {
         // Set up button sets for the different states a upload can be in: editing, locked, uploading, failed/erred
         defineUploadStates();
 
+        // Set selectionModel for the uploads listView
+        listView.setSelectionModel(new NoneSelectionModel<>());
+
         // If any uploads was saved when the program was closed last time
-        if(configManager.hasWaitingUploads()) {
+        if (configManager.hasWaitingUploads()) {
             ArrayList<String> waitingUploads = configManager.getWaitingUploads();
             boolean failedLoadingWaitingUpload = false;
             if (waitingUploads != null) {
-                for(String waitingUpload : waitingUploads) {
+                for (String waitingUpload : waitingUploads) {
                     try {
                         VideoUpload loadedUpload = new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++));
                         loadedUpload.setThumbnailCursorEventHandler(this::updateCursor);

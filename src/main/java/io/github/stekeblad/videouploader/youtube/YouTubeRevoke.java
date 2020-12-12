@@ -1,13 +1,13 @@
-package io.github.stekeblad.videouploader.utils.background;
+package io.github.stekeblad.videouploader.youtube;
 
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.HttpOperations;
 import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.YouTubeApiLayer;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.control.ButtonType;

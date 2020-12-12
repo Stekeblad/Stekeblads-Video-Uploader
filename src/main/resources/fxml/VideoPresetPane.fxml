@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<GridPane fx:id="presetPane" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+          minWidth="-Infinity" prefHeight="180.0" prefWidth="510.0"
+          style="-fx-border-color: black; -fx-border-width: 1; -fx-border-style: solid;"
+          xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="io.github.stekeblad.videouploader.windowControllers.PresetItemController">
+    <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="100.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="100.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="170.0"/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" vgrow="SOMETIMES"/>
+        <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+    </rowConstraints>
+    <TextField fx:id="title" disable="true"/>
+    <ChoiceBox fx:id="category" disable="true" prefWidth="150.0" GridPane.columnIndex="1"/>
+    <ChoiceBox fx:id="playlist" disable="true" prefWidth="150.0" GridPane.columnIndex="2"/>
+    <TextArea fx:id="description" disable="true" prefHeight="200.0" prefWidth="200.0" wrapText="true"
+              GridPane.rowIndex="1" GridPane.rowSpan="4"/>
+    <TextArea fx:id="tags" prefHeight="200.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1"
+              GridPane.rowIndex="1" GridPane.rowSpan="2"/>
+    <CheckBox fx:id="madeForKids" disable="true" mnemonicParsing="false" text="CheckBox" GridPane.columnIndex="1"
+              GridPane.rowIndex="3"/>
+    <ImageView fx:id="thumbnail" disable="true" fitHeight="90.0" fitWidth="160.0" pickOnBounds="true"
+               preserveRatio="true" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="3">
+        <Image url="@../images/no_image.png"/>
+    </ImageView>
+    <ChoiceBox fx:id="visibility" disable="true" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+    <HBox fx:id="buttonBox" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.rowIndex="5"/>
+    <TextField fx:id="presetName" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+    <CheckBox fx:id="notifySubscribers" mnemonicParsing="false" text="CheckBox" GridPane.columnIndex="1"
+              GridPane.rowIndex="4"/>
+</GridPane>

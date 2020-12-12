@@ -2,11 +2,11 @@ package io.github.stekeblad.videouploader.managers;
 
 import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.managers.presetMigrators.PresetMigrator;
+import io.github.stekeblad.videouploader.models.VideoPresetModel;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.TimeUtils;
-import io.github.stekeblad.videouploader.youtube.VideoPresetModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;

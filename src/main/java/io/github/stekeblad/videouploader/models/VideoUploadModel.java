@@ -1,4 +1,7 @@
-package io.github.stekeblad.videouploader.youtube;
+package io.github.stekeblad.videouploader.models;
+
+import io.github.stekeblad.videouploader.youtube.LocalCategory;
+import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 
 import java.io.File;
 import java.util.List;

@@ -1,5 +1,7 @@
-package io.github.stekeblad.videouploader.youtube;
+package io.github.stekeblad.videouploader.models;
 
+import io.github.stekeblad.videouploader.youtube.LocalCategory;
+import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
 
 import java.util.List;
@@ -12,7 +14,7 @@ public class VideoInfoBaseModel {
     private LocalPlaylist selectedPlaylist;
     private LocalCategory selectedCategory;
     private boolean tellSubs;
-    private String /*Path?*/ thumbNailPath;
+    private String /*Path?*/ thumbnailPath;
     private boolean madeForKids;
 
     public String getVideoName() {
@@ -36,11 +38,8 @@ public class VideoInfoBaseModel {
     }
 
     public void setVisibility(String visibility) {
-        if (!VisibilityStatus.PUBLIC.equals(visibility)
-                && !VisibilityStatus.UNLISTED.equals(visibility)
-                && !VisibilityStatus.PRIVATE.equals(visibility)) {
-            throw new IllegalArgumentException("Status must be \"public\", \"private\" or \"unlisted\"");
-        }
+        VisibilityStatus newStatus = VisibilityStatus.valueOf(visibility);
+        // Exception thrown if the parameter is not a valid VisibilityStatus
         this.visibility = visibility;
     }
 
@@ -76,12 +75,12 @@ public class VideoInfoBaseModel {
         this.tellSubs = tellSubs;
     }
 
-    public String getThumbNailPath() {
-        return thumbNailPath;
+    public String getThumbnailPath() {
+        return thumbnailPath;
     }
 
-    public void setThumbNailPath(String thumbNailPath) {
-        this.thumbNailPath = thumbNailPath;
+    public void setThumbnailPath(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
     }
 
     public boolean isMadeForKids() {
@@ -94,7 +93,7 @@ public class VideoInfoBaseModel {
 
     public VideoInfoBaseModel(String videoName, String videoDescription, String visibility, List<String> videoTags,
                               LocalPlaylist selectedPlaylist, LocalCategory selectedCategory, boolean tellSubs,
-                              String thumbNailPath, boolean madeForKids) {
+                              String thumbnailPath, boolean madeForKids) {
         this.videoName = videoName;
         this.videoDescription = videoDescription;
         setVisibility(visibility);
@@ -102,7 +101,7 @@ public class VideoInfoBaseModel {
         this.selectedPlaylist = selectedPlaylist;
         this.selectedCategory = selectedCategory;
         this.tellSubs = tellSubs;
-        this.thumbNailPath = thumbNailPath;
+        this.thumbnailPath = thumbnailPath;
         this.madeForKids = madeForKids;
     }
 

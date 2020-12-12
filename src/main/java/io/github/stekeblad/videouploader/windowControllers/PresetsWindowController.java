@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
+import io.github.stekeblad.videouploader.jfxExtension.NoneSelectionModel;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
@@ -103,6 +104,9 @@ public class PresetsWindowController {
 
         // Set up button sets for different preset states (locked, editing)
         definePresetStates();
+
+        // Set selectionModel for the presets listView
+        listPresets.setSelectionModel(new NoneSelectionModel<>());
 
         // Load all saved presets
         ArrayList<String> savedPresetNames = configManager.getPresetNames();

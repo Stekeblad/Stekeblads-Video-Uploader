@@ -5,10 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.managers.CategoryManager;
 import io.github.stekeblad.videouploader.managers.PlaylistManager;
+import io.github.stekeblad.videouploader.models.VideoPresetModel;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.youtube.LocalCategory;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
-import io.github.stekeblad.videouploader.youtube.VideoPresetModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,7 +84,7 @@ class PresetNaNTo3Migration {
                         newPreset.setTellSubs(Boolean.parseBoolean(line.substring(colonIndex + 1)));
                         break;
                     case NODE_ID_THUMBNAIL:
-                        newPreset.setThumbNailPath(line.substring(colonIndex + 1));
+                        newPreset.setThumbnailPath(line.substring(colonIndex + 1));
                         break;
                     case NODE_ID_MADE_FOR_KIDS:
                         newPreset.setMadeForKids(Boolean.parseBoolean(line.substring(colonIndex + 1)));
