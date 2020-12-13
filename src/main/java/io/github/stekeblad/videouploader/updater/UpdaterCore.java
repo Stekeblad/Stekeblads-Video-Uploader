@@ -254,7 +254,7 @@ public class UpdaterCore {
      *                       or if any of the expected keys in the update response is missing.
      */
     private UpdateInfo fetchLatestVersionInfo() throws JSONException {
-        String updateInformation = HttpOperations.getString("http://localhost:56930/latestuploaderversion.json");
+        String updateInformation = HttpOperations.getString("https://stekeblad.se/latestuploaderversion.json");
         UpdateInfo info = null;
         if (updateInformation != null) {
             JSONObject updateJson = new JSONObject(updateInformation);
