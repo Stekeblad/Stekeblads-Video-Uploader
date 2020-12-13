@@ -1,8 +1,4 @@
 # Stekeblad's Video Uploader
-In July 2020 Stekeblads Video Uploader past 20 000 uploaded videos in a
-single month for the first time! Not only that, it past a total of 400
-downloads since the release of version 1.0 in february 2018! Thank you
-all past, current and future users!
 
 ## Easier bulk uploads to YouTube
 Helps people who upload a lot of videos to YouTube by automatically
