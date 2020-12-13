@@ -1,5 +1,5 @@
 group 'io.github.stekeblad'
-version '1.4.1'
+version '1.4.2'
 
 apply plugin: 'idea'
 apply plugin: 'java'
@@ -55,9 +55,9 @@ repositories {
 
 dependencies {
     // The YouTube API and its requirements
-    compile 'com.google.api-client:google-api-client:1.30.5'
-    compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.4'
-    compile 'com.google.apis:google-api-services-youtube:v3-rev20200213-1.30.9'
+    compile 'com.google.api-client:google-api-client:1.31.1'
+    compile 'com.google.oauth-client:google-oauth-client-jetty:1.31.2'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev20201202-1.31.0'
     // For the metadata-related features
     compile 'org.jcodec:jcodec:0.2.5'
     // Verifying downloaded updates are real and not from someone else

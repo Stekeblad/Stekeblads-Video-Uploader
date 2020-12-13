@@ -2,6 +2,7 @@ package io.github.stekeblad.videouploader.utils.background;
 
 import io.github.stekeblad.videouploader.updater.UpdateInfo;
 import io.github.stekeblad.videouploader.updater.UpdaterCore;
+import io.github.stekeblad.videouploader.updater.VersionFormat;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
@@ -67,6 +68,22 @@ public class UpdaterUi {
                 }
                 return;
             }
+
+            // Do not allow automatic updates to a new major release
+            // In this case we sak if the user wants to update manually and sends them to the releases page on GitHub
+            VersionFormat currentVersion = updater.determineCurrentVersion();
+            boolean isMajorUpdate = currentVersion.getMajor() < updateInfo.getVersion().getMajor();
+            if (isMajorUpdate) {
+                if (getInstallUpdateButtonChoice(updateInfo) == ButtonType.NO) {
+                    Platform.runLater(() ->
+                            dialogStage.fireEvent(new WindowEvent(dialogStage, WindowEvent.WINDOW_CLOSE_REQUEST))
+                    );
+                } else {
+                    OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases/");
+                }
+                return;
+            }
+
 
             // if in background and silent updates is enabled then the user will not be not
             // be notified and the update is downloaded directly.
@@ -163,6 +180,26 @@ public class UpdaterUi {
             Translations basicTrans = TranslationsManager.getTranslation(TranslationBundles.BASE);
 
             String alertText = basicTrans.getString("update_available_full") + info.getVersion() +
+                    "\n\n" + info.getHeading() +
+                    "\n\n" + info.getBody();
+
+            return AlertUtils.yesNo(basicTrans.getString("update_available_short") + " - Stekeblads Video Uploader",
+                    alertText, ButtonType.NO);
+        } catch (Exception ignored) {
+            return ButtonType.NO;
+        }
+    }
+
+    /**
+     * Opens a AlertUtils.yesNo-dialog on the UI thread asking if the user wants to download the major update manually.
+     *
+     * @return The ButtonType of the selected button or ButtonType.NO if the user canceled or something went wrong.
+     */
+    private ButtonType getUpdateManuallyButtonChoice(UpdateInfo info) {
+        try {
+            Translations basicTrans = TranslationsManager.getTranslation(TranslationBundles.BASE);
+
+            String alertText = basicTrans.getString("update_available_noAuto_full") + info.getVersion() +
                     "\n\n" + info.getHeading() +
                     "\n\n" + info.getBody();
 

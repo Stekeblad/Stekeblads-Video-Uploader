@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
@@ -68,7 +69,7 @@ public class Auth {
             Credential creds = Auth.authUser();
             YouTube youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, creds).setApplicationName(
                     "Stekeblads Video Uploader").build();
-            YouTube.Channels.List myChannel = youtube.channels().list("snippet");
+            YouTube.Channels.List myChannel = youtube.channels().list(Collections.singletonList("snippet"));
             myChannel.setMine(true);
             ChannelListResponse channelListResponse = myChannel.execute();
             List<Channel> channelList = channelListResponse.getItems();

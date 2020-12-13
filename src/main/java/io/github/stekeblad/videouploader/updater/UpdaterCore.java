@@ -110,6 +110,8 @@ public class UpdaterCore {
                         acceptStatusFeed("No new update available");
                         _info = null;
                         return null;
+                    } else if (_info.getVersion().getMajor() > currentVersion.getMajor()) {
+                        acceptStatusFeed("New major release found, please update manually");
                     } else {
                         acceptStatusFeed("Update found");
                     }
@@ -214,16 +216,6 @@ public class UpdaterCore {
     }
 
     /**
-     * Just performs a null check around _statusFeed before calling _statusFeed.accept(statusText)
-     *
-     * @param statusText Text to forward to _statusFeed.accept if a status feed exists
-     */
-    private void acceptStatusFeed(String statusText) {
-        if (_statusFeed != null)
-            _statusFeed.accept(statusText);
-    }
-
-    /**
      * Reads the automatically generated resource file /generated/CurrentVersion.properties and parses its content.
      * The returned version number can then be compared with the version number from the update check to see if a newer
      * version is available. The automatically generated file is created when creating release builds with Gradle and the
@@ -231,7 +223,7 @@ public class UpdaterCore {
      *
      * @return VersionInfo with the program's current version
      */
-    private VersionFormat determineCurrentVersion() {
+    public VersionFormat determineCurrentVersion() {
         try {
             URL versionFileUrl = UpdaterCore.class.getResource("/generated/CurrentVersion.properties");
             if (versionFileUrl == null)
@@ -244,6 +236,16 @@ public class UpdaterCore {
     }
 
     /**
+     * Just performs a null check around _statusFeed before calling _statusFeed.accept(statusText)
+     *
+     * @param statusText Text to forward to _statusFeed.accept if a status feed exists
+     */
+    private void acceptStatusFeed(String statusText) {
+        if (_statusFeed != null)
+            _statusFeed.accept(statusText);
+    }
+
+    /**
      * Contacts the update server and retrieves information about the latest available version.
      *
      * @return A UpdateInfo object with information about the latest available update, or null if the information could
@@ -252,7 +254,7 @@ public class UpdaterCore {
      *                       or if any of the expected keys in the update response is missing.
      */
     private UpdateInfo fetchLatestVersionInfo() throws JSONException {
-        String updateInformation = HttpOperations.getString("https://stekeblad.se/latestuploaderversion.json");
+        String updateInformation = HttpOperations.getString("http://localhost:56930/latestuploaderversion.json");
         UpdateInfo info = null;
         if (updateInformation != null) {
             JSONObject updateJson = new JSONObject(updateInformation);

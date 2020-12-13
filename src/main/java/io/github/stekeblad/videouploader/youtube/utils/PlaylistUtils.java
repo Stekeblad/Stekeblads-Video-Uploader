@@ -41,7 +41,10 @@ public enum PlaylistUtils {
                     "Stekeblads Video Uploader").build();
 
             // Prepare request
-            YouTube.Playlists.List userPlaylists = youtube.playlists().list("snippet,contentDetails");
+            ArrayList<String> playlistParts = new ArrayList<>();
+            playlistParts.add("snippet");
+            playlistParts.add("contentDetails");
+            YouTube.Playlists.List userPlaylists = youtube.playlists().list(playlistParts);
             userPlaylists.setMine(true);
             userPlaylists.setMaxResults(25L);
 
@@ -175,7 +178,10 @@ public enum PlaylistUtils {
             unsyncedPlaylist.setSnippet(snippet);
             unsyncedPlaylist.setStatus(status);
 
-            YouTube.Playlists.Insert playlistInserter = youtube.playlists().insert("snippet,status", unsyncedPlaylist);
+            ArrayList<String> playlistParts = new ArrayList<>();
+            playlistParts.add("snippet");
+            playlistParts.add("status");
+            YouTube.Playlists.Insert playlistInserter = youtube.playlists().insert(playlistParts, unsyncedPlaylist);
             Playlist syncedPlaylist = playlistInserter.execute();
 
             LocalPlaylist localPlaylist = new LocalPlaylist(

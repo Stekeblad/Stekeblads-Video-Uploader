@@ -9,6 +9,7 @@ import io.github.stekeblad.videouploader.youtube.Auth;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public enum CategoryUtils {
                     "Stekeblads Video Uploader").build();
 
             // Prepare and send request
-            YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list("snippet");
+            YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list(Collections.singletonList("snippet"));
             videoCategoriesListForRegionRequest.setHl(lang);
             videoCategoriesListForRegionRequest.setRegionCode(region);
             VideoCategoryListResponse response = videoCategoriesListForRegionRequest.execute();
