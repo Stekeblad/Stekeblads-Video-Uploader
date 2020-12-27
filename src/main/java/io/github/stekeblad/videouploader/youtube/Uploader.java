@@ -252,10 +252,7 @@ public class Uploader {
                     "\". It may have been deleted, moved or renamed since the upload was queued");
         }
 
-        ArrayList<String> videoParts = new ArrayList<>();
-        videoParts.add("snippet");
-        videoParts.add("statistics");
-        videoParts.add("status");
+        List<String> videoParts = Arrays.asList("snippet", "statistics", "status");
         YouTube.Videos.Insert videoInsert = myTube.videos()
                 .insert(videoParts, videoObject, videoFileStream);
         videoInsert.setNotifySubscribers(video.isTellSubs());
@@ -334,9 +331,7 @@ public class Uploader {
 
             PlaylistItem playlistItem = new PlaylistItem();
             playlistItem.setSnippet(playlistSnippet);
-            ArrayList<String> playlistParts = new ArrayList<>();
-            playlistParts.add("snippet");
-            playlistParts.add("contentDetails");
+            List<String> playlistParts = Arrays.asList("snippet", "contentDetails");
             YouTube.PlaylistItems.Insert playlistInsert = myTube.playlistItems().insert(playlistParts, playlistItem);
             playlistInsert.execute();
         }

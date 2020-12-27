@@ -22,9 +22,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 
@@ -56,9 +54,7 @@ public class YouTubeApiLayer {
             unsyncedPlaylist.setSnippet(snippet);
             unsyncedPlaylist.setStatus(status);
 
-            ArrayList<String> playlistParts = new ArrayList<>();
-            playlistParts.add("snippet");
-            playlistParts.add("status");
+            List<String> playlistParts = Arrays.asList("snippet", "status");
             YouTube.Playlists.Insert createPlaylistRequest = youtube.playlists().insert(playlistParts, unsyncedPlaylist);
             return createPlaylistRequest.execute();
         } catch (IOException e) {
@@ -93,8 +89,7 @@ public class YouTubeApiLayer {
         try {
             YouTube youtube = buildYouTube();
 
-            ArrayList<String> channelParts = new ArrayList<>();
-            channelParts.add("snippet");
+            List<String> channelParts = Collections.singletonList("snippet");
             YouTube.Channels.List myChannel = youtube.channels().list(channelParts);
             myChannel.setMine(true);
             ChannelListResponse channelListResponse = myChannel.execute();
@@ -122,9 +117,7 @@ public class YouTubeApiLayer {
             YouTube youtube = buildYouTube();
 
             //  Prepare request for playlists
-            ArrayList<String> playlistParts = new ArrayList<>();
-            playlistParts.add("snippet");
-            playlistParts.add("contentDetails");
+            List<String> playlistParts = Arrays.asList("snippet", "contentDetails");
             YouTube.Playlists.List playlistRequest = youtube.playlists().list(playlistParts);
             playlistRequest.setMine(true);
             playlistRequest.setMaxResults(25L);
@@ -163,8 +156,7 @@ public class YouTubeApiLayer {
     public static List<VideoCategory> requestVideoCategories(String region, String language) throws YouTubeException {
         try {
             YouTube youtube = buildYouTube();
-            ArrayList<String> categoryParts = new ArrayList<>();
-            categoryParts.add("snippet");
+            List<String> categoryParts = Collections.singletonList("snippet");
             YouTube.VideoCategories.List videoCategoriesListForRegionRequest = youtube.videoCategories().list(categoryParts);
             videoCategoriesListForRegionRequest.setHl(language);
             videoCategoriesListForRegionRequest.setRegionCode(region);
