@@ -2,12 +2,12 @@
 
 #### Right now
 - Bugs and small things (there is always bugs and small things...)
-- Both playlists and categories should internally be referenced by ID.
-  The IDs should also be saved in preset save files etc. instead of the name.
-- Convert all save files to a JSON-based format
 
 #### Higher priority things to do
-
+- Dialog on first one informing about the license used(?) "And you must
+  show them these terms so they know their rights." Or at least the
+  minimum of a button in the settings window
+- Add a upload to YouTube notice (see the end of this file)
 
 #### Lower priority things to do
 - Setting for start folder when:
@@ -43,3 +43,18 @@ the preset in the select preset dropdown.
     height... Grouping in pop-ups hidden under buttons? Having a
     full-size version and a collapsed version as mentioned already in this
     file?
+
+
+9 Notices to Users.
+
+9.1 Required Notice.
+
+If your API Client(s) uses any YouTube API Services to permit users to upload videos to YouTube websites,
+applications, services or products, the screen or window in which the end user clicks the "upload" button
+must display the following warning in the language(s) available on your API Client(s):
+
+"By clicking 'upload,' you certify that the content you are uploading
+complies with the YouTube Terms of Service (including the YouTube
+Community Guidelines) at
+[https://www.youtube.com/t/terms](https://www.youtube.com/t/terms).
+Please be sure not to violate others' copyright or privacy rights."
