@@ -1,6 +1,6 @@
 package io.github.stekeblad.videouploader.tagProcessing;
 
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
 
 import java.io.File;
 import java.util.List;
@@ -15,7 +15,7 @@ public class RawnameTagProcessor implements ITagProcessor {
     private final String RAWNAME_TAG = "$(rawname)";
 
     @Override
-    public void init(VideoPreset preset, int initialAutoNum) {
+    public void init(NewVideoPresetModel preset, int initialAutoNum) {
         tagFoundInTitle = preset.getVideoName().contains(RAWNAME_TAG);
         tagFoundInDescription = preset.getVideoDescription().contains(RAWNAME_TAG);
         tagFoundInTagsList = false;

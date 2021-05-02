@@ -1,9 +1,9 @@
 package io.github.stekeblad.videouploader.utils.background;
 
+import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.updater.UpdateInfo;
 import io.github.stekeblad.videouploader.updater.UpdaterCore;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
@@ -40,11 +40,11 @@ public class UpdaterUi {
      *                     in the settings window.
      */
     public void runUpdater(boolean inBackground) {
-        ConfigManager configManager = ConfigManager.INSTANCE;
+        SettingsManager settingsManager = SettingsManager.getSettingsManager();
 
         // Do not check for updates if running in background and disabled from settings
         // Allow manually started updates
-        if (inBackground && !configManager.getCheckForUpdates())
+        if (inBackground && !settingsManager.getCheckForUpdates())
             return;
 
         createUpdateDialog();
@@ -70,7 +70,7 @@ public class UpdaterUi {
 
             // if in background and silent updates is enabled then the user will not be not
             // be notified and the update is downloaded directly.
-            if (inBackground && configManager.getSilentUpdates()) {
+            if (inBackground && settingsManager.getSilentUpdates()) {
                 updater.installUpdate(null);
             } else {
                 // Ask user if they want to update

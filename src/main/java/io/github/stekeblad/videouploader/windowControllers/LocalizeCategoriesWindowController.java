@@ -1,13 +1,13 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
+import io.github.stekeblad.videouploader.managers.CategoryManager;
+import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -32,8 +32,8 @@ public class LocalizeCategoriesWindowController implements IWindowController {
     public Label label_langId;
     public Label label_countryId;
 
-    private final ConfigManager configManager = ConfigManager.INSTANCE;
-    private final CategoryUtils categoryUtils = CategoryUtils.INSTANCE;
+    private final SettingsManager settingsManager = SettingsManager.getSettingsManager();
+    private final CategoryManager categoryManager = CategoryManager.getCategoryManager();
     private Translations transLocCatWin;
     private Translations transBasic;
 
@@ -70,8 +70,8 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         btn_codeListLang.setTooltip(new Tooltip("https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes"));
 
         // Insert the current country and language code in their text fields
-        txt_country.setText(configManager.getCategoryCountry());
-        txt_lang.setText(configManager.getCategoryLanguage());
+        txt_country.setText(categoryManager.getCategoryCountry());
+        txt_lang.setText(categoryManager.getCategoryLanguage());
 
         // Set so pressing F1 opens the wiki page for this window
         window.getScene().setOnKeyPressed(event -> {
@@ -102,7 +102,7 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         }
 
         // Authentication with youtube is required, check if the user has given permission, if not then ask for it
-        if(configManager.getNeverAuthed()) {
+        if (settingsManager.getNeverAuthed()) {
             ButtonType buttonChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
             if (buttonChoice == ButtonType.NO) {
@@ -121,19 +121,12 @@ public class LocalizeCategoriesWindowController implements IWindowController {
         Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() {
-                final boolean result = categoryUtils.downloadCategories(txt_lang.getText(), txt_country.getText());
-                Platform.runLater(() -> {
-                    if (!result) {
-                        btn_getCategories.setText(transLocCatWin.getString("btn_getCategories"));
-                        btn_cancel.setDisable(false);
-                        btn_getCategories.setDisable(false);
-                        return;
-                    }
+                categoryManager.downloadCategories(txt_country.getText(), txt_lang.getText());
 
-                    // Save the language and country code in the config file after successful update
-                    configManager.setCategoryCountry(txt_country.getText());
-                    configManager.setCategoryLanguage(txt_lang.getText());
-                    configManager.saveSettings();
+                Platform.runLater(() -> {
+                    btn_getCategories.setText(transLocCatWin.getString("btn_getCategories"));
+                    btn_cancel.setDisable(false);
+                    btn_getCategories.setDisable(false);
                     onCancelClicked(new ActionEvent());
                 });
                 return null;

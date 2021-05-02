@@ -2,19 +2,29 @@ package io.github.stekeblad.videouploader.models;
 
 import io.github.stekeblad.videouploader.youtube.LocalCategory;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
+import io.github.stekeblad.videouploader.youtube.VisibilityStatus;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
+import java.util.List;
+import java.util.UUID;
+
 public class NewVideoInfoBaseModel {
+    private final UUID uniqueId = UUID.randomUUID();
+
     private final StringProperty videoName = new SimpleStringProperty();
     private final StringProperty videoDescription = new SimpleStringProperty();
-    private final StringProperty visibility = new SimpleStringProperty();
+    private final ObjectProperty<VisibilityStatus> visibility = new SimpleObjectProperty<>();
     private final ListProperty<String> videoTags = new SimpleListProperty<>();
     private final ObjectProperty<LocalPlaylist> selectedPlaylist = new SimpleObjectProperty<>();
     private final ObjectProperty<LocalCategory> selectedCategory = new SimpleObjectProperty<>();
     private final BooleanProperty tellSubs = new SimpleBooleanProperty();
     private final StringProperty thumbnailPath = new SimpleStringProperty();
     private final BooleanProperty madeForKids = new SimpleBooleanProperty();
+
+    public UUID getUniqueId() {
+        return uniqueId;
+    }
 
     public String getVideoName() {
         return videoName.get();
@@ -40,15 +50,15 @@ public class NewVideoInfoBaseModel {
         this.videoDescription.set(videoDescription);
     }
 
-    public String getVisibility() {
+    public VisibilityStatus getVisibility() {
         return visibility.get();
     }
 
-    public StringProperty visibilityProperty() {
+    public ObjectProperty<VisibilityStatus> visibilityProperty() {
         return visibility;
     }
 
-    public void setVisibility(String visibility) {
+    public void setVisibility(VisibilityStatus visibility) {
         this.visibility.set(visibility);
     }
 
@@ -60,8 +70,9 @@ public class NewVideoInfoBaseModel {
         return videoTags;
     }
 
-    public void setVideoTags(ObservableList<String> videoTags) {
-        this.videoTags.set(videoTags);
+    public void setVideoTags(List<String> videoTags) {
+        this.videoTags.clear();
+        this.videoTags.addAll(videoTags);
     }
 
     public LocalPlaylist getSelectedPlaylist() {

@@ -1,6 +1,6 @@
 package io.github.stekeblad.videouploader.tagProcessing;
 
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
 
 import java.io.File;
 import java.util.List;
@@ -18,7 +18,7 @@ public class EpisodeTagProcessor implements ITagProcessor {
     }
 
     @Override
-    public void init(VideoPreset preset, int initialAutoNum) {
+    public void init(NewVideoPresetModel preset, int initialAutoNum) {
         tagFound = preset.getVideoName().contains(EPISODE_TAG);
         if (!tagFound)
             return;

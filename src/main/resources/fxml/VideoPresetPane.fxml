@@ -8,7 +8,7 @@
           minWidth="-Infinity" prefHeight="180.0" prefWidth="510.0"
           style="-fx-border-color: black; -fx-border-width: 1; -fx-border-style: solid;"
           xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="io.github.stekeblad.videouploader.windowControllers.PresetItemController">
+          fx:controller="io.github.stekeblad.videouploader.ListControllers.PresetItemController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="100.0"/>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="100.0"/>

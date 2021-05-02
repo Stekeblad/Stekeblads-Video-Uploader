@@ -1,35 +1,37 @@
 package io.github.stekeblad.videouploader.main;
 
+import io.github.stekeblad.videouploader.ListControllers.UploadItemController;
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.jfxExtension.NoneSelectionModel;
-import io.github.stekeblad.videouploader.utils.*;
+import io.github.stekeblad.videouploader.jfxExtension.stringConverters.VideoPresetStringConverter;
+import io.github.stekeblad.videouploader.managers.CategoryManager;
+import io.github.stekeblad.videouploader.managers.PlaylistManager;
+import io.github.stekeblad.videouploader.managers.PresetManager;
+import io.github.stekeblad.videouploader.managers.SettingsManager;
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
+import io.github.stekeblad.videouploader.models.NewVideoUploadModel;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
+import io.github.stekeblad.videouploader.utils.Constants;
+import io.github.stekeblad.videouploader.utils.TimeUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.PresetApplicator;
 import io.github.stekeblad.videouploader.utils.background.UpdaterUi;
-import io.github.stekeblad.videouploader.utils.state.ButtonProperties;
-import io.github.stekeblad.videouploader.utils.state.VideoUploadState;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.windowControllers.PresetsWindowController;
 import io.github.stekeblad.videouploader.youtube.Uploader;
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
-import io.github.stekeblad.videouploader.youtube.VideoUpload;
 import io.github.stekeblad.videouploader.youtube.exceptions.*;
-import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
-import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -38,22 +40,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
-import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX_THUMB_SIZE;
-import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.THUMBNAIL_FILE_FORMAT;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 public class mainWindowController implements IWindowController {
     public AnchorPane mainWindowPane;
     public ToolBar toolbar;
-    public ListView<GridPane> listView;
+    public ListView<UploadItemController> listUploads;
     public HBox box_presetProgress;
-    public ListView<String> chosen_files;
-    public ChoiceBox<String> choice_presets;
+    public ListView<File> chosen_files;
+    public ChoiceBox<NewVideoPresetModel> choice_presets;
     public TextField txt_autoNum;
     public Button btn_presets;
     public Button btn_settings;
@@ -68,17 +67,14 @@ public class mainWindowController implements IWindowController {
     public Label label_presetProgress;
     public ProgressBar progress_preset;
 
-    private ConfigManager configManager;
-    private PlaylistUtils playlistUtils;
-    private CategoryUtils categoryUtils;
-    private int uploadPaneCounter = 0;
+    private SettingsManager settingsManager;
+    private PlaylistManager playlistManager;
+    private CategoryManager categoryManager;
+    private PresetManager presetManager;
+
+    private ObservableList<UploadItemController> uploadItems;
     private int presetsInProgress = 0;
-    private List<VideoUpload> uploadQueueVideos;
-    private List<File> videosToAdd;
-    private HashMap<String, VideoUpload> editBackups;
-    private static final String UPLOAD_PANE_ID_PREFIX = "upload-";
     private boolean bypassAbortWarning = false;
-    private VideoUploadState buttonStates;
 
     private Uploader uploader;
     private PresetApplicator presetApplicator;
@@ -115,25 +111,14 @@ public class mainWindowController implements IWindowController {
         uploader = new Uploader();
         presetApplicator = new PresetApplicator();
 
-        uploadPaneCounter = 0;
-        uploadQueueVideos = new ArrayList<>();
-        editBackups = new HashMap<>();
-        configManager = ConfigManager.INSTANCE;
-        // configManager.configManager(); Done in Main.java
-        playlistUtils = PlaylistUtils.INSTANCE;
-        playlistUtils.loadCache();
-        categoryUtils = CategoryUtils.INSTANCE;
-        categoryUtils.loadCategories();
+        settingsManager = SettingsManager.getSettingsManager();
+        playlistManager = PlaylistManager.getPlaylistManager();
+        categoryManager = CategoryManager.getCategoryManager();
+        presetManager = PresetManager.getPresetManager();
 
         // Populate presets dropdown/choice box
-        ArrayList<String> presetNames = configManager.getPresetNames();
-        if (presetNames == null) {
-            presetNames = new ArrayList<>();
-            presetNames.add(transBasic.getString("noSelected"));
-        } else {
-            presetNames.add(0, transBasic.getString("noSelected"));
-        }
-        choice_presets.setItems(FXCollections.observableArrayList(presetNames));
+        choice_presets.setItems(presetManager.getAllPresetsIncludingDefault());
+        choice_presets.setConverter(new VideoPresetStringConverter());
         choice_presets.getSelectionModel().select(0);
 
         // Only allow numbers in autoNum textField
@@ -149,37 +134,15 @@ public class mainWindowController implements IWindowController {
         presetApplicator.setSuccessCallback(upload -> Platform.runLater(() -> onPresetApplicationSuccess(upload)));
         presetApplicator.setErrorCallback((video, throwable) -> Platform.runLater(() -> onPresetApplicationError(video, throwable)));
 
-        // Set up button sets for the different states a upload can be in: editing, locked, uploading, failed/erred
-        defineUploadStates();
-
         // Set selectionModel for the uploads listView
-        listView.setSelectionModel(new NoneSelectionModel<>());
+        listUploads.setSelectionModel(new NoneSelectionModel<>());
+
+        uploadItems = FXCollections.emptyObservableList();
+        listUploads.setItems(uploadItems);
 
         // If any uploads was saved when the program was closed last time
-        if (configManager.hasWaitingUploads()) {
-            ArrayList<String> waitingUploads = configManager.getWaitingUploads();
-            boolean failedLoadingWaitingUpload = false;
-            if (waitingUploads != null) {
-                for (String waitingUpload : waitingUploads) {
-                    try {
-                        VideoUpload loadedUpload = new VideoUpload(waitingUpload, String.valueOf(uploadPaneCounter++));
-                        loadedUpload.setThumbnailCursorEventHandler(this::updateCursor);
-                        buttonStates.setLocked(loadedUpload);
-
-                        // Auto resize width and translation
-                        loadedUpload.getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
-                        transUpload.autoTranslate(loadedUpload.getPane(), loadedUpload.getPaneId());
-
-                        uploadQueueVideos.add(loadedUpload);
-                    } catch (Exception e) {
-                        failedLoadingWaitingUpload = true;
-                    }
-                }
-                if (failedLoadingWaitingUpload)
-                    AlertUtils.simpleClose(transBasic.getString("app_name"),
-                            transMainWin.getString("diag_loadWaitingUploads")).show();
-            }
-            updateUploadList();
+        if (settingsManager.hasWaitingUploads()) {
+            // TODO: Implement
         }
         // Set so pressing F1 opens the wiki page for this window
         Scene scene = mainWindowPane.getScene();
@@ -226,30 +189,10 @@ public class mainWindowController implements IWindowController {
         } else if (choice.equals(op3)) {
 
             Set<String> tasks = uploader.kill();
-            tasks.forEach(s -> {
-                int index = getUploadIndexByName(s);
-                if (index != -1) { // If a task does not have a index it has been removed and is not interesting, or bugged with a bad id, skip them
-                    configManager.saveWaitingUpload(uploadQueueVideos.get(index).toString(), String.valueOf(index));
-                }
-            });
+            //TODO: For each task, save that upload so it can be recreated net time program runs
             return true;
         }
         return false;
-    }
-
-    /**
-     * Called when the pick files button is pressed.
-     * Opens a file chooser and sets the list of selected files to the left of the button
-     * @param actionEvent the click event
-     */
-    public void onPickFileClicked(ActionEvent actionEvent) {
-        videosToAdd = FileUtils.pickVideos(Long.MAX_VALUE);
-        ArrayList<String> filenames = new ArrayList<>();
-        for (File file : videosToAdd) {
-            filenames.add(file.getName());
-        }
-        chosen_files.setItems(FXCollections.observableArrayList(filenames));
-        actionEvent.consume();
     }
 
     /**
@@ -259,6 +202,7 @@ public class mainWindowController implements IWindowController {
      * @param actionEvent the click event
      */
     public void onApplyPresetClicked(ActionEvent actionEvent) {
+        List<File> videosToAdd = chosen_files.getItems();
         if(videosToAdd == null || videosToAdd.size() == 0 ) {
             AlertUtils.simpleClose(transMainWin.getString("diag_noFiles_short"),
                     transMainWin.getString("diag_noFiles_full")).show();
@@ -268,38 +212,21 @@ public class mainWindowController implements IWindowController {
         if (choice_presets.getSelectionModel().getSelectedIndex() < 1) {
             // No preset, add videos to upload list with file name as title and blank/default values on the rest
             for(File videoFile : videosToAdd) {
-                VideoUpload newUpload = new VideoUpload(videoFile.getName(), null, null,
-                        null, null, null, false,
-                        null, false, UPLOAD_PANE_ID_PREFIX + uploadPaneCounter, videoFile);
+                NewVideoUploadModel newUpload = new NewVideoUploadModel();
+                newUpload.setVideoName(videoFile.getName());
+                newUpload.setMadeForKids(false);
+                newUpload.setTellSubs(false);
+                newUpload.setVideoFile(videoFile);
 
-                newUpload.setThumbnailCursorEventHandler(this::updateCursor);
-                // make the upload change its width together with the uploads list and the window
-                newUpload.getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
-                // Translate the upload
-                transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
-                uploadQueueVideos.add(newUpload);
+                uploadItems.add(new UploadItemController(newUpload, listUploads.prefWidthProperty()));
 
                 // Enables the upload to be edited because the lack of details.
-                onEdit(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + "_fakeButton");
                 // Change the cancel button to a delete button, the backed up state created by onEdit is not valid
-                Button deleteButton = new Button(transBasic.getString("delete"));
-                deleteButton.setId(UPLOAD_PANE_ID_PREFIX + uploadPaneCounter + BUTTON_DELETE);
-                deleteButton.setOnMouseClicked(event -> onDelete(deleteButton.getId()));
-                uploadQueueVideos.get(uploadQueueVideos.size() - 1).setButton2(deleteButton);
-
-                uploadPaneCounter++;
+                // TODO: Control this?
             }
         } else { // preset selected
             // Load details of the selected preset
-            VideoPreset chosenPreset;
-            try {
-                chosenPreset = new VideoPreset(configManager.getPresetString(
-                        choice_presets.getSelectionModel().getSelectedItem()), "preset");
-            } catch (Exception e) {
-                AlertUtils.simpleClose("Preset error", "Cant read preset \"" +
-                        choice_presets.getSelectionModel().getSelectedItem() + "\", the videos will not be added");
-                return;
-            }
+            NewVideoPresetModel chosenPreset = choice_presets.getSelectionModel().getSelectedItem();
 
             // Get the auto numbering
             int autoNum;
@@ -346,22 +273,12 @@ public class mainWindowController implements IWindowController {
             stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
             PresetsWindowController controller = fxmlLoader.getController();
             stage.setOnCloseRequest(controller::onWindowClose);
-            controller.myInit(!editBackups.isEmpty() || uploader.getIsActive());
+            controller.myInit(false);// TODO: verify that this is not needed
             stage.showAndWait();
         } catch (IOException e) {
             AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
         }
         actionEvent.consume();
-        // Update presets choice box in case presets was added or remove
-        ArrayList<String> presetNames = configManager.getPresetNames();
-        if (presetNames == null) {
-            presetNames = new ArrayList<>();
-            presetNames.add(transBasic.getString("noSelected"));
-        } else {
-            presetNames.add(0, transBasic.getString("noSelected"));
-        }
-        choice_presets.setItems(FXCollections.observableArrayList(presetNames));
-        choice_presets.getSelectionModel().select(0);
     }
 
     /**
@@ -392,7 +309,7 @@ public class mainWindowController implements IWindowController {
      */
     public void onStartAllUploadsClicked(ActionEvent actionEvent) {
         // Check if the user has given the program permission to access the user's youtube account, if not then ask for it
-        if(configManager.getNeverAuthed()) {
+        if (settingsManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
 
@@ -400,11 +317,8 @@ public class mainWindowController implements IWindowController {
                 return;
         }
         // Permission given, start uploads
-        for (VideoUpload uploadQueueVideo : uploadQueueVideos) {
-            if (uploadQueueVideo.getButton3Id() != null &&
-                    uploadQueueVideo.getButton3Id().contains(BUTTON_START_UPLOAD)) {
-                onStartUpload(uploadQueueVideo.getButton3Id());
-            }
+        for (UploadItemController uploadQueueVideo : uploadItems) {
+            uploadQueueVideo.startUpload(new ActionEvent());
         }
         actionEvent.consume();
     }
@@ -422,7 +336,6 @@ public class mainWindowController implements IWindowController {
                 i--;
             }
         }
-        updateUploadList();
         actionEvent.consume();
     }
 
@@ -465,75 +378,9 @@ public class mainWindowController implements IWindowController {
         if (userChoice == ButtonType.YES) {
             bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
             onAbortAllUploadsClicked(new ActionEvent());
-            uploadQueueVideos.clear();
-            uploadPaneCounter = 0;
-            updateUploadList();
+            uploadItems.clear();
         }
         actionEvent.consume();
-    }
-
-    /**
-     * Defines the different states for buttonStates, this is made to make it much simpler to manage the buttons
-     * for the different states a upload can be in. Previously buttons was created all over the place and set
-     * to call methods. Now there is sets of buttons defined here and this sets is then used when setting the
-     * buttons to show. Each old button setting could be towards 15 lines long, now its 1 line and easier to manage.
-     */
-    private void defineUploadStates() {
-        buttonStates = new VideoUploadState();
-
-        // Define Locked from editing
-        buttonStates.defineLocked(new ButtonProperties[]{
-                new ButtonProperties(BUTTON_EDIT, transBasic.getString("edit"), this::onEdit),
-                new ButtonProperties(BUTTON_DELETE, transBasic.getString("delete"), this::onDelete),
-                new ButtonProperties(BUTTON_START_UPLOAD, transBasic.getString("startUpload"), this::onStartUpload)
-        });
-
-        // Define Editing
-        buttonStates.defineEditing(new ButtonProperties[]{
-                new ButtonProperties(BUTTON_SAVE, transBasic.getString("save"), this::onSave),
-                new ButtonProperties(BUTTON_CANCEL, transBasic.getString("cancel"), this::onCancel),
-                new ButtonProperties("_ghost", "", null)
-        });
-
-        // Define Uploading
-        buttonStates.defineUploading(new ButtonProperties[]{
-                new ButtonProperties("_ghost1", "Just to give it width", null),
-                new ButtonProperties(BUTTON_ABORT_UPLOAD, transBasic.getString("abort"), this::onAbort),
-                new ButtonProperties("_ghost", "", null)
-        });
-
-
-        // Define Failed/Erred
-        buttonStates.defineFailed(new ButtonProperties[]{
-                new ButtonProperties("_ghost1", "Just to give it width", null),
-                new ButtonProperties(BUTTON_RESET, transBasic.getString("reset"), this::onResetUpload),
-                new ButtonProperties("_ghost", "", null)
-        });
-    }
-
-    /**
-     * Re-adds all elements to the uploadQueuePanes so the UI is up-to-date
-     */
-    private void updateUploadList() {
-        List<GridPane> uploadQueuePanes = new ArrayList<>();
-        for(VideoUpload vid : uploadQueueVideos) {
-            uploadQueuePanes.add(vid.getPane());
-        }
-        listView.setItems(FXCollections.observableArrayList(uploadQueuePanes));
-    }
-
-    /**
-     * Set this method to trigger when the cursor enters or leaves a node to change how it looks.
-     *
-     * @param entered if true, sets the cursor to a pointing hand (usually on enter event).
-     *                if false, sets the cursor to default (usually on exit event).
-     */
-    private void updateCursor(boolean entered) {
-        if (entered) {
-            mainWindowPane.getScene().setCursor(Cursor.HAND);
-        } else {
-            mainWindowPane.getScene().setCursor(Cursor.DEFAULT);
-        }
     }
 
     /**
@@ -550,147 +397,11 @@ public class mainWindowController implements IWindowController {
     }
 
     /**
-     * Takes a node Id and checks if there is a upload with that id and if so returns its index inside uploadQueueVideos.
-     * @param nameToTest a Node id
-     * @return the index of a upload with that id inside uploadQueueVideos or -1 if it was not found in uploadQueueVideos.
-     */
-    private int getUploadIndexByName(String nameToTest) {
-        int videoIndex = -1;
-        for(int i = 0; i < uploadQueueVideos.size(); i++) {
-            if(uploadQueueVideos.get(i).getPaneId().equals(nameToTest)) {
-                videoIndex = i;
-                break;
-            }
-        }
-        return videoIndex;
-    }
-
-    /**
-     * Called when the edit button for a upload is clicked
-     * Enables editing for that upload, takes a backup of its state to be able to revert and changes the available buttons
-     * @param callerId the id of the upload + button name
-     */
-    private void onEdit(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("edit button belongs to a invalid or non-existing parent");
-            return;
-        }
-        // Create a backup to be able to revert
-        editBackups.put(uploadQueueVideos.get(selected).getPaneId(), uploadQueueVideos.get(selected).copy(null)); //null -> same id
-
-        // Set on thumbnail clicked
-        uploadQueueVideos.get(selected).setEditable(true);
-        uploadQueueVideos.get(selected).setOnThumbnailClicked(event -> {
-            if (event.getButton() == MouseButton.SECONDARY) return; // Conflicting with context menu
-            File pickedThumbnail = FileUtils.pickThumbnail(THUMBNAIL_FILE_FORMAT, MAX_THUMB_SIZE);
-            if(pickedThumbnail != null) {
-                try {
-                    uploadQueueVideos.get(selected).setThumbNailFile(pickedThumbnail);
-                } catch (Exception e) {
-                    AlertUtils.exceptionDialog(transBasic.getString("app_name"), "Could not set Thumbnail", e);
-                }
-            }
-        });
-        // Sets the thumbnail right click context menu
-        ContextMenu thumbnailRClickMenu = new ContextMenu();
-        MenuItem item1 = new MenuItem(transBasic.getString("resetToDefault"));
-        item1.setOnAction(actionEvent -> {
-            try {
-                uploadQueueVideos.get(selected).setThumbNailFile(null);
-            } catch (Exception e) {
-                AlertUtils.exceptionDialog(transBasic.getString("app_name"), "Could not clear Thumbnail", e);
-            }
-            actionEvent.consume();
-        });
-        thumbnailRClickMenu.getItems().add(item1);
-        uploadQueueVideos.get(selected).setThumbnailContextMenu(thumbnailRClickMenu);
-
-        buttonStates.setEditing(uploadQueueVideos.get(selected));
-        // Make sure visual change get to the UI
-        updateUploadList();
-    }
-
-    /**
-     * Called when the save button for a upload is clicked.
-     * Saves all changes made to the upload, disables editing and changes the visible buttons.
-     * @param callerId the id of the upload + button name
-     */
-    private void onSave(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("save button belongs to a invalid or non-existing parent");
-            return;
-        }
-        // Check fields, video name
-        if(uploadQueueVideos.get(selected).getVideoName().equals("")) {
-            AlertUtils.simpleClose(transMainWin.getString("diag_noVidTitle_short"),
-                    transMainWin.getString("diag_noVidTitle_full")).show();
-            return;
-        }
-        // Make sure a category is selected (is initially null and can be set to null if categories has been re-localized)
-        if (uploadQueueVideos.get(selected).getCategory() == null) {
-            AlertUtils.simpleClose(transBasic.getString("diag_invalidCategory_short"),
-                    transBasic.getString("diag_invalidCategory_full")).show();
-            return;
-        }
-        // Check if categories has been re-localized and list is no longer correct
-        if (!categoryUtils.getCategoryNames().contains(uploadQueueVideos.get(selected).getCategory())) {
-            AlertUtils.simpleClose(transBasic.getString("diag_categoryRemoved_short"),
-                    transBasic.getString("diag_categoryRemoved_full")).show();
-            return;
-        }
-
-        uploadQueueVideos.get(selected).setEditable(false);
-        buttonStates.setLocked(uploadQueueVideos.get(selected));
-        // Delete backup if there is one
-        editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-        // Make sure visual change get to the UI
-        updateUploadList();
-    }
-
-    /**
-     * Called when the cancel button for a upload is clicked.
-     * disables editing, reverts all changes made to the upload and changes the visible buttons.
-     * @param callerId the id of the upload + button name
-     */
-    private void onCancel(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("cancel button belongs to a invalid or non-existing parent");
-            return;
-        }
-        uploadQueueVideos.get(selected).setEditable(false);
-        // Restore from backup and delete it if there is one
-        if(editBackups.containsKey(uploadQueueVideos.get(selected).getPaneId())) {
-            uploadQueueVideos.set(selected, editBackups.get(uploadQueueVideos.get(selected).getPaneId()));
-            uploadQueueVideos.get(selected).getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
-            editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-        } else {
-            AlertUtils.simpleClose(transMainWin.getString("diag_backupNoRestore_short"),
-                    transMainWin.getString("diag_backupNoRestore_full")).show();
-        }
-
-        buttonStates.setLocked(uploadQueueVideos.get(selected));
-        // Make sure visual change get to the UI
-        updateUploadList();
-    }
-
-    /**
      * Called when the delete button for a upload is clicked.
      * Shows a confirmation dialog and removes the upload from the list if the user select yes
      * @param callerId the id of the upload + button name
      */
     private void onDelete(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("delete button belongs to a invalid or non-existing parent");
-            return;
-        }
         String desc = String.format(transMainWin.getString("diag_confirmDelete_full"),
                 uploadQueueVideos.get(selected).getVideoName());
 
@@ -700,11 +411,9 @@ public class mainWindowController implements IWindowController {
             // delete backup (may exist if upload was created with no preset and directly deleted
             editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
             uploadQueueVideos.remove(selected);
-            updateUploadList();
         } // else if ButtonType.NO or closed [X] do nothing
 
         // Make sure visual change get to the UI
-        updateUploadList();
     }
 
     /**
@@ -725,14 +434,14 @@ public class mainWindowController implements IWindowController {
                     transMainWin.getString("diag_noStartUpload_full_noTitle")).show();
             return;
         }
-        if (categoryUtils.getCategoryId(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
+        if (categoryManager.findById(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
             AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
                     transMainWin.getString("diag_noStartUpload_full_noCategory")).show();
             return;
         }
 
         // If the user has not given the program permission to access their youtube channel, ask the user to do so.
-        if(configManager.getNeverAuthed()) {
+        if (settingsManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
 
@@ -747,12 +456,8 @@ public class mainWindowController implements IWindowController {
         uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());
 
         // Change buttons, make progressbar visible and set text to show it is waiting to be uploaded.
-        buttonStates.setUploading(uploadQueueVideos.get(selected));
         uploadQueueVideos.get(selected).setProgressBarVisibility(true);
         uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("waiting"));
-
-        // Make sure visual change get to the UI
-        updateUploadList();
     }
 
     /**
@@ -789,10 +494,6 @@ public class mainWindowController implements IWindowController {
         } else {
             AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason").show();
         }
-
-        buttonStates.setLocked(uploadQueueVideos.get(selected));
-        // Make sure visual change get to the UI
-        updateUploadList();
     }
 
     /**
@@ -801,20 +502,10 @@ public class mainWindowController implements IWindowController {
      * @param callerId the id of the upload + button name
      */
     private void onResetUpload(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("reset upload button belongs to a invalid or non-existing parent");
-            return;
-        }
         // Change back progressBar color, hide it and set the locked state buttons
         uploadQueueVideos.get(selected).setProgressBarColor(null);
         uploadQueueVideos.get(selected).setProgressBarVisibility(false);
         uploadQueueVideos.get(selected).setStatusLabelText(transUpload.getString("_status"));
-        buttonStates.setLocked(uploadQueueVideos.get(selected));
-
-        // Make sure visual change get to the UI
-        updateUploadList();
     }
 
     /**
@@ -832,7 +523,6 @@ public class mainWindowController implements IWindowController {
         }
         editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
         uploadQueueVideos.remove(selected);
-        updateUploadList();
     }
 
     /**
@@ -840,15 +530,12 @@ public class mainWindowController implements IWindowController {
      *
      * @param newUpload the newly created VideoUpload created from a File and a VideoPreset
      */
-    private void onPresetApplicationSuccess(VideoUpload newUpload) {
+    private void onPresetApplicationSuccess(NewVideoUploadModel newUpload) {
         // make the upload change its width together with the uploads list and the window
-        newUpload.getPane().prefWidthProperty().bind(listView.widthProperty().subtract(35));
-        newUpload.setThumbnailCursorEventHandler(this::updateCursor);
+        newUpload.getPane().prefWidthProperty().bind(listUploads.widthProperty().subtract(35));
 
         transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
-        buttonStates.setLocked(newUpload);
         uploadQueueVideos.add(newUpload);
-        updateUploadList();
         updatePresetProgressIndicator(-1);
     }
 
@@ -870,16 +557,10 @@ public class mainWindowController implements IWindowController {
      * @param paneId the id of the upload
      */
     private void onUploadFinished(String paneId) {
-        int index = getUploadIndexByName(paneId);
-        if (index == -1) {
-            System.err.println("Unknown upload just finished: " + paneId);
-            return;
-        }
         Button finishedUploadButton = new Button(transBasic.getString("hide"));
         finishedUploadButton.setId(paneId + BUTTON_FINISHED_UPLOAD);
         finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
         uploadQueueVideos.get(index).setButton2(finishedUploadButton);
-        updateUploadList();
     }
 
     /**
@@ -888,7 +569,7 @@ public class mainWindowController implements IWindowController {
      * @param video the video that failed uploading
      * @param e     the exception that occurred
      */
-    private void onUploadErred(VideoUpload video, Throwable e) {
+    private void onUploadErred(NewVideoUploadModel video, Throwable e) {
         String header = transBasic.getString("app_name") + " - Failed to upload video";
         if (e == null && video == null) {
             AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
@@ -956,8 +637,6 @@ public class mainWindowController implements IWindowController {
         if (video != null) {
             video.setProgressBarColor("red");
             video.setStatusLabelText(transUpload.getString("failed"));
-            buttonStates.setFailed(video);
-            updateUploadList();
         }
     }
 }

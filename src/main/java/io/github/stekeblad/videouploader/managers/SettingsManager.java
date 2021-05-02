@@ -169,6 +169,10 @@ public class SettingsManager extends ManagerBase {
         }
     }
 
+    public void saveUploads() {
+        //TODO: but not right now
+    }
+
     /**
      * Checks if the user have authenticated with YouTube
      *

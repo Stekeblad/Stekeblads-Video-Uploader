@@ -1,7 +1,7 @@
 package io.github.stekeblad.videouploader.tagProcessing;
 
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
-import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
+import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 
 import java.io.File;
 import java.util.List;
@@ -17,13 +17,15 @@ public class PlaylistTagProcessor implements ITagProcessor {
     public PlaylistTagProcessor() {
     }
 
-    public void init(VideoPreset preset, int initialAutoNum) {
+    public void init(NewVideoPresetModel preset, int initialAutoNum) {
         tagFound = preset.getVideoDescription().contains(PLAYLIST_TAG);
         if (!tagFound)
             return;
-        PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
-        playlistUrl = playlistUtils.getPlaylistUrl(preset.getSelectedPlaylist());
-        if (playlistUrl == null) {
+
+        LocalPlaylist playlist = preset.getSelectedPlaylist();
+        if (playlist != null) {
+            playlistUrl = playlist.playlistUrl();
+        } else {
             playlistUrl = "";
         }
     }

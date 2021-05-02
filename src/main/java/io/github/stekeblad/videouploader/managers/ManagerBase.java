@@ -124,12 +124,23 @@ abstract class ManagerBase {
     }
 
     /**
-     * Throws an exception if config does not contain a property with the name prop
+     * Throws an exception if config does not contain a property with the name prop.
+     * Throws an NullPointerException if prop is null
      *
      * @param prop the name of a property to check if it exist
      */
     private void assertProperty(String prop) {
-        if (!config.has(prop))
-            throw new RuntimeException("Property \"" + prop + "\" not found");
+        if (prop == null)
+            throw new NullPointerException();
+
+        if (!config.has(prop)) {
+            String errorMessage = "Property " + prop + " not found in the following object:";
+            try {
+                errorMessage += gson.toJson(config);
+            } catch (Exception ignored) {
+                errorMessage += "Error - Could not convert to a string";
+            }
+            throw new RuntimeException(errorMessage);
+        }
     }
 }

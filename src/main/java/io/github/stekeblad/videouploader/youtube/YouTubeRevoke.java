@@ -1,7 +1,7 @@
 package io.github.stekeblad.videouploader.youtube;
 
+import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.HttpOperations;
 import io.github.stekeblad.videouploader.utils.RecursiveDirectoryDeleter;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
@@ -62,7 +62,7 @@ public class YouTubeRevoke {
         // getString() is more likely to throw exceptions than returning null and then its an error in the code or the translation.
         if (button1.equals(buttonChoice)) {
             delete = true;
-        } else if (button2.equals(buttonChoice) && !ConfigManager.INSTANCE.getNeverAuthed()) {
+        } else if (button2.equals(buttonChoice) && !SettingsManager.getSettingsManager().getNeverAuthed()) {
             delete = true;
             logOut = true;
         }

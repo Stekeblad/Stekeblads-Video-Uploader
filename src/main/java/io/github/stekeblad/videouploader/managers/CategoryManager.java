@@ -38,7 +38,7 @@ public class CategoryManager extends ManagerBase {
      * Returns the shared CategoryManager, creating it if this is the first time this
      * method gets called since the program started.
      */
-    public static CategoryManager getCategoryManger() {
+    public static CategoryManager getCategoryManager() {
         if (_manager == null)
             _manager = new CategoryManager();
 
@@ -191,9 +191,14 @@ public class CategoryManager extends ManagerBase {
                 .collect(Collectors.toList());
 
         // Do not overwrite categories with receivedTransformedCategories, categories is observable and
-        // it will probably make all observers lose track of it.
+        // it will probably make all observers lose track of it. Updating categories will probably place
+        // all presets and uploads in a bad state and will need to be edited by the user.
         categories.clear();
         categories.addAll(receivedTransformedCategories);
+
+        // save the new country and language codes
+        setCategoryCountry(country);
+        setCategoryLanguage(language);
     }
 
     public String getCategoryCountry() {

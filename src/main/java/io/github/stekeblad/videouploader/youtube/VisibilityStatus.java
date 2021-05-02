@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.youtube.utils;
+package io.github.stekeblad.videouploader.youtube;
 
 /**
  * A Enum for the different video visibility statues that Youtube have
@@ -18,7 +18,7 @@ public enum VisibilityStatus {
         return status;
     }
 
-    public boolean equals(/*VisibilityStatus status,*/ String str) {
+    public boolean equals(String str) {
         return str.equals(this.status);
     }
 }

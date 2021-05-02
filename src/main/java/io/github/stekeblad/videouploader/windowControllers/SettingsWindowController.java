@@ -2,8 +2,8 @@ package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
+import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.UpdaterUi;
@@ -47,8 +47,9 @@ public class SettingsWindowController implements IWindowController {
     private TranslationsMeta translationsMeta;
     private Translations settingsTrans;
     private Translations basicTrans;
-    private ConfigManager configManager;
+    private SettingsManager settingsManager;
     private boolean hasDoneChanges = false;
+
 
     /**
      * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
@@ -57,7 +58,7 @@ public class SettingsWindowController implements IWindowController {
         // Set the default exception handler, hopefully it can catch some of the exceptions that is not already caught
         Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> AlertUtils.unhandledExceptionDialog(exception));
 
-        configManager = ConfigManager.INSTANCE;
+        settingsManager = SettingsManager.getSettingsManager();
         translationsMeta = new TranslationsMeta();
         basicTrans = TranslationsManager.getTranslation(TranslationBundles.BASE);
         settingsTrans = TranslationsManager.getTranslation(TranslationBundles.WINDOW_SETTINGS);
@@ -65,11 +66,11 @@ public class SettingsWindowController implements IWindowController {
 
         // set the options in the window to their state in the configuration file
         choice_languages.setItems(FXCollections.observableList(translationsMeta.getAllTranslationLocales()));
-        choice_languages.getSelectionModel().select(translationsMeta.localeCodeToLangName(configManager.getSelectedLanguage()));
+        choice_languages.getSelectionModel().select(translationsMeta.localeCodeToLangName(settingsManager.getSelectedLanguage()));
         choice_languages.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> hasDoneChanges = true);
 
-        check_checkForUpdates.setSelected(configManager.getCheckForUpdates());
-        check_silentUpdates.setSelected(configManager.getSilentUpdates());
+        check_checkForUpdates.setSelected(settingsManager.getCheckForUpdates());
+        check_silentUpdates.setSelected(settingsManager.getSilentUpdates());
 
         // F1 for wiki on this window
         settingsWindow.getScene().setOnKeyPressed(event -> {
@@ -83,12 +84,18 @@ public class SettingsWindowController implements IWindowController {
     @Override
     public boolean onWindowClose() {
         if (hasDoneChanges) {
-            AlertUtils.simpleClose("restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
+            AlertUtils.simpleClose("Restart may be required", "For some changes to take effect you may need to restart the program").showAndWait();
         }
-        configManager.setSelectedLanguage(translationsMeta.langNameToLocaleCode(choice_languages.getValue()));
-        configManager.setCheckForUpdates(check_checkForUpdates.isSelected());
-        configManager.setSilentUpdates(check_silentUpdates.isSelected());
-        configManager.saveSettings();
+        settingsManager.setSelectedLanguage(translationsMeta.langNameToLocaleCode(choice_languages.getValue()));
+        settingsManager.setCheckForUpdates(check_checkForUpdates.isSelected());
+        settingsManager.setSilentUpdates(check_silentUpdates.isSelected());
+        try {
+            settingsManager.saveSettings();
+        } catch (IOException exception) {
+            AlertUtils.exceptionDialog("Stekeblads Video Uploader",
+                    "Could not save settings",
+                    exception);
+        }
         return true;
     }
 

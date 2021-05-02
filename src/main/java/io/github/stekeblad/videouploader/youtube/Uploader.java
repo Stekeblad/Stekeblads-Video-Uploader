@@ -8,11 +8,10 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
+import io.github.stekeblad.videouploader.models.NewVideoUploadModel;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.utils.CategoryUtils;
-import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
@@ -37,10 +36,8 @@ public class Uploader {
     private final String VIDEO_FILE_FORMAT = "video/";
 
     private final Map<String, Future<?>> tasks;
-    private final CategoryUtils categoryUtils;
-    private final PlaylistUtils playlistUtils;
     private Consumer<String> uploadFinishedCallback = null;
-    private BiConsumer<VideoUpload, Throwable> uploadErredCallback = null;
+    private BiConsumer<NewVideoUploadModel, Throwable> uploadErredCallback = null;
     private final ExecutorService exec;
     private final Translations translationsUpload;
     private final Translations translationsBasic;
@@ -50,8 +47,6 @@ public class Uploader {
         translationsUpload = TranslationsManager.getTranslation(TranslationBundles.UPLOADER);
         translationsBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
         tasks = Collections.synchronizedMap(new HashMap<>());
-        categoryUtils = CategoryUtils.INSTANCE;
-        playlistUtils = PlaylistUtils.INSTANCE;
         exec = Executors.newSingleThreadExecutor(Thread::new);
 
     }
@@ -69,11 +64,12 @@ public class Uploader {
     /**
      * Sets a method to be called when a upload fails and it can not be handled by this class. The parameters given to the
      * callback will be the VideoUpload that erred and the exception that could not be handled.
-     * Setting this callback is not required. This method is not threadsafe. It is 
+     * Setting this callback is not required. This method is not threadsafe. It is
      * recommended to call this method shortly after an instance of the class is created and before any uploads are added.
+     *
      * @param callback the callback to be called when an upload errors
      */
-    public void setUploadErredCallback(BiConsumer<VideoUpload, Throwable> callback) {
+    public void setUploadErredCallback(BiConsumer<NewVideoUploadModel, Throwable> callback) {
         this.uploadErredCallback = callback;
     }
 
@@ -131,10 +127,11 @@ public class Uploader {
 
     /**
      * Adds video to the upload list. This method is threadsafe.
-     * @param video video to upload
+     *
+     * @param video      video to upload
      * @param cancelName String to use for aborting the upload (and used to report that its finished if a callback is set)
      */
-    public void add(VideoUpload video, String cancelName) {
+    public void add(NewVideoUploadModel video, String cancelName) {
         // Create the task
         Task<Void> newTask = new Task<>() {
             @Override
@@ -187,11 +184,12 @@ public class Uploader {
 
     /**
      * Does the uploading.
+     *
      * @param video a VideoUpload with all the details needed for uploading
      * @throws IOException if the user aborts the upload while it is uploading, there is a exception while reading the video
-     * or thumbnail file or there is a network error that could not be handled.
+     *                     or thumbnail file or there is a network error that could not be handled.
      */
-    private void upload(VideoUpload video) throws IOException {
+    private void upload(NewVideoUploadModel video) throws IOException {
 
         // debug thing to force error
         if (video.getVideoName().equals("forceUploadFailure")) {
@@ -212,7 +210,7 @@ public class Uploader {
 
         // Extra check if this upload has been aborted
         synchronized (tasks) {
-            if (!tasks.containsKey(video.getPaneId()))
+            if (!tasks.containsKey(video.getUniqueId().toString()))
                 throw new IOException("INTERRUPTED");
         }
         // debug for testing daily upload limit exceeded
@@ -239,7 +237,7 @@ public class Uploader {
         videoMetaData.setTitle(video.getVideoName());
         videoMetaData.setDescription(video.getVideoDescription());
         videoMetaData.setTags(video.getVideoTags());
-        videoMetaData.setCategoryId(categoryUtils.getCategoryId(video.getCategory()));
+        videoMetaData.setCategoryId(video.getSelectedCategory().getId());
 
         videoObject.setSnippet(videoMetaData);
         InputStreamContent videoFileStream;
@@ -298,9 +296,9 @@ public class Uploader {
         Video uploadedVideo = videoInsert.execute();
 
         // Set thumbnail if selected
-        if (video.getThumbNail() != null) {
+        if (video.getThumbnailPath() != null) {
             Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("thumbnail")));
-            File thumbFile = video.getThumbNail();
+            File thumbFile = new File(video.getThumbnailPath());
             String contentType = Files.probeContentType(Paths.get(thumbFile.toURI()));
 
             InputStreamContent thumbnailFileContent;
@@ -316,17 +314,18 @@ public class Uploader {
             thumbnailSet.execute();
         }
         // Add to playlist if it is not null, empty or the "no selected" default value
-        String playlistString = video.getSelectedPlaylist();
-        if (playlistString != null && !playlistString.equals("null") && !playlistString.equals("") &&
-                !playlistString.equals(translationsBasic.getString("noSelected"))) {
-            String newStatusText = String.format(translationsUpload.getString("playlist"), video.getSelectedPlaylist());
+        LocalPlaylist selectedPlaylist = video.getSelectedPlaylist();
+        if (selectedPlaylist != null
+                && !selectedPlaylist.getName().equals(translationsBasic.getString("noSelected"))) {
+            String playlistName = selectedPlaylist.getName();
+            String newStatusText = String.format(translationsUpload.getString("playlist"), playlistName);
             Platform.runLater(() -> video.setStatusLabelText(newStatusText));
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
             resourceId.setVideoId(uploadedVideo.getId());
 
             PlaylistItemSnippet playlistSnippet = new PlaylistItemSnippet();
-            playlistSnippet.setPlaylistId(playlistUtils.getPlaylistId(video.getSelectedPlaylist()));
+            playlistSnippet.setPlaylistId(selectedPlaylist.getId());
             playlistSnippet.setResourceId(resourceId);
 
             PlaylistItem playlistItem = new PlaylistItem();

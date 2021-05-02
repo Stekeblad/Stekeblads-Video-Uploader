@@ -23,7 +23,7 @@
             <ProgressBar fx:id="progress_preset" prefHeight="18.0" prefWidth="47.0"/>
         </HBox>
     </ToolBar>
-    <ListView fx:id="listView" layoutX="15.0" layoutY="350.0" AnchorPane.bottomAnchor="15.0"
+    <ListView fx:id="listUploads" layoutX="15.0" layoutY="350.0" AnchorPane.bottomAnchor="15.0"
               AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="200.0"/>
     <ListView id="chosen_files" fx:id="chosen_files" layoutX="14.0" layoutY="40.0" prefHeight="154.0" prefWidth="309.0"
               AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="40.0"/>

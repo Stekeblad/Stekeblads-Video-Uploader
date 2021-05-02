@@ -23,6 +23,7 @@ public class OtherYouTubeException extends YouTubeException {
 
     public OtherYouTubeException(GoogleJsonError.ErrorInfo error, String moreInfo, Throwable cause) {
         super(error, cause);
+        this.moreInfo = moreInfo;
     }
 
     public String getMessage() {

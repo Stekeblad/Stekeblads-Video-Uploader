@@ -5,10 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import io.github.stekeblad.videouploader.managers.CategoryManager;
 import io.github.stekeblad.videouploader.managers.PlaylistManager;
-import io.github.stekeblad.videouploader.models.VideoPresetModel;
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.youtube.LocalCategory;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
+import io.github.stekeblad.videouploader.youtube.VisibilityStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,14 +31,14 @@ class PresetNaNTo3Migration {
     JsonObject migrate(ArrayList<ArrayList<String>> oldPresets) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         PlaylistManager playlistManager = PlaylistManager.getPlaylistManager();
-        CategoryManager categoryManager = CategoryManager.getCategoryManger();
+        CategoryManager categoryManager = CategoryManager.getCategoryManager();
 
         JsonObject newJson = new JsonObject();
         newJson.addProperty(Constants.VERSION_FORMAT_KEY, 3);
-        ArrayList<VideoPresetModel> newPresetList = new ArrayList<>();
+        ArrayList<NewVideoPresetModel> newPresetList = new ArrayList<>();
 
         for (ArrayList<String> preset : oldPresets) {
-            VideoPresetModel newPreset = new VideoPresetModel();
+            NewVideoPresetModel newPreset = new NewVideoPresetModel();
             for (int i = 0; i < preset.size(); i++) {
 
                 String line = preset.get(i);
@@ -66,7 +67,7 @@ class PresetNaNTo3Migration {
                         newPreset.setVideoDescription(descBuilder.toString());
                         break;
                     case NODE_ID_VISIBILITY:
-                        newPreset.setVisibility(line.substring(colonIndex + 1));
+                        newPreset.setVisibility(VisibilityStatus.valueOf(line.substring(colonIndex + 1)));
                         break;
                     case NODE_ID_TAGS:
                         line = line.substring(colonIndex + 2, line.length() - 1); // remove brackets

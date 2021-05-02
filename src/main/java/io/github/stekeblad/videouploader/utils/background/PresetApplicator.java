@@ -1,8 +1,8 @@
 package io.github.stekeblad.videouploader.utils.background;
 
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
+import io.github.stekeblad.videouploader.models.NewVideoUploadModel;
 import io.github.stekeblad.videouploader.tagProcessing.ITagProcessor;
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
-import io.github.stekeblad.videouploader.youtube.VideoUpload;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import org.jcodec.api.NotSupportedException;
@@ -20,19 +20,16 @@ import java.util.function.Consumer;
  */
 public class PresetApplicator {
     private final Map<String, Future<?>> tasks;
-    private Consumer<VideoUpload> successCallback = null;
+    private Consumer<NewVideoUploadModel> successCallback = null;
     private BiConsumer<File, Throwable> errorCallback = null;
     private final ExecutorService exec;
 
-    private VideoPreset lastPreset;
+    private NewVideoPresetModel lastPreset;
     private List<ITagProcessor> tagProcessors = null;
-
-    private final Random random;
 
     public PresetApplicator() {
         exec = Executors.newSingleThreadExecutor(Thread::new);
         tasks = Collections.synchronizedMap(new HashMap<>());
-        random = new Random();
     }
 
     /**
@@ -43,7 +40,7 @@ public class PresetApplicator {
      * @param presetApplicatorSuccessCallback the callback to call for every created VideoUpload
      * @throws NotSupportedException if you try to change the callback while the PresetApplicator is working
      */
-    public void setSuccessCallback(Consumer<VideoUpload> presetApplicatorSuccessCallback) throws NotSupportedException {
+    public void setSuccessCallback(Consumer<NewVideoUploadModel> presetApplicatorSuccessCallback) throws NotSupportedException {
         if (!tasks.keySet().isEmpty())
             throw new NotSupportedException("Success callback can not be changed while the PresetApplicator is working");
         else
@@ -83,7 +80,7 @@ public class PresetApplicator {
         return tasks.keySet();
     }
 
-    public void applyPreset(List<File> videoFiles, VideoPreset preset, int autoNum) {
+    public void applyPreset(List<File> videoFiles, NewVideoPresetModel preset, int autoNum) {
         for (File videoFile : videoFiles) {
             // assume the user will not send a file to PresetApplicator that is already queued
             String cancelName = videoFile.getAbsolutePath();
@@ -95,7 +92,7 @@ public class PresetApplicator {
                 protected Void call() {
                     try {
                         //Apply
-                        VideoUpload readyUpload = apply(videoFile, preset, taskAutoNum);
+                        NewVideoUploadModel readyUpload = apply(videoFile, preset, taskAutoNum);
                         Platform.runLater(() -> successCallback.accept(readyUpload));
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -128,7 +125,7 @@ public class PresetApplicator {
      * @param autoNum   automatic episode numbering number
      * @return a VideoUpload, ready to be uploaded
      */
-    private VideoUpload apply(File videoFile, VideoPreset preset, int autoNum) {
+    private NewVideoUploadModel apply(File videoFile, NewVideoPresetModel preset, int autoNum) {
         // Find tagProcessors if tagProcessors list is null
         if (tagProcessors == null) {
             tagProcessors = new ArrayList<>();
@@ -157,21 +154,18 @@ public class PresetApplicator {
             videoTags = processor.processTags(videoTags, videoFile);
         }
 
-        // Create the VideoUpload object
-        VideoUpload.Builder newUploadBuilder = new VideoUpload.Builder()
-                .setVideoName(name)
-                .setVideoDescription(description)
-                .setVisibility(preset.getVisibility())
-                .setVideoTags(videoTags)
-                .setSelectedPlaylist(preset.getSelectedPlaylist())
-                .setCategory(preset.getCategory())
-                .setTellSubs(preset.isTellSubs())
-                .setMadeForKids(preset.isMadeForKids())
-                .setPaneName("upload-" + Integer.toHexString(random.nextInt()))
-                .setVideoFile(videoFile);
-        if (preset.getThumbNail() != null) {
-            newUploadBuilder.setThumbNailPath(preset.getThumbNail().getAbsolutePath());
-        }
-        return newUploadBuilder.build();
+        NewVideoUploadModel upload = new NewVideoUploadModel();
+        upload.setVideoName(name);
+        upload.setVideoDescription(description);
+        upload.setVisibility(preset.getVisibility());
+        upload.setVideoTags(videoTags);
+        upload.setSelectedPlaylist(preset.getSelectedPlaylist());
+        upload.setSelectedCategory(preset.getSelectedCategory());
+        upload.setTellSubs(preset.isTellSubs());
+        upload.setMadeForKids(preset.isMadeForKids());
+        upload.setThumbnailPath(preset.getThumbnailPath());
+        upload.setVideoFile(videoFile);
+
+        return upload;
     }
 }

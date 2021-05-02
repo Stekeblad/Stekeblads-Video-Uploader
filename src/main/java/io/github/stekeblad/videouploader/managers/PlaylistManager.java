@@ -49,8 +49,9 @@ public class PlaylistManager extends ManagerBase {
     }
 
     private final Path playlistPath;
-    private final ObservableList<LocalPlaylist> playlists;
-    private final FilteredList<LocalPlaylist> visiblePlaylists;
+    private final ObservableList<LocalPlaylist> rawPlaylists; // includes the dummy list
+    private final FilteredList<LocalPlaylist> playlists; // all the users playlists
+    private final FilteredList<LocalPlaylist> filteredVisiblePlaylists;
     private final Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
 
     /**
@@ -100,8 +101,11 @@ public class PlaylistManager extends ManagerBase {
         ArrayList<LocalPlaylist> tempList = getArrayList("playlists", LocalPlaylist.class);
         // giving sort null means that the items in the list must implement the Comparable interface and it's compareTo method will be used
         tempList.sort(null);
-        playlists = FXCollections.observableArrayList(tempList);
-        visiblePlaylists = playlists.filtered(LocalPlaylist::isVisible);
+        // add the default no playlist-playlist. TODO translate the name
+        tempList.add(0, new LocalPlaylist(false, LocalPlaylist.MAGIC_PLAYLIST_ID, "--No playlist--"));
+        rawPlaylists = FXCollections.observableArrayList(tempList);
+        playlists = rawPlaylists.filtered(localPlaylist -> !localPlaylist.getId().equals("0"));
+        filteredVisiblePlaylists = rawPlaylists.filtered(LocalPlaylist::isVisible);
     }
 
     /**
@@ -119,7 +123,7 @@ public class PlaylistManager extends ManagerBase {
      * * in the playlist dropdown lists
      */
     public ObservableList<LocalPlaylist> getVisiblePlaylists() {
-        return visiblePlaylists;
+        return filteredVisiblePlaylists;
     }
 
     /**
@@ -203,8 +207,9 @@ public class PlaylistManager extends ManagerBase {
 
         // Do not overwrite playlists with remoteTransformedPlaylists, playlists is observable and
         // it will probably make all observers lose track of it.
-        playlists.clear();
-        playlists.addAll(remoteTransformedPlaylists);
+        // Keep the first element (the no playlist-playlist)
+        rawPlaylists.remove(1, rawPlaylists.size());
+        rawPlaylists.addAll(remoteTransformedPlaylists);
     }
 
     /**
@@ -244,6 +249,7 @@ public class PlaylistManager extends ManagerBase {
 
         LocalPlaylist localPlaylist = new LocalPlaylist(
                 true, newPlaylist.getId(), newPlaylist.getSnippet().getTitle());
-        playlists.add(localPlaylist);
+        rawPlaylists.add(localPlaylist);
+        rawPlaylists.sort(null);
     }
 }

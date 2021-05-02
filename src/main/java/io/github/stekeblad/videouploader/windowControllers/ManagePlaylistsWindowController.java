@@ -1,41 +1,39 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
+import io.github.stekeblad.videouploader.ListControllers.PlaylistItemController;
 import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
+import io.github.stekeblad.videouploader.managers.PlaylistManager;
+import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
-import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
-import io.github.stekeblad.videouploader.youtube.utils.PlaylistUtils;
-import io.github.stekeblad.videouploader.youtube.utils.VisibilityStatus;
+import io.github.stekeblad.videouploader.youtube.VisibilityStatus;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 public class ManagePlaylistsWindowController implements IWindowController {
     public Button btn_refreshPlaylists;
     public Button btn_addNewPlaylist;
     public TextField txt_newPlaylistName;
-    public ListView<CheckBox> list_playlists;
+    public ListView<PlaylistItemController> list_playlists;
     public ChoiceBox<String> choice_privacyStatus;
     public GridPane window;
     public ToolBar toolbar;
     public Label label_description;
 
-    private final ConfigManager configManager = ConfigManager.INSTANCE;
-    private final PlaylistUtils playlistUtils = PlaylistUtils.INSTANCE;
+    private final SettingsManager settingsManager = SettingsManager.getSettingsManager();
+    private final PlaylistManager playlistManager = PlaylistManager.getPlaylistManager();
     private Translations transPlaylistWindow;
     private Translations transBasic;
 
@@ -53,6 +51,10 @@ public class ManagePlaylistsWindowController implements IWindowController {
 
         // Insert the stored playlists into the list
         updatePlaylistList();
+        list_playlists.setItems(playlistManager.getAllPlaylists().stream()
+                .map(PlaylistItemController::new)
+                .collect(Collectors.toList())
+                .so);
 
         // cant autoTranslate Nodes in Toolbar (bug)
         txt_newPlaylistName.setPromptText(transPlaylistWindow.getString("txt_newPlaylistName_pt"));
@@ -93,13 +95,14 @@ public class ManagePlaylistsWindowController implements IWindowController {
      * Executed when the window's close button is triggered
      */
     public boolean onWindowClose() {
-        ObservableList<CheckBox> listItems = list_playlists.getItems();
-        if (listItems.size() > 0) {
-            for (CheckBox listItem : listItems) {
-                playlistUtils.setVisible(listItem.getText(), listItem.isSelected());
-            }
-            playlistUtils.saveCache();
-        }
+        // TODO: Test this, is visibility updated automatically by the observing feature?
+//        ObservableList<CheckBox> listItems = list_playlists.getItems();
+//        if (listItems.size() > 0) {
+//            for (CheckBox listItem : listItems) {
+//                playlistManager.setVisible(listItem.getText(), listItem.isSelected());
+//            }
+//            playlistManager.saveCache();
+//        }
         return true;
     }
 
@@ -108,7 +111,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
      * @param actionEvent the button click event
      */
     public void onRefreshPlaylistsClicked(ActionEvent actionEvent) {
-        if (configManager.getNeverAuthed()) {
+        if (settingsManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
 
@@ -126,9 +129,8 @@ public class ManagePlaylistsWindowController implements IWindowController {
         Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                playlistUtils.refreshPlaylist(); // Get playlists from Youtube on background thread
+                playlistManager.updateFromYouTube();
                 Platform.runLater(() -> {
-                    updatePlaylistList(); // update list in window on UI thread
                     btn_refreshPlaylists.setText(transPlaylistWindow.getString("btn_refreshPlaylists"));
                 });
                 return null;
@@ -154,12 +156,12 @@ public class ManagePlaylistsWindowController implements IWindowController {
      * @param actionEvent the button click event
      */
     public void onAddNewPlaylistClicked(ActionEvent actionEvent) {
-        if(txt_newPlaylistName.getText().isEmpty()) {
+        if (txt_newPlaylistName.getText().isEmpty()) {
             AlertUtils.simpleClose(transPlaylistWindow.getString("diag_noPlaylistName_short"),
                     transPlaylistWindow.getString("diag_noPlaylistName_full")).show();
             return;
         }
-        if (configManager.getNeverAuthed()) {
+        if (settingsManager.getNeverAuthed()) {
             ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
                     transBasic.getString("auth_full"), ButtonType.NO);
             if (userChoice == ButtonType.NO) { // or closed [X]
@@ -178,16 +180,12 @@ public class ManagePlaylistsWindowController implements IWindowController {
         Task<Void> backgroundTask = new Task<>() {
             @Override
             protected Void call() {
-                LocalPlaylist localPlaylist = playlistUtils.addPlaylist(listName, privacyLevel);
-                if (localPlaylist == null) {
-                    Platform.runLater(() -> AlertUtils.simpleClose(transBasic.getString("error"),
-                            transPlaylistWindow.getString("diag_creatingFailed")).show());
-                    return null;
-                }
-                CheckBox cb = new CheckBox(localPlaylist.getName());
-                cb.setSelected(true);
+                playlistManager.createPlaylist(listName, privacyLevel);
+                // TODO: The million tests, updating and creating playlists
+                //CheckBox cb = new CheckBox(localPlaylist.getName());
+                //cb.setSelected(true);
                 Platform.runLater(() -> {
-                    list_playlists.getItems().add(cb);
+                    //list_playlists.getItems().add(cb);
                     txt_newPlaylistName.setText(""); // visually indicate its done by clearing the new playlist name textField
                     btn_addNewPlaylist.setDisable(false);
                     btn_addNewPlaylist.setText(transPlaylistWindow.getString("btn_addNewPlaylist"));
@@ -212,27 +210,28 @@ public class ManagePlaylistsWindowController implements IWindowController {
      * Makes sure the playlist list is up to date
      */
     private void updatePlaylistList() {
-        ArrayList<CheckBox> playlistCheckBoxes = new ArrayList<>();
-        ArrayList<LocalPlaylist> playlists = playlistUtils.getAllPlaylists();
-        if (playlists != null) {
-            for (LocalPlaylist playlist : playlists) {
-                CheckBox cb = new CheckBox(playlist.getName());
-                cb.setSelected(playlist.isVisible());
-
-                // Add right click feature to view playlist on YouTube
-                ContextMenu playlistContext = new ContextMenu();
-                MenuItem item1 = new MenuItem(transPlaylistWindow.getString("viewOnYouTube"));
-                item1.setOnAction(event ->
-                        OpenInBrowser.openInBrowser("https://www.youtube.com/playlist?list=" + playlist.getId()));
-                playlistContext.getItems().add(item1);
-                cb.setOnContextMenuRequested(event -> playlistContext.show(cb, Side.LEFT, 250, 0));
-
-                // Add to list
-                playlistCheckBoxes.add(cb);
-            }
-            // Sorts the playlists lexicographically
-            playlistCheckBoxes.sort(Comparator.comparing(Labeled::getText));
-            list_playlists.setItems(FXCollections.observableArrayList(playlistCheckBoxes));
-        }
+        //TODO: Only used by myInit. Fix, shorten and move there
+//        ArrayList<CheckBox> playlistCheckBoxes = new ArrayList<>();
+//        ArrayList<LocalPlaylist> playlists = playlistManager.getAllPlaylists();
+//        if (playlists != null) {
+//            for (LocalPlaylist playlist : playlists) {
+//                CheckBox cb = new CheckBox(playlist.getName());
+//                cb.setSelected(playlist.isVisible());
+//
+//                // Add right click feature to view playlist on YouTube
+//                ContextMenu playlistContext = new ContextMenu();
+//                MenuItem item1 = new MenuItem(transPlaylistWindow.getString("viewOnYouTube"));
+//                item1.setOnAction(event ->
+//                        OpenInBrowser.openInBrowser("https://www.youtube.com/playlist?list=" + playlist.getId()));
+//                playlistContext.getItems().add(item1);
+//                cb.setOnContextMenuRequested(event -> playlistContext.show(cb, Side.LEFT, 250, 0));
+//
+//                // Add to list
+//                playlistCheckBoxes.add(cb);
+//            }
+//            // Sorts the playlists lexicographically
+//            playlistCheckBoxes.sort(Comparator.comparing(Labeled::getText));
+//            list_playlists.setItems(FXCollections.observableArrayList(playlistCheckBoxes));
+    }
     }
 }

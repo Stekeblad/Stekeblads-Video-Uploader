@@ -1,7 +1,7 @@
 package io.github.stekeblad.videouploader.tagProcessing.metaDataTagProcessor;
 
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
 import io.github.stekeblad.videouploader.tagProcessing.ITagProcessor;
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -34,8 +34,9 @@ public class MetaDataTagProcessor implements ITagProcessor {
     // nameOfTag starts after : and ends at the first occurrence of , or )
     // if , is found first it starts matching fallback until a ) is found
     private final Pattern METADATA_TAG = Pattern.compile("\\$\\(metadata:([^,)]+)(,[^)]*)?\\)");
+
     @Override
-    public void init(VideoPreset preset, int initialAutoNum) {
+    public void init(NewVideoPresetModel preset, int initialAutoNum) {
         tagFoundInTitle = false;
         tagFoundInDescription = false;
         tagFoundInTagsList = false;

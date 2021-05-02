@@ -1,6 +1,6 @@
 package io.github.stekeblad.videouploader.tagProcessing;
 
-import io.github.stekeblad.videouploader.youtube.VideoPreset;
+import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
 
 import java.io.File;
 import java.util.List;
@@ -17,14 +17,14 @@ public interface ITagProcessor {
      * init(...) has been called. This is a good place to do some initial processing and prepare as much as possible to
      * reduce the amount of work needed in the process methods. For example if the tag this TagProcessor is looking for
      * does not exist in the preset it can set a boolean so it returns directly in the process methods.
-     *
+     * <p>
      * IMPORTANT: TagProcessors must support init(...) being called multiple times and reset all internal variables
      * so nothing set from the first call incorrectly remain after a second call.
      *
-     * @param preset        the selected VideoPreset
+     * @param preset         the selected VideoPreset
      * @param initialAutoNum the value in the auto num field when the apply preset button was pressed
      */
-    void init(VideoPreset preset, int initialAutoNum);
+    void init(NewVideoPresetModel preset, int initialAutoNum);
 
     /**
      * Processes the title field of a video and replaces the tags target by this TagProcessor with new data. Note that the

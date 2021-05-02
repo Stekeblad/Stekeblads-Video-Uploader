@@ -14,6 +14,8 @@ public class LocalPlaylist implements Comparable<LocalPlaylist> {
     private String id;
     private String name;
 
+    public static final String MAGIC_PLAYLIST_ID = "0";
+
     public LocalPlaylist(boolean visible, String playlistId, String playlistName) {
         this.visible = visible;
         this.id = playlistId;
@@ -50,6 +52,12 @@ public class LocalPlaylist implements Comparable<LocalPlaylist> {
 
     @Override
     public int compareTo(@NotNull LocalPlaylist other) {
-        return this.name.compareTo(other.getName());
+        // A playlist with the magic id is the placeholder for not selecting any real playlist and should be sorted first
+        if (this.id.equals(MAGIC_PLAYLIST_ID))
+            return -1;
+        else if (other.getId().equals(MAGIC_PLAYLIST_ID))
+            return 1;
+        else
+            return this.name.compareTo(other.getName());
     }
 }

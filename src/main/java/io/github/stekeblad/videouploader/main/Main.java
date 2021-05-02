@@ -1,8 +1,8 @@
 package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.jfxExtension.MyStage;
+import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
-import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
@@ -20,13 +20,12 @@ import java.util.Locale;
  * The program starts here, opens MainWindow and waits for all windows to close
  */
 public class Main extends Application {
-    private ConfigManager configManager;
+    private SettingsManager settingsManager;
 
     @Override
     public void start(Stage primaryStage) {
         try {
-            configManager = ConfigManager.INSTANCE;
-            configManager.configManager();
+            settingsManager = SettingsManager.getSettingsManager();
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtils.exceptionDialog("ERROR",
@@ -70,11 +69,11 @@ public class Main extends Application {
     private String getWindowTitle() {
         Translations trans = TranslationsManager.getTranslation(TranslationBundles.BASE);
         // If the user has never authed, only use program name
-        if (configManager.getNeverAuthed()) {
+        if (settingsManager.getNeverAuthed()) {
             return trans.getString("app_name");
         }
         // then check the settings
-        else if (configManager.getChannelName() == null || configManager.getChannelName().equals("")) {
+        else if (settingsManager.getChannelName() == null || settingsManager.getChannelName().equals("")) {
             // Not there, get from YouTube
             String channelName;
             try {
@@ -85,7 +84,7 @@ public class Main extends Application {
             }
             if (channelName != null) {
                 // success, save and return program name + channel name
-                configManager.setChannelName(channelName);
+                settingsManager.setChannelName(channelName);
                 return trans.getString("app_name") + " - (" + channelName + ")";
             } else {
                 // failure, only return program name
@@ -93,13 +92,13 @@ public class Main extends Application {
             }
         } else {
             // return program name and saved channel name
-            return trans.getString("app_name") + " - (" + configManager.getChannelName() + ")";
+            return trans.getString("app_name") + " - (" + settingsManager.getChannelName() + ")";
         }
     }
 
     private void loadTranslations() throws Exception {
 
-        String localeString = configManager.getSelectedLanguage();
+        String localeString = settingsManager.getSelectedLanguage();
         Locale locale;
         if (localeString != null && !localeString.isEmpty()) {
             locale = new Locale(localeString);

@@ -1,10 +1,13 @@
 package io.github.stekeblad.videouploader.jfxExtension;
 
-import io.github.stekeblad.videouploader.utils.ConfigManager;
+import io.github.stekeblad.videouploader.managers.SettingsManager;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.Constants;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class MyStage extends Stage {
 
@@ -15,8 +18,8 @@ public class MyStage extends Stage {
     }
 
     public void makeScene(Parent root, WindowDimensionsRestriction dimensions) {
-        ConfigManager configManager = ConfigManager.INSTANCE;
-        WindowFrame points = configManager.getWindowRectangle(myWindowPropertyName);
+        SettingsManager settingsManager = SettingsManager.getSettingsManager();
+        WindowFrame points = settingsManager.getWindowFrame(myWindowPropertyName);
         Scene scene = new Scene(root, points.getWidth(), points.getHeight());
         setScene(scene);
         setX(points.getX());
@@ -55,19 +58,26 @@ public class MyStage extends Stage {
      * @param controller a class implementing MyControllerBase
      */
     private void triggerController(Object controller) {
+        SettingsManager settingsManager = SettingsManager.getSettingsManager();
         if (controller instanceof IWindowController) {
             IWindowController cont = (IWindowController) controller;
             setOnCloseRequest(event -> {
                 if (cont.onWindowClose()) { // true == close && false == doNotClose
                     WindowFrame toSave = new WindowFrame(getX(), getY(), getWidth(), getHeight());
-                    ConfigManager.INSTANCE.setWindowRectangle(myWindowPropertyName, toSave);
+                    settingsManager.setWindowFrame(myWindowPropertyName, toSave);
                 } else {
                     event.consume();
                 }
 
                 // Make sure all settings is saved on exit do not save when not needed
                 if (myWindowPropertyName.equals(Constants.WindowPropertyNames.MAIN)) {
-                    ConfigManager.INSTANCE.saveSettings();
+                    try {
+                        settingsManager.saveSettings();
+                    } catch (IOException exception) {
+                        AlertUtils.exceptionDialog("Saving failed - Stekeblads Video Uploader",
+                                "The following error caused the saving of some changes to fail:",
+                                exception);
+                    }
                 }
             });
             cont.myInit();
