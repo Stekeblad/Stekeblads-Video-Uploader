@@ -9,17 +9,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.ChannelListResponse;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -34,14 +31,15 @@ import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 public class Auth {
 
     public static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-    public static final JsonFactory JSON_FACTORY = new JacksonFactory();
+    public static final JsonFactory JSON_FACTORY = new GsonFactory();
 
     public static Credential authUser() throws IOException {
         List<String> scope = new ArrayList<>();
         scope.add(YouTubeScopes.YOUTUBE_UPLOAD);
         scope.add(YouTubeScopes.YOUTUBE);
 
-        Reader clientSecretReader = new InputStreamReader(Auth.class.getClassLoader().getResourceAsStream(".auth/client_secrets.json"));
+        Reader clientSecretReader = new InputStreamReader(new FileInputStream(
+                new File(Paths.get(AUTH_DIR, "client_secrets.json").toUri())));
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader);
         FileDataStoreFactory fileFactory = new FileDataStoreFactory(new File(AUTH_DIR));
 

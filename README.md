@@ -32,7 +32,9 @@ privacy policy can be found here:
 Downloads can be found under "Releases" in the right sidebar
 [or by clicking here](https://github.com/Stekeblad/Stekeblads-Video-Uploader/releases)
 
-Note that you need Java 8 to use Stekeblads Video Uploader.
+Note that you need Java 8 **and your own YouTube API key** to use
+Stekeblads Video Uploader.
+[Help on creating your own API key.](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Personal-API-key)<!-- @IGNORE PREVIOUS: link -->
 
 ### Images
 Images are taken from the 1.1 release, several things have changed since
@@ -55,5 +57,5 @@ Managing playlists:
 
 ### Videos
 I have made a few short videos introducing the program and how to use it
-(The videos are pretty outdated, a updated series is in planning phase):
+(The videos are pretty outdated but much is still the same):
 [Playlist](https://www.youtube.com/playlist?list=PLAA2832YwTI9mddiWDeZ_RDnIjaBa8dP-)

@@ -13,7 +13,6 @@ playlists and deciding if they should be visible or not (playlists can
 be renamed, but ID is always the same.)
 
 #### Lower priority things to do
-- Applying for higher quota limit
 - Setting for start folder when:
   - selecting video files
   - selecting thumbnail
