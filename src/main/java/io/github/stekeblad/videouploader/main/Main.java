@@ -4,7 +4,6 @@ import io.github.stekeblad.videouploader.jfxExtension.MyStage;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.ConfigManager;
 import io.github.stekeblad.videouploader.utils.Constants;
-import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
@@ -19,11 +18,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Locale;
-
-import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 
 /**
  * The program starts here, opens MainWindow and waits for all windows to close
@@ -47,37 +42,6 @@ public class Main extends Application {
             e.printStackTrace();
             AlertUtils.exceptionDialog("ERROR - Stekeblads Video Uploader",
                     "Failed to load translations, unable to launch. Your detected language: " + Locale.getDefault(), e);
-            return;
-        }
-
-        try {
-            if (!Files.exists(Paths.get(AUTH_DIR)))
-                Files.createDirectories(Paths.get(AUTH_DIR));
-
-            if (!Files.exists(Paths.get(AUTH_DIR, "client_secrets.json"))) {
-
-                if (!Files.exists(Paths.get(AUTH_DIR, "place your own client_secrets.json file here")))
-                    Files.createFile(Paths.get(AUTH_DIR, "place your own client_secrets.json file here"));
-
-                String choice = AlertUtils.threeButtons("Missing API key - Stekeblads Video Uploader",
-                        "You need your own YouTube Data API v3 key to use " +
-                                "Stekeblads Video Uploader. Please create one and save it to " +
-                                Paths.get(AUTH_DIR, "client_secrets.json").toAbsolutePath().toString() +
-                                "\r\n\r\nClick look around to try Stekeblads Video Uploader with all YouTube-related features " +
-                                "inaccessible or read how to create a API key for free.",
-                        "Read how",
-                        "Look around",
-                        "Exit");
-                if ("Read how".equals(choice)) {
-                    OpenInBrowser.openInBrowser("https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Personal-API-key");
-                    return;
-                } else if ("Exit".equals(choice))
-                    return;
-                // else Look around, continue program, be prepared for exceptions
-            }
-        } catch (Exception e) {
-            AlertUtils.simpleClose("ERROR - Stekeblads Video Uploader",
-                    "Failed while checking for an API key").showAndWait();
             return;
         }
 

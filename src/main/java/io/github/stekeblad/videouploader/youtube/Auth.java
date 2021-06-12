@@ -18,10 +18,13 @@ import com.google.api.services.youtube.model.ChannelListResponse;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
 
@@ -38,9 +41,7 @@ public class Auth {
         scope.add(YouTubeScopes.YOUTUBE_UPLOAD);
         scope.add(YouTubeScopes.YOUTUBE);
 
-        Reader clientSecretReader = new InputStreamReader(new FileInputStream(
-                new File(Paths.get(AUTH_DIR, "client_secrets.json").toUri())));
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader);
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, getSecRead());
         FileDataStoreFactory fileFactory = new FileDataStoreFactory(new File(AUTH_DIR));
 
         GoogleAuthorizationCodeFlow authFlow = new GoogleAuthorizationCodeFlow.Builder(
@@ -87,6 +88,19 @@ public class Auth {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    /**
+     * Gets user custom file if present, else default file
+     */
+    public static Reader getSecRead() throws IOException {
+        Path userSecFile = Paths.get(AUTH_DIR, "client_secrets.json");
+        if (Files.exists(userSecFile, LinkOption.NOFOLLOW_LINKS)) {
+            return new InputStreamReader(new FileInputStream(new File(userSecFile.toUri())));
+        } else {
+            return new InputStreamReader(Objects.requireNonNull(
+                    Auth.class.getClassLoader().getResourceAsStream(".auth/client_secrets.json")));
         }
     }
 }
