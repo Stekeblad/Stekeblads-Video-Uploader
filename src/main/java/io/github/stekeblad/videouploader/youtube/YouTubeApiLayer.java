@@ -9,18 +9,17 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
 import com.google.api.services.youtube.model.*;
 import io.github.stekeblad.videouploader.youtube.exceptions.YouTubeException;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -31,7 +30,7 @@ import static io.github.stekeblad.videouploader.utils.Constants.AUTH_DIR;
  */
 public class YouTubeApiLayer {
     static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-    static final JsonFactory JSON_FACTORY = new JacksonFactory();
+    static final JsonFactory JSON_FACTORY = new GsonFactory();
 
     /**
      * Create a new playlist for the user's channel
@@ -194,9 +193,7 @@ public class YouTubeApiLayer {
         scope.add(YouTubeScopes.YOUTUBE_UPLOAD);
         scope.add(YouTubeScopes.YOUTUBE);
 
-        Reader clientSecretReader = new InputStreamReader(
-                Objects.requireNonNull(YouTubeApiLayer.class.getClassLoader().getResourceAsStream(".auth/client_secrets.json")));
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, clientSecretReader);
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, getSecRead());
         FileDataStoreFactory fileFactory = new FileDataStoreFactory(new File(AUTH_DIR));
 
         GoogleAuthorizationCodeFlow authFlow = new GoogleAuthorizationCodeFlow.Builder(
@@ -219,5 +216,22 @@ public class YouTubeApiLayer {
         return new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, creds)
                 .setApplicationName("Stekeblads Video Uploader")
                 .build();
+    }
+
+    /* ******************************************************************
+     * Private methods
+     * ******************************************************************* */
+
+    /**
+     * Gets user custom file if present, else default file
+     */
+    public static Reader getSecRead() throws IOException {
+        Path userSecFile = Paths.get(AUTH_DIR, "client_secrets.json");
+        if (Files.exists(userSecFile, LinkOption.NOFOLLOW_LINKS)) {
+            return new InputStreamReader(new FileInputStream(new File(userSecFile.toUri())));
+        } else {
+            return new InputStreamReader(Objects.requireNonNull(
+                    YouTubeApiLayer.class.getClassLoader().getResourceAsStream(".auth/client_secrets.json")));
+        }
     }
 }

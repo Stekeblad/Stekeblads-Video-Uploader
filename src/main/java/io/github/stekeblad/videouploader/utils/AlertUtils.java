@@ -4,6 +4,7 @@ import io.github.stekeblad.videouploader.utils.exceptionHistory.ExceptionHistory
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -59,7 +60,7 @@ public class AlertUtils {
         textArea.setWrapText(wrapText);
         Button closeButton = new Button("Close");
         closeButton.setId("closeButton");
-        closeButton.setCancelButton(true);
+        closeButton.setId("btnClose");
 
         GridPane pane = new GridPane();
         GridPane.setMargin(textArea, new Insets(3, 0, 0, 0));
@@ -79,6 +80,17 @@ public class AlertUtils {
     private static void paneToWindow(Pane pane, String header) {
         Scene alertDialog = new Scene(pane);
         Stage stage = new Stage();
+
+        // Try checking for a close button on the pane and bind it to closing the stage
+        Node closeButtonNode = alertDialog.lookup("#btnClose");
+        if (closeButtonNode instanceof Button) {
+            Button closeButton = (Button) closeButtonNode;
+            closeButton.setOnMouseClicked((event -> {
+                event.consume();
+                stage.close();
+            }));
+        }
+
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(alertDialog);
         stage.setTitle(header);

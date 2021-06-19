@@ -4,7 +4,7 @@ import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeyVerify;
-import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.signature.SignatureConfig;
 
 /**
  * Allows checking digital signatures using Google Tink: https://github.com/google/tink/
@@ -26,7 +26,7 @@ public class CheckSignatureWithTink {
     public static boolean verifySignature(byte[] data, byte[] signature) {
         try {
             if (!isTinkRegistered) {
-                TinkConfig.register();
+                SignatureConfig.register();
                 isTinkRegistered = true;
             }
 

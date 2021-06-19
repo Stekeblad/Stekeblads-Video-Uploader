@@ -28,14 +28,14 @@ public class Main extends Application {
             settingsManager = SettingsManager.getSettingsManager();
         } catch (Exception e) {
             e.printStackTrace();
-            AlertUtils.exceptionDialog("ERROR",
+            AlertUtils.exceptionDialog("ERROR - Stekeblads Video Uploader",
                     "Failed to load settings or other configurations file, unable to launch.", e);
         }
         try {
             loadTranslations();
         } catch (Exception e) {
             e.printStackTrace();
-            AlertUtils.exceptionDialog("ERROR",
+            AlertUtils.exceptionDialog("ERROR - Stekeblads Video Uploader",
                     "Failed to load translations, unable to launch. Your detected language: " + Locale.getDefault(), e);
             return;
         }
