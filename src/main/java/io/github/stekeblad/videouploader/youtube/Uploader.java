@@ -267,26 +267,26 @@ public class Uploader {
             }
             switch (uploader1.getUploadState()) {
                 case INITIATION_STARTED:
-                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("preparing")));
+                    Platform.runLater(() -> video.setStatusText(translationsUpload.getString("preparing")));
                     break;
                 case INITIATION_COMPLETE:
-                    Platform.runLater(() -> video.setProgressBarProgress(0));
-                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("starting")));
+                    Platform.runLater(() -> video.setUploadProgress(0));
+                    Platform.runLater(() -> video.setStatusText(translationsUpload.getString("starting")));
                     break;
                 case MEDIA_IN_PROGRESS: // uploader1.getProgress() errors, this is not a perfect replacement as
                     // the upload is slightly larger than the video file, but for longer videos it will be close enough
                     double progress = ((double) uploader1.getNumBytesUploaded() / video.getVideoFile().length());
-                    Platform.runLater(() -> video.setProgressBarProgress(progress));
+                    Platform.runLater(() -> video.setUploadProgress(progress));
                     String newStatusText = String.format(
                             translationsUpload.getString("uploadWithProgress"), (int) Math.floor(progress * 100));
-                    Platform.runLater(() -> video.setStatusLabelText(newStatusText));
+                    Platform.runLater(() -> video.setStatusText(newStatusText));
                     break;
                 case MEDIA_COMPLETE:
-                    Platform.runLater(() -> video.setProgressBarProgress(1)); // 100% full
-                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("finished")));
+                    Platform.runLater(() -> video.setUploadProgress(1)); // 100% full
+                    Platform.runLater(() -> video.setStatusText(translationsUpload.getString("finished")));
                     break;
                 case NOT_STARTED:
-                    Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("notStarted")));
+                    Platform.runLater(() -> video.setStatusText(translationsUpload.getString("notStarted")));
                     break;
             }
         };
@@ -297,7 +297,7 @@ public class Uploader {
 
         // Set thumbnail if selected
         if (video.getThumbnailPath() != null) {
-            Platform.runLater(() -> video.setStatusLabelText(translationsUpload.getString("thumbnail")));
+            Platform.runLater(() -> video.setStatusText(translationsUpload.getString("thumbnail")));
             File thumbFile = new File(video.getThumbnailPath());
             String contentType = Files.probeContentType(Paths.get(thumbFile.toURI()));
 
@@ -319,7 +319,7 @@ public class Uploader {
                 && !selectedPlaylist.getName().equals(translationsBasic.getString("noSelected"))) {
             String playlistName = selectedPlaylist.getName();
             String newStatusText = String.format(translationsUpload.getString("playlist"), playlistName);
-            Platform.runLater(() -> video.setStatusLabelText(newStatusText));
+            Platform.runLater(() -> video.setStatusText(newStatusText));
             ResourceId resourceId = new ResourceId();
             resourceId.setKind("youtube#video");
             resourceId.setVideoId(uploadedVideo.getId());
@@ -336,7 +336,7 @@ public class Uploader {
         }
         String link = "https://youtu.be/" + uploadedVideo.getId();
         String newStatusText = String.format(translationsUpload.getString("doneWithLink"), link);
-        Platform.runLater(() -> video.setStatusLabelText(newStatusText));
-        Platform.runLater(() -> video.setStatusLabelOnClickUrl(link));
+        Platform.runLater(() -> video.setStatusText(newStatusText));
+        Platform.runLater(() -> video.setStatusTextLink(link));
     }
 }

@@ -12,6 +12,7 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.VisibilityStatus;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
@@ -36,6 +37,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
     private final PlaylistManager playlistManager = PlaylistManager.getPlaylistManager();
     private Translations transPlaylistWindow;
     private Translations transBasic;
+    private ObservableList<PlaylistItemController> playlistItems;
 
     /**
      * Initialize a few things when the window is opened, used instead of initialize as that one does not have access to the scene
@@ -50,11 +52,12 @@ public class ManagePlaylistsWindowController implements IWindowController {
         transPlaylistWindow.autoTranslate(window);
 
         // Insert the stored playlists into the list
-        updatePlaylistList();
-        list_playlists.setItems(playlistManager.getAllPlaylists().stream()
-                .map(PlaylistItemController::new)
-                .collect(Collectors.toList())
-                .so);
+        playlistItems = FXCollections.observableArrayList(
+                playlistManager.getAllPlaylists().stream()
+                        .map(PlaylistItemController::new)
+                        .collect(Collectors.toList()))
+                .sorted();
+        list_playlists.setItems(playlistItems);
 
         // cant autoTranslate Nodes in Toolbar (bug)
         txt_newPlaylistName.setPromptText(transPlaylistWindow.getString("txt_newPlaylistName_pt"));
@@ -130,9 +133,7 @@ public class ManagePlaylistsWindowController implements IWindowController {
             @Override
             protected Void call() throws Exception {
                 playlistManager.updateFromYouTube();
-                Platform.runLater(() -> {
-                    btn_refreshPlaylists.setText(transPlaylistWindow.getString("btn_refreshPlaylists"));
-                });
+                Platform.runLater(() -> btn_refreshPlaylists.setText(transPlaylistWindow.getString("btn_refreshPlaylists")));
                 return null;
             }
         };
@@ -204,34 +205,5 @@ public class ManagePlaylistsWindowController implements IWindowController {
         // Start the background thread and return
         backgroundThread.start();
         actionEvent.consume();
-    }
-
-    /**
-     * Makes sure the playlist list is up to date
-     */
-    private void updatePlaylistList() {
-        //TODO: Only used by myInit. Fix, shorten and move there
-//        ArrayList<CheckBox> playlistCheckBoxes = new ArrayList<>();
-//        ArrayList<LocalPlaylist> playlists = playlistManager.getAllPlaylists();
-//        if (playlists != null) {
-//            for (LocalPlaylist playlist : playlists) {
-//                CheckBox cb = new CheckBox(playlist.getName());
-//                cb.setSelected(playlist.isVisible());
-//
-//                // Add right click feature to view playlist on YouTube
-//                ContextMenu playlistContext = new ContextMenu();
-//                MenuItem item1 = new MenuItem(transPlaylistWindow.getString("viewOnYouTube"));
-//                item1.setOnAction(event ->
-//                        OpenInBrowser.openInBrowser("https://www.youtube.com/playlist?list=" + playlist.getId()));
-//                playlistContext.getItems().add(item1);
-//                cb.setOnContextMenuRequested(event -> playlistContext.show(cb, Side.LEFT, 250, 0));
-//
-//                // Add to list
-//                playlistCheckBoxes.add(cb);
-//            }
-//            // Sorts the playlists lexicographically
-//            playlistCheckBoxes.sort(Comparator.comparing(Labeled::getText));
-//            list_playlists.setItems(FXCollections.observableArrayList(playlistCheckBoxes));
-    }
     }
 }

@@ -18,6 +18,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,7 +50,7 @@ public class PlaylistManager extends ManagerBase {
     }
 
     private final Path playlistPath;
-    private final ObservableList<LocalPlaylist> rawPlaylists; // includes the dummy list
+    private final SortedList<LocalPlaylist> rawPlaylists; // includes the dummy list
     private final FilteredList<LocalPlaylist> playlists; // all the users playlists
     private final FilteredList<LocalPlaylist> filteredVisiblePlaylists;
     private final Translations transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
@@ -103,7 +104,7 @@ public class PlaylistManager extends ManagerBase {
         tempList.sort(null);
         // add the default no playlist-playlist. TODO translate the name
         tempList.add(0, new LocalPlaylist(false, LocalPlaylist.MAGIC_PLAYLIST_ID, "--No playlist--"));
-        rawPlaylists = FXCollections.observableArrayList(tempList);
+        rawPlaylists = FXCollections.observableArrayList(tempList).sorted();
         playlists = rawPlaylists.filtered(localPlaylist -> !localPlaylist.getId().equals("0"));
         filteredVisiblePlaylists = rawPlaylists.filtered(LocalPlaylist::isVisible);
     }
@@ -250,6 +251,5 @@ public class PlaylistManager extends ManagerBase {
         LocalPlaylist localPlaylist = new LocalPlaylist(
                 true, newPlaylist.getId(), newPlaylist.getSnippet().getTitle());
         rawPlaylists.add(localPlaylist);
-        rawPlaylists.sort(null);
     }
 }

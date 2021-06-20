@@ -1,15 +1,17 @@
 package io.github.stekeblad.videouploader.ListControllers;
 
 import io.github.stekeblad.videouploader.models.NewVideoUploadModel;
+import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
 import io.github.stekeblad.videouploader.utils.translation.Translations;
 import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.RowConstraints;
 
 import java.util.function.Consumer;
@@ -40,11 +42,8 @@ public class UploadItemController extends VideoInfoItemController<NewVideoUpload
     public UploadItemController(NewVideoUploadModel videoUpload, ReadOnlyDoubleProperty parentPrefWidthProperty) {
         super(videoUpload, parentPrefWidthProperty);
         extendPane();
+        createBindings();
         transUpload.autoTranslate(this);
-    }
-
-    public void updateStatusLabel(String newText) {
-        statusLabel.setText(newText);
     }
 
     @Override
@@ -108,7 +107,6 @@ public class UploadItemController extends VideoInfoItemController<NewVideoUpload
 
         uploadProgress = new ProgressBar();
         uploadProgress.setId(NODE_ID_PROGRESS);
-        uploadProgress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         uploadProgress.setVisible(false);
         innerPane.add(uploadProgress, 2, 5);
 
@@ -132,5 +130,37 @@ public class UploadItemController extends VideoInfoItemController<NewVideoUpload
 
         buttonBox.getChildren().addAll(saveButton, editButton,
                 cancelButton, deleteButton);
+    }
+
+    private void createBindings() {
+        statusLabel.textProperty().bind(model.statusTextProperty());
+        uploadProgress.progressProperty().bind(model.uploadProgressProperty());
+
+        model.statusTextLinkProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                statusLabel.setOnMouseClicked(Event::consume);
+                statusLabel.setOnMouseEntered(Event::consume);
+                statusLabel.setOnMouseExited(Event::consume);
+            } else {
+                statusLabel.setOnMouseClicked(event -> {
+                    OpenInBrowser.openInBrowser(model.getStatusTextLink());
+                    event.consume();
+                });
+                statusLabel.setOnMouseEntered(event -> {
+                    this.getScene().setCursor(Cursor.HAND);
+                    event.consume();
+                });
+                statusLabel.setOnMouseExited(event -> {
+                    this.getScene().setCursor(Cursor.DEFAULT);
+                    event.consume();
+                });
+            }
+        });
+    }
+
+    //TODO: make sure it gets called at the right time
+    private void releaseBindings() {
+        statusLabel.textProperty().unbind();
+        uploadProgress.progressProperty().unbind();
     }
 }

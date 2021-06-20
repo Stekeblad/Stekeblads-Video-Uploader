@@ -1,13 +1,15 @@
 package io.github.stekeblad.videouploader.models;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 
 import java.io.File;
 
 public class NewVideoUploadModel extends NewVideoInfoBaseModel {
 
     private final ObjectProperty<File> videoFile = new SimpleObjectProperty<>();
+    private final StringProperty statusText = new SimpleStringProperty();
+    private final StringProperty statusTextLink = new SimpleStringProperty();
+    private final DoubleProperty uploadProgress = new SimpleDoubleProperty();
 
     public File getVideoFile() {
         return videoFile.get();
@@ -19,5 +21,41 @@ public class NewVideoUploadModel extends NewVideoInfoBaseModel {
 
     public void setVideoFile(File video) {
         videoFile.set(video);
+    }
+
+    public String getStatusText() {
+        return statusText.get();
+    }
+
+    public StringProperty statusTextProperty() {
+        return statusText;
+    }
+
+    public void setStatusText(String statusLink) {
+        this.statusTextLink.set(statusLink);
+    }
+
+    public String getStatusTextLink() {
+        return statusTextLink.get();
+    }
+
+    public StringProperty statusTextLinkProperty() {
+        return statusTextLink;
+    }
+
+    public void setStatusTextLink(String statusText) {
+        this.statusText.set(statusText);
+    }
+
+    public double getUploadProgress() {
+        return uploadProgress.get();
+    }
+
+    public DoubleProperty uploadProgressProperty() {
+        return uploadProgress;
+    }
+
+    public void setUploadProgress(double uploadProgress) {
+        this.uploadProgress.set(uploadProgress);
     }
 }
