@@ -69,7 +69,7 @@ public class PlaylistManager extends ManagerBase {
             if (Files.exists(oldPlaylistFilePath)) {
                 try {
                     // back up, migrate, delete original (but keep copy)
-                    Files.copy(oldPlaylistFilePath, Paths.get(CONFIG_BACKUP_DIR + "/playlists-" + TimeUtils.currentTimeString()));
+                    Files.copy(oldPlaylistFilePath, Paths.get(CONFIG_BACKUP_DIR + "/playlists-" + TimeUtils.currentTimeStringPathSafe()));
                     List<String> playlistLines = Files.readAllLines(oldPlaylistFilePath);
                     config = playlistMigrator.migrate(playlistLines);
                     Files.delete(oldPlaylistFilePath);
@@ -87,7 +87,7 @@ public class PlaylistManager extends ManagerBase {
                 loadConfigFromFile(playlistPath);
                 if (!playlistMigrator.isLatestVersion(config)) {
                     // File is in a older format, create a backup of it and then upgrade to latest format
-                    final String backupFileName = "/playlists-" + TimeUtils.currentTimeString() + ".json";
+                    final String backupFileName = "/playlists-" + TimeUtils.currentTimeStringPathSafe() + ".json";
                     Files.copy(playlistPath, Paths.get(CONFIG_BACKUP_DIR + backupFileName));
                     playlistMigrator.migrate(config);
                     writeConfigToFile(playlistPath);

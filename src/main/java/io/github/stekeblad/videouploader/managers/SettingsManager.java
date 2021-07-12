@@ -87,7 +87,7 @@ public class SettingsManager extends ManagerBase {
             FileInputStream propInputStream = null;
             try {
                 // Backup old config file before converting to new format
-                final String backupFileName = "/settings-" + TimeUtils.currentTimeString() + ".properties";
+                final String backupFileName = "/settings-" + TimeUtils.currentTimeStringPathSafe() + ".properties";
                 Files.copy(Paths.get(oldSettingsFilePath), Paths.get(CONFIG_BACKUP_DIR + backupFileName));
                 // Read, convert, save and then delete the old file
                 Properties prop = new Properties();
@@ -118,7 +118,7 @@ public class SettingsManager extends ManagerBase {
                 loadConfigFromFile(Paths.get(filesPath + "/settings.json"));
                 if (!settingsMigrator.isLatestVersion(config)) {
                     // File is in a older format, create a backup of it and then upgrade to latest format
-                    final String backupFileName = "/settings-" + TimeUtils.currentTimeString() + ".json";
+                    final String backupFileName = "/settings-" + TimeUtils.currentTimeStringPathSafe() + ".json";
                     Files.copy(Paths.get(filesPath + "/settings.json"), Paths.get(CONFIG_BACKUP_DIR + backupFileName));
                     settingsMigrator.migrate(config);
                     saveSettings();

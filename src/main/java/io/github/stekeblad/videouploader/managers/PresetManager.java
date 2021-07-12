@@ -51,9 +51,9 @@ public class PresetManager extends ManagerBase {
         if (Files.exists(oldPresetsDir)) {
             try {
                 // back up
-                final Path presetBackupsDir = Paths.get(CONFIG_BACKUP_DIR + "/presets-" + TimeUtils.currentTimeString());
+                final Path presetBackupsDir = Paths.get(CONFIG_BACKUP_DIR + "/presets-" + TimeUtils.currentTimeStringPathSafe());
                 Files.copy(oldPresetsDir, presetBackupsDir);
-                Files.walk(oldPresetsDir, 3, (FileVisitOption) null)
+                Files.walk(oldPresetsDir, 3, FileVisitOption.FOLLOW_LINKS)
                         .forEach(file -> {
                             try {
                                 Files.copy(file, Paths.get(presetBackupsDir.toAbsolutePath().toString() + file.getFileName()));
@@ -81,7 +81,7 @@ public class PresetManager extends ManagerBase {
                 loadConfigFromFile(presetsPath);
                 if (!presetMigrator.isLatestVersion(config)) {
                     // File is in a older format, create a backup of it and then upgrade to latest format
-                    final String backupFileName = "/presets-" + TimeUtils.currentTimeString() + ".json";
+                    final String backupFileName = "/presets-" + TimeUtils.currentTimeStringPathSafe() + ".json";
                     Files.copy(presetsPath, Paths.get(CONFIG_BACKUP_DIR + backupFileName));
                     presetMigrator.migrate(config);
                     writeConfigToFile(presetsPath);

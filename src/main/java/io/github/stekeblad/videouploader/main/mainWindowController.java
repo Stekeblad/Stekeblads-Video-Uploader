@@ -11,8 +11,10 @@ import io.github.stekeblad.videouploader.managers.PresetManager;
 import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
 import io.github.stekeblad.videouploader.models.NewVideoUploadModel;
+import io.github.stekeblad.videouploader.models.NewVideoUploadState;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.Constants;
+import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.TimeUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.background.PresetApplicator;
@@ -35,6 +37,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,9 +45,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-import static io.github.stekeblad.videouploader.utils.Constants.*;
-import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
+import static io.github.stekeblad.videouploader.utils.Constants.WindowPropertyNames;
 
 public class mainWindowController implements IWindowController {
     public AnchorPane mainWindowPane;
@@ -74,14 +77,12 @@ public class mainWindowController implements IWindowController {
 
     private ObservableList<UploadItemController> uploadItems;
     private int presetsInProgress = 0;
-    private boolean bypassAbortWarning = false;
 
     private Uploader uploader;
     private PresetApplicator presetApplicator;
 
     private Translations transMainWin;
     private Translations transBasic;
-    private Translations transUpload;
 
     /**
      * Initialize things when the window is opened, used instead of initialize as that one does not have access to the scene
@@ -100,7 +101,6 @@ public class mainWindowController implements IWindowController {
         btn_settings.setText(transMainWin.getString("btn_settings"));
 
         transBasic = TranslationsManager.getTranslation(TranslationBundles.BASE);
-        transUpload = TranslationsManager.getTranslation(TranslationBundles.PRESET_UPLOAD);
 
         // Load custom CSS (for improved readability of disabled ChoiceBoxes)
         URL css_path = mainWindowController.class.getClassLoader().getResource("css/disabled.css");
@@ -189,7 +189,7 @@ public class mainWindowController implements IWindowController {
         } else if (choice.equals(op3)) {
 
             Set<String> tasks = uploader.kill();
-            //TODO: For each task, save that upload so it can be recreated net time program runs
+            //TODO: For each task, save that upload so it can be recreated next time program runs
             return true;
         }
         return false;
@@ -218,11 +218,11 @@ public class mainWindowController implements IWindowController {
                 newUpload.setTellSubs(false);
                 newUpload.setVideoFile(videoFile);
 
-                uploadItems.add(new UploadItemController(newUpload, listUploads.prefWidthProperty()));
-
-                // Enables the upload to be edited because the lack of details.
-                // Change the cancel button to a delete button, the backed up state created by onEdit is not valid
-                // TODO: Control this?
+                UploadItemController uploadController = new UploadItemController(newUpload, listUploads.prefWidthProperty());
+                uploadController.registerStartUploadButtonActionHandler(this::onStartUpload);
+                uploadController.registerDeleteButtonActionHandler(this::removeUploadFromList);
+                uploadController.registerHideUploadButtonActionHandler(this::removeUploadFromList);
+                uploadItems.add(uploadController);
             }
         } else { // preset selected
             // Load details of the selected preset
@@ -303,8 +303,20 @@ public class mainWindowController implements IWindowController {
     }
 
     /**
+     * Called when the pick files button is pressed.
+     * Opens a file chooser and sets the list of selected files to the left of the button
+     *
+     * @param actionEvent the click event
+     */
+    public void onPickFileClicked(ActionEvent actionEvent) {
+        chosen_files.setItems(FXCollections.observableArrayList(FileUtils.pickVideos(Long.MAX_VALUE)));
+        actionEvent.consume();
+    }
+
+    /**
      * Called when the start all ready uploads button is clicked.
      * If a upload is allowed to be started (the start upload button is visible) then that button is clicked by this method.
+     *
      * @param actionEvent the click event
      */
     public void onStartAllUploadsClicked(ActionEvent actionEvent) {
@@ -318,7 +330,9 @@ public class mainWindowController implements IWindowController {
         }
         // Permission given, start uploads
         for (UploadItemController uploadQueueVideo : uploadItems) {
-            uploadQueueVideo.startUpload(new ActionEvent());
+            if (uploadQueueVideo.getState() == NewVideoUploadState.SAVED) {
+                uploadQueueVideo.startUpload(new ActionEvent());
+            }
         }
         actionEvent.consume();
     }
@@ -329,13 +343,15 @@ public class mainWindowController implements IWindowController {
      * @param actionEvent the click event
      */
     public void onRemoveFinishedUploadsClicked(ActionEvent actionEvent) {
-        for (int i = 0; i < uploadQueueVideos.size(); i++) {
-            if (uploadQueueVideos.get(i).getButton2Id() != null &&
-                    uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_FINISHED_UPLOAD)) {
-                uploadQueueVideos.remove(i);
+        for (int i = 0; i < uploadItems.size(); i++) {
+            var item = uploadItems.get(i);
+            if (item.getState() == NewVideoUploadState.COMPLETED) {
+                item.delete(new ActionEvent());
+                uploadItems.remove(i);
                 i--;
             }
         }
+
         actionEvent.consume();
     }
 
@@ -345,25 +361,12 @@ public class mainWindowController implements IWindowController {
      */
     public void onAbortAllUploadsClicked(ActionEvent actionEvent) {
         // Show confirmation dialog
-        if (!bypassAbortWarning) { // can be set from onAbortAndClearClicked
-            ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
-                    transMainWin.getString("diag_abortAll_full"), ButtonType.NO);
-            if (userChoice == ButtonType.NO) {
-                return;
-            }
+        ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAll_short"),
+                transMainWin.getString("diag_abortAll_full"), ButtonType.NO);
+        if (userChoice == ButtonType.NO) {
+            return;
         }
-        // Prevent the "Are you sure you want to abort X?" dialog for every upload
-        bypassAbortWarning = true;
-        // Abort the uploads in the reversed order of that they was most likely started in
-        // to avoid that the program attempts to start a new upload that will also be aborted, and then the next one...
-        for (int i = uploadQueueVideos.size() - 1; i >= 0; i--) {
-            if(uploadQueueVideos.get(i).getButton2Id() != null &&
-                    uploadQueueVideos.get(i).getButton2Id().contains(BUTTON_ABORT_UPLOAD)) {
-                onAbort(uploadQueueVideos.get(i).getButton2Id());
-            }
-        }
-        // Re-enable the individual confirmation on aborts
-        bypassAbortWarning = false;
+        abortUploads();
         actionEvent.consume();
     }
 
@@ -376,11 +379,22 @@ public class mainWindowController implements IWindowController {
         ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortAllClear_short"),
                 transMainWin.getString("diag_abortAllClear_full"), ButtonType.NO);
         if (userChoice == ButtonType.YES) {
-            bypassAbortWarning = true; // is set back to false by onAbortAllUploadsClicked
-            onAbortAllUploadsClicked(new ActionEvent());
-            uploadItems.clear();
+            abortUploads();
+            while (!uploadItems.isEmpty()) {
+                uploadItems.get(0).delete(new ActionEvent(), false);
+            }
         }
         actionEvent.consume();
+    }
+
+    private void abortUploads() {
+        // Abort the uploads in the reversed order of that they was most likely started in
+        // to avoid that the program attempts to start a new upload that will also be aborted, and then the next one...
+        for (int i = uploadItems.size() - 1; i >= 0; i--) {
+            var item = uploadItems.get(i);
+            if (item.getState() == NewVideoUploadState.UPLOADING)
+                item.abort(new ActionEvent(), false);
+        }
     }
 
     /**
@@ -397,132 +411,39 @@ public class mainWindowController implements IWindowController {
     }
 
     /**
-     * Called when the delete button for a upload is clicked.
-     * Shows a confirmation dialog and removes the upload from the list if the user select yes
-     * @param callerId the id of the upload + button name
+     * Registered as a callback to uploadModelControllers and called when a upload should be removed from the list
+     *
+     * @param upload The upload that need to be removed
      */
-    private void onDelete(String callerId) {
-        String desc = String.format(transMainWin.getString("diag_confirmDelete_full"),
-                uploadQueueVideos.get(selected).getVideoName());
-
-        ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_confirmDelete_short"),
-                desc, ButtonType.NO);
-        if (userChoice == ButtonType.YES) {
-            // delete backup (may exist if upload was created with no preset and directly deleted
-            editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-            uploadQueueVideos.remove(selected);
-        } // else if ButtonType.NO or closed [X] do nothing
-
-        // Make sure visual change get to the UI
+    private void removeUploadFromList(NewVideoUploadModel upload) {
+        int index = findUploadIndexFromUniqueId(upload.getUniqueId());
+        uploadItems.remove(index);
     }
 
-    /**
-     * Called when the start upload button for a upload is clicked.
-     * Schedules the upload to be uploaded after performing a few checks.
-     * @param callerId the id of the upload + button name
-     */
-    private void onStartUpload(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("start upload button belongs to a invalid or non-existing parent");
-            return;
-        }
-        // a few small checks first
-        if (uploadQueueVideos.get(selected).getVideoName().length() < 1) {
-            AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
-                    transMainWin.getString("diag_noStartUpload_full_noTitle")).show();
-            return;
-        }
-        if (categoryManager.findById(uploadQueueVideos.get(selected).getCategory()).equals("-1")) {
-            AlertUtils.simpleClose(transMainWin.getString("diag_noStartUpload_short"),
-                    transMainWin.getString("diag_noStartUpload_full_noCategory")).show();
-            return;
-        }
-
-        // If the user has not given the program permission to access their youtube channel, ask the user to do so.
-        if (settingsManager.getNeverAuthed()) {
-            ButtonType userChoice = AlertUtils.yesNo(transBasic.getString("auth_short"),
-                    transBasic.getString("auth_full"), ButtonType.NO);
-
-            if (userChoice == ButtonType.NO)
-                return;
-
-
-        }
-        // User is authenticated or is warned about the upcoming prompt to do so.
-
-        // Queue upload
-        uploader.add(uploadQueueVideos.get(selected), uploadQueueVideos.get(selected).getPaneId());
-
-        // Change buttons, make progressbar visible and set text to show it is waiting to be uploaded.
-        uploadQueueVideos.get(selected).setProgressBarVisibility(true);
-        uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("waiting"));
+    private int findUploadIndexFromUniqueId(String uuid) {
+        return findUploadIndexFromUniqueId(UUID.fromString(uuid));
     }
 
-    /**
-     * Called when the abort button is clicked on a upload that is scheduled or in progress
-     * @param callerId the id of the upload + button name
-     */
-    private void onAbort(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("abort upload button belongs to a invalid or non-existing parent");
-            return;
-        }
-        // Show confirmation dialog, but not if abort all button was clicked
-        if (!bypassAbortWarning) {
-            String desc = String.format(transMainWin.getString("diag_abortSingle_full"),
-                    uploadQueueVideos.get(selected).getVideoName());
-
-            ButtonType userChoice = AlertUtils.yesNo(transMainWin.getString("diag_abortSingle_short"),
-                    desc, ButtonType.NO);
-            if (userChoice == ButtonType.NO) {
-                // ButtonType.NO or Closed with [X] button
-                return;
+    private int findUploadIndexFromUniqueId(UUID uuid) {
+        for (int i = 0, uploadItemsSize = uploadItems.size(); i < uploadItemsSize; i++) {
+            UploadItemController uploadItem = uploadItems.get(i);
+            if (uploadItem.getUniqueModelId().equals(uuid)) {
+                return i;
             }
         }
-        // Abort upload
-        boolean abortSuccess = uploader.abortUpload(uploadQueueVideos.get(selected).getPaneId());
-
-        if (abortSuccess) {
-            // Set label text and reset progress bar
-            uploadQueueVideos.get(selected).setProgressBarVisibility(false);
-            uploadQueueVideos.get(selected).setProgressBarProgress(INDETERMINATE_PROGRESS); // reset progressBar to be animated
-            uploadQueueVideos.get(selected).setStatusLabelText(transBasic.getString("aborted"));
-        } else {
-            AlertUtils.simpleClose(transBasic.getString("error"), "Failed to terminate upload for unknown reason").show();
-        }
+        return -1;
     }
 
-    /**
-     * Called when Reset upload button is clicked (appear when an upload failed)
-     *
-     * @param callerId the id of the upload + button name
-     */
-    private void onResetUpload(String callerId) {
-        // Change back progressBar color, hide it and set the locked state buttons
-        uploadQueueVideos.get(selected).setProgressBarColor(null);
-        uploadQueueVideos.get(selected).setProgressBarVisibility(false);
-        uploadQueueVideos.get(selected).setStatusLabelText(transUpload.getString("_status"));
-    }
+    //TODO: I am new
+    private void onStartUpload(NewVideoUploadModel upload) {
+        // validation?
 
-    /**
-     * Called when the hide button that appears then a upload finishes is clicked.
-     * Removes that upload from the list
-     *
-     * @param callerId the id of the upload + button name
-     */
-    private void onRemoveFinishedUpload(String callerId) {
-        String parentId = callerId.substring(0, callerId.indexOf('_'));
-        int selected = getUploadIndexByName(parentId);
-        if (selected == -1) {
-            System.err.println("remove finished upload, button belongs to a invalid or non-existing parent");
-            return;
-        }
-        editBackups.remove(uploadQueueVideos.get(selected).getPaneId());
-        uploadQueueVideos.remove(selected);
+        // Queue upload
+        // TODO: Ensure video is not null before adding!
+        uploader.add(upload, upload.getUniqueId().toString());
+
+        // Change buttons, make progressbar visible and set text to show it is waiting to be uploaded.
+        upload.setStatusText(transBasic.getString("waiting"));
     }
 
     /**
@@ -531,11 +452,11 @@ public class mainWindowController implements IWindowController {
      * @param newUpload the newly created VideoUpload created from a File and a VideoPreset
      */
     private void onPresetApplicationSuccess(NewVideoUploadModel newUpload) {
-        // make the upload change its width together with the uploads list and the window
-        newUpload.getPane().prefWidthProperty().bind(listUploads.widthProperty().subtract(35));
-
-        transUpload.autoTranslate(newUpload.getPane(), newUpload.getPaneId());
-        uploadQueueVideos.add(newUpload);
+        UploadItemController uploadController = new UploadItemController(newUpload, listUploads.widthProperty());
+        uploadController.registerDeleteButtonActionHandler(this::removeUploadFromList);
+        uploadController.registerStartUploadButtonActionHandler(this::onStartUpload);
+        uploadController.registerHideUploadButtonActionHandler(this::removeUploadFromList);
+        uploadItems.add(uploadController);
         updatePresetProgressIndicator(-1);
     }
 
@@ -554,13 +475,12 @@ public class mainWindowController implements IWindowController {
     /**
      * Called when an upload finishes.
      * Places the hide button
-     * @param paneId the id of the upload
+     *
+     * @param id the unique model id of the upload
      */
-    private void onUploadFinished(String paneId) {
-        Button finishedUploadButton = new Button(transBasic.getString("hide"));
-        finishedUploadButton.setId(paneId + BUTTON_FINISHED_UPLOAD);
-        finishedUploadButton.setOnMouseClicked(event -> onRemoveFinishedUpload(finishedUploadButton.getId()));
-        uploadQueueVideos.get(index).setButton2(finishedUploadButton);
+    private void onUploadFinished(String id) {
+        uploadItems.get(findUploadIndexFromUniqueId(id))
+                .complete();
     }
 
     /**
@@ -569,74 +489,67 @@ public class mainWindowController implements IWindowController {
      * @param video the video that failed uploading
      * @param e     the exception that occurred
      */
-    private void onUploadErred(NewVideoUploadModel video, Throwable e) {
-        String header = transBasic.getString("app_name") + " - Failed to upload video";
-        if (e == null && video == null) {
-            AlertUtils.simpleClose(header, "For an unknown reason is error information not available").show();
+    private void onUploadErred(@NotNull NewVideoUploadModel video, Throwable e) {
+        String appName = transBasic.getString("app_name");
+        String header = appName + " - Failed to upload video";
+        if (e == null) {
+            AlertUtils.simpleClose(header, "Failed to upload the video " + video.getVideoName()
+                    + "\n\nMore detailed error information is not available").show();
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).fail();
+            return;
         }
 
-        if (e == null && video != null) {
-            AlertUtils.simpleClose(header, "An unknown error occurred while uploading the video " +
-                    video.getVideoName()).show();
-        }
-
-        if (e != null) {
-            String onVideoWithName = "";
-            if (video != null)
-                onVideoWithName = "\n\nThis happened on the video named " + video.getVideoName();
-            if (e instanceof QuotaLimitExceededException) {
-                // abort all scheduled uploads, they will all fail with this error
-                bypassAbortWarning = true;
-                for (String key : uploader.getUploadQueue()) {
-                    uploader.abortUpload((key));
-                    onAbort(key + "_fakeButton");
-                }
-                bypassAbortWarning = false;
-
-                // Find when midnight in the pacific timezone is in the user's timezone
-                String userClockAtPacificMidnight = TimeUtils.fromMidnightPacificToUserTimeZone();
-                AlertUtils.simpleClose(header, transBasic.getString("app_name") + " has reached its daily upload limit" +
-                        " in the YouTube API and can not continue the uploading. All scheduled uploads has been aborted.\n\n" +
-                        "The limit will be reset at midnight Pacific Time. (" + userClockAtPacificMidnight + " in your timezone.)").show();
-            } else if (e instanceof UploadLimitExceededException) {
-                // abort all scheduled uploads, they will all fail with this error
-                bypassAbortWarning = true;
-                for (String key : uploader.getUploadQueue()) {
-                    uploader.abortUpload((key));
-                    onAbort(key + "_fakeButton");
-                }
-                bypassAbortWarning = false;
-                AlertUtils.simpleClose(header, "You have reached your personal upload limit on YouTube" +
-                        " and you can not upload more videos right now. All scheduled uploads has been aborted.\n\n" +
-                        "Wait a few hours or retry again tomorrow").show();
-            } else if (e instanceof InvalidVideoDetailsException) {
-                AlertUtils.simpleClose(header, "YouTube reported a video property contains invalid content: " +
-                        e.getMessage() + onVideoWithName).show();
-            } else if (e instanceof InvalidMissingImageException) {
-                AlertUtils.simpleClose(transBasic.getString("app_name") + " - Failed to set thumbnail",
-                        "The video has been uploaded, but the selected image file could not be used as " +
-                                "thumbnail.\n\n" + e.getMessage() + onVideoWithName).show();
-            } else if (e instanceof PlaylistNotFoundException) {
-                AlertUtils.simpleClose(transBasic.getString("app_name") + " - Failed to add to playlist",
-                        "The video has been uploaded, but it could not be added to the selected playlist, " +
-                                "YouTube says the playlist could not be found." + onVideoWithName).show();
-            } else if (e instanceof PlaylistFullException) {
-                AlertUtils.simpleClose(transBasic.getString("app_name") + " - Failed to add to playlist",
-                        "The video has been uploaded but it could not be added to the selected playlist, " +
-                                "the playlist is full and no more videos can be added to it." + onVideoWithName).show();
-            } else if (e instanceof OtherYouTubeException) {
-                AlertUtils.exceptionDialog(transBasic.getString("app_name"),
-                        "An error was returned from YouTube: ",
-                        e);
-            } else {
-                AlertUtils.unhandledExceptionDialog(e);
+        String onVideoWithName = "\n\nThis happened on the video named " + video.getVideoName();
+        if (e instanceof QuotaLimitExceededException) {
+            // abort all scheduled uploads, they will all fail with this error
+            for (String key : uploader.getUploadQueue()) {
+                uploader.abortUpload((key));
+                UploadItemController item = uploadItems.get(findUploadIndexFromUniqueId(key));
+                item.abort(new ActionEvent(), false);
             }
-        }
 
-        //Switch to a reset upload button instead of abort for the upload that threw the error
-        if (video != null) {
-            video.setProgressBarColor("red");
-            video.setStatusLabelText(transUpload.getString("failed"));
+            // Find when midnight in the pacific timezone is in the user's timezone
+            String userClockAtPacificMidnight = TimeUtils.fromMidnightPacificToUserTimeZone();
+            AlertUtils.simpleClose(header, appName + " has reached its daily upload limit" +
+                    " in the YouTube API and can not continue the uploading. All scheduled uploads has been aborted.\n\n" +
+                    "The limit will be reset at midnight Pacific Time. (" + userClockAtPacificMidnight + " in your timezone.)").show();
+        } else if (e instanceof UploadLimitExceededException) {
+            // abort all scheduled uploads, they will all fail with this error
+            for (String key : uploader.getUploadQueue()) {
+                UploadItemController item = uploadItems.get(findUploadIndexFromUniqueId(key));
+                item.abort(new ActionEvent(), false);
+            }
+            AlertUtils.simpleClose(header, "You have reached your personal upload limit on YouTube" +
+                    " and you can not upload more videos right now. All scheduled uploads has been aborted.\n\n" +
+                    "Wait a few hours or retry again tomorrow").show();
+        } else if (e instanceof InvalidVideoDetailsException) {
+            AlertUtils.simpleClose(header, "YouTube reported a video property contains invalid content: " +
+                    e.getMessage() + onVideoWithName).show();
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).fail();
+        } else if (e instanceof InvalidMissingImageException) {
+            AlertUtils.simpleClose(appName + " - Failed to set thumbnail",
+                    "The video has been uploaded, but the selected image file could not be used as " +
+                            "thumbnail. If you have selected a playlist to add this video to then this error " +
+                            "happened before that could be done.\n\n" + e.getMessage() + onVideoWithName).show();
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).complete();
+        } else if (e instanceof PlaylistNotFoundException) {
+            AlertUtils.simpleClose(appName + " - Failed to add to playlist",
+                    "The video has been uploaded, but it could not be added to the selected playlist. " +
+                            "YouTube says the playlist could not be found." + onVideoWithName).show();
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).complete();
+        } else if (e instanceof PlaylistFullException) {
+            AlertUtils.simpleClose(appName + " - Failed to add to playlist",
+                    "The video has been uploaded but it could not be added to the selected playlist, " +
+                            "the playlist is full and no more videos can be added to it." + onVideoWithName).show();
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).complete();
+        } else if (e instanceof OtherYouTubeException) {
+            AlertUtils.exceptionDialog(appName,
+                    "An error was returned from YouTube" + onVideoWithName,
+                    e);
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).fail();
+        } else {
+            AlertUtils.unhandledExceptionDialog(e);
+            uploadItems.get(findUploadIndexFromUniqueId(video.getUniqueId())).fail();
         }
     }
 }

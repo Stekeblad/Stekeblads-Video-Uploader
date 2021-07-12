@@ -30,6 +30,7 @@ public class Main extends Application {
             e.printStackTrace();
             AlertUtils.exceptionDialog("ERROR - Stekeblads Video Uploader",
                     "Failed to load settings or other configurations file, unable to launch.", e);
+            return;
         }
         try {
             loadTranslations();

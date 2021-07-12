@@ -79,7 +79,7 @@ public class CategoryManager extends ManagerBase {
                 loadConfigFromFile(categoriesPath);
                 if (!categoryMigrator.isLatestVersion(config)) {
                     // File is in a older format, create a backup of it and then upgrade to latest format
-                    final String backupFileName = "/categories-" + TimeUtils.currentTimeString() + ".json";
+                    final String backupFileName = "/categories-" + TimeUtils.currentTimeStringPathSafe() + ".json";
                     Files.copy(categoriesPath, Paths.get(CONFIG_BACKUP_DIR + backupFileName));
                     categoryMigrator.migrate(config);
                     writeConfigToFile(categoriesPath);

@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.utils;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Calculations and conversation related to time and timezones
@@ -20,7 +21,7 @@ public class TimeUtils {
         return String.format("%02d", timeDiff.toHours()) + ":" + String.format("%02d", minutes);
     }
 
-    public static String currentTimeString() {
-        return LocalDateTime.now().toString();
+    public static String currentTimeStringPathSafe() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
     }
 }
