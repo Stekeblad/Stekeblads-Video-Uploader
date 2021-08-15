@@ -1,10 +1,10 @@
 package io.github.stekeblad.videouploader.main;
 
 import io.github.stekeblad.videouploader.ListControllers.UploadItemController;
-import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
-import io.github.stekeblad.videouploader.jfxExtension.MyStage;
-import io.github.stekeblad.videouploader.jfxExtension.NoneSelectionModel;
-import io.github.stekeblad.videouploader.jfxExtension.stringConverters.VideoPresetStringConverter;
+import io.github.stekeblad.videouploader.extensions.jfx.IWindowController;
+import io.github.stekeblad.videouploader.extensions.jfx.MyStage;
+import io.github.stekeblad.videouploader.extensions.jfx.NoneSelectionModel;
+import io.github.stekeblad.videouploader.extensions.jfx.stringConverters.VideoPresetStringConverter;
 import io.github.stekeblad.videouploader.managers.CategoryManager;
 import io.github.stekeblad.videouploader.managers.PlaylistManager;
 import io.github.stekeblad.videouploader.managers.PresetManager;
@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static io.github.stekeblad.videouploader.utils.Constants.WindowPropertyNames;
@@ -188,7 +187,7 @@ public class mainWindowController implements IWindowController {
             return true;
         } else if (choice.equals(op3)) {
 
-            Set<String> tasks = uploader.kill();
+            String[] tasks = uploader.kill();
             //TODO: For each task, save that upload so it can be recreated next time program runs
             return true;
         }

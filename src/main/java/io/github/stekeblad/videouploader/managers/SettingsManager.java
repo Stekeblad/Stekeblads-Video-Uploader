@@ -1,7 +1,7 @@
 package io.github.stekeblad.videouploader.managers;
 
 import com.google.gson.JsonObject;
-import io.github.stekeblad.videouploader.jfxExtension.WindowFrame;
+import io.github.stekeblad.videouploader.extensions.jfx.WindowFrame;
 import io.github.stekeblad.videouploader.managers.settingsMigrations.SettingsMigrator;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.Constants;
@@ -85,6 +85,7 @@ public class SettingsManager extends ManagerBase {
         final String oldSettingsFilePath = filesPath + "/settings.properties";
         if (Files.exists(Paths.get(oldSettingsFilePath))) {
             FileInputStream propInputStream = null;
+            boolean deleteOldFile = false;
             try {
                 // Backup old config file before converting to new format
                 final String backupFileName = "/settings-" + TimeUtils.currentTimeStringPathSafe() + ".properties";
@@ -96,13 +97,16 @@ public class SettingsManager extends ManagerBase {
                 config = settingsMigrator.migrate(prop);
                 saveSettings();
                 // Delete the file from config directory root, its backed up in the backup folder
-                Files.delete(Paths.get(oldSettingsFilePath));
-            } catch (IOException ignored) {
+                deleteOldFile = true;
+            } catch (IOException e) {
+                AlertUtils.exceptionDialog("migration exception", "Error while updating the 'settings' configuration file", e);
             } finally {
                 if (propInputStream != null) {
                     try {
                         propInputStream.close();
-                    } catch (IOException e) {
+                        if (deleteOldFile)
+                            Files.delete(Paths.get(oldSettingsFilePath));
+                    } catch (Exception e) {
                         AlertUtils.exceptionDialog("Failed to load or update settings file",
                                 "The settings file could not be read. If the program have updated since last run something" +
                                         " could have failed while updating the settings file to a newer version",
@@ -110,6 +114,7 @@ public class SettingsManager extends ManagerBase {
                     }
                 }
             }
+
             return;
         }
 

@@ -59,11 +59,15 @@ public class CategoryManager extends ManagerBase {
             if (Files.exists(oldCategoryFilePath)) {
                 // Found data file in the oldest format. Back it up, migrate and delete original
                 try {
-                    Files.copy(oldCategoryFilePath, Paths.get(CONFIG_BACKUP_DIR + "/categories"));
+                    Files.copy(oldCategoryFilePath, Paths.get(CONFIG_BACKUP_DIR + "/categories" + TimeUtils.currentTimeStringPathSafe()));
                     List<String> categoryLines = Files.readAllLines(oldCategoryFilePath);
                     config = categoryMigrator.migrate(categoryLines);
+                    writeConfigToFile(categoriesPath);
                     Files.delete(oldCategoryFilePath);
-                } catch (IOException ignored) {
+                } catch (Exception e) {
+                    AlertUtils.exceptionDialog("Failed to update categories file",
+                            "Something went wrong when updating categories data file to a newer version",
+                            e);
                 }
             } else {
                 // No data found

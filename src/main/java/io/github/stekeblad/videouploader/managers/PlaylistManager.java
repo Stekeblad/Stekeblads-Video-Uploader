@@ -72,8 +72,12 @@ public class PlaylistManager extends ManagerBase {
                     Files.copy(oldPlaylistFilePath, Paths.get(CONFIG_BACKUP_DIR + "/playlists-" + TimeUtils.currentTimeStringPathSafe()));
                     List<String> playlistLines = Files.readAllLines(oldPlaylistFilePath);
                     config = playlistMigrator.migrate(playlistLines);
+                    writeConfigToFile(playlistPath);
                     Files.delete(oldPlaylistFilePath);
-                } catch (IOException ignored) {
+                } catch (Exception e) {
+                    AlertUtils.exceptionDialog("Failed to update playlists file",
+                            "Something went wrong when updating playlist data to a newer version.",
+                            e);
                 }
             } else {
                 // no file exists

@@ -1,8 +1,8 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.ListControllers.PresetItemController;
-import io.github.stekeblad.videouploader.jfxExtension.MyStage;
-import io.github.stekeblad.videouploader.jfxExtension.NoneSelectionModel;
+import io.github.stekeblad.videouploader.extensions.jfx.MyStage;
+import io.github.stekeblad.videouploader.extensions.jfx.NoneSelectionModel;
 import io.github.stekeblad.videouploader.managers.CategoryManager;
 import io.github.stekeblad.videouploader.managers.PresetManager;
 import io.github.stekeblad.videouploader.managers.SettingsManager;

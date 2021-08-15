@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.jfxExtension.stringConverters;
+package io.github.stekeblad.videouploader.extensions.jfx.stringConverters;
 
 import javafx.util.StringConverter;
 

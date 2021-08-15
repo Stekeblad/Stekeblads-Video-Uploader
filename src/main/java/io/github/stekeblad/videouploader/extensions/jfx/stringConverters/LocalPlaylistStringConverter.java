@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.jfxExtension.stringConverters;
+package io.github.stekeblad.videouploader.extensions.jfx.stringConverters;
 
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import javafx.util.StringConverter;

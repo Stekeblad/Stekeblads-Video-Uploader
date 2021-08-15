@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.jfxExtension;
+package io.github.stekeblad.videouploader.extensions.jfx;
 
 /**
  * Class to hold information about the minimum and maximum allowed width/height of a window

@@ -1,6 +1,6 @@
 package io.github.stekeblad.videouploader.utils;
 
-import io.github.stekeblad.videouploader.jfxExtension.WindowDimensionsRestriction;
+import io.github.stekeblad.videouploader.extensions.jfx.WindowDimensionsRestriction;
 
 public class Constants {
     // Constants for directory and file names used to store settings and other configuration

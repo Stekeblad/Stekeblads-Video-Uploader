@@ -1,7 +1,7 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
 import io.github.stekeblad.videouploader.ListControllers.PlaylistItemController;
-import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
+import io.github.stekeblad.videouploader.extensions.jfx.IWindowController;
 import io.github.stekeblad.videouploader.managers.PlaylistManager;
 import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;

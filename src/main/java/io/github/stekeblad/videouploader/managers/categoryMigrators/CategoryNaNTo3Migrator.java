@@ -1,8 +1,8 @@
 package io.github.stekeblad.videouploader.managers.categoryMigrators;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import io.github.stekeblad.videouploader.extensions.gson.MyGsonFactory;
 import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.Constants;
 import io.github.stekeblad.videouploader.youtube.LocalCategory;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 class CategoryNaNTo3Migrator {
     JsonObject migrate(List<String> oldFormat) {
         JsonObject newJson = new JsonObject();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = MyGsonFactory.CreateGsonInstance();
         newJson.addProperty(Constants.VERSION_FORMAT_KEY, 3);
 
         // The language and country codes was earlier in ConfigManger but gets first migrated to SettingsManger

@@ -1,8 +1,8 @@
 package io.github.stekeblad.videouploader.managers.presetMigrators;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import io.github.stekeblad.videouploader.extensions.gson.MyGsonFactory;
 import io.github.stekeblad.videouploader.managers.CategoryManager;
 import io.github.stekeblad.videouploader.managers.PlaylistManager;
 import io.github.stekeblad.videouploader.models.NewVideoPresetModel;
@@ -29,7 +29,7 @@ class PresetNaNTo3Migration {
     private static final String NODE_ID_PRESETNAME = "_presetName";
 
     JsonObject migrate(ArrayList<ArrayList<String>> oldPresets) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = MyGsonFactory.CreateGsonInstance();
         PlaylistManager playlistManager = PlaylistManager.getPlaylistManager();
         CategoryManager categoryManager = CategoryManager.getCategoryManager();
 

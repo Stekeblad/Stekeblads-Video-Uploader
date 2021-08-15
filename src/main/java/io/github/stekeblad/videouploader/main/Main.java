@@ -1,6 +1,6 @@
 package io.github.stekeblad.videouploader.main;
 
-import io.github.stekeblad.videouploader.jfxExtension.MyStage;
+import io.github.stekeblad.videouploader.extensions.jfx.MyStage;
 import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.Constants;

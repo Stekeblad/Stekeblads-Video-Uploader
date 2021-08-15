@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.jfxExtension;
+package io.github.stekeblad.videouploader.extensions.jfx;
 
 /**
  * Class for storing the coordinates and dimensions of a window

@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.jfxExtension;
+package io.github.stekeblad.videouploader.extensions.jfx;
 
 public interface IWindowController {
 

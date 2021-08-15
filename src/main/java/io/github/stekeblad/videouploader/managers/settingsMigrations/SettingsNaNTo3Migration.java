@@ -1,9 +1,9 @@
 package io.github.stekeblad.videouploader.managers.settingsMigrations;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import io.github.stekeblad.videouploader.jfxExtension.WindowFrame;
+import io.github.stekeblad.videouploader.extensions.gson.MyGsonFactory;
+import io.github.stekeblad.videouploader.extensions.jfx.WindowFrame;
 import io.github.stekeblad.videouploader.utils.Constants;
 
 import java.util.Properties;
@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 class SettingsNaNTo3Migration {
     JsonObject migrate(Properties oldProps) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = MyGsonFactory.CreateGsonInstance();
         JsonObject newJson = new JsonObject();
 
         // Settings that can be directly copied over

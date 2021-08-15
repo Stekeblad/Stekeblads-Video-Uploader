@@ -1,6 +1,7 @@
 package io.github.stekeblad.videouploader.managers;
 
 import com.google.gson.*;
+import io.github.stekeblad.videouploader.extensions.gson.MyGsonFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +14,7 @@ abstract class ManagerBase {
     protected Gson gson;
 
     protected ManagerBase() {
-        gson = new GsonBuilder().setPrettyPrinting().create();
+        gson = MyGsonFactory.CreateGsonInstance();
     }
 
     protected void loadConfigFromFile(Path path) throws IOException {

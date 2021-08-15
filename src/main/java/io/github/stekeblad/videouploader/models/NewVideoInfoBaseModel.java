@@ -1,9 +1,13 @@
 package io.github.stekeblad.videouploader.models;
 
+import io.github.stekeblad.videouploader.extensions.jfx.objectProperties.LocalCategoryObjectProperty;
+import io.github.stekeblad.videouploader.extensions.jfx.objectProperties.LocalPlaylistObjectProperty;
+import io.github.stekeblad.videouploader.extensions.jfx.objectProperties.VisibilityStatusObjectProperty;
 import io.github.stekeblad.videouploader.youtube.LocalCategory;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.VisibilityStatus;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.List;
@@ -14,10 +18,10 @@ public class NewVideoInfoBaseModel {
 
     private final StringProperty videoName = new SimpleStringProperty();
     private final StringProperty videoDescription = new SimpleStringProperty();
-    private final ObjectProperty<VisibilityStatus> visibility = new SimpleObjectProperty<>();
-    private final ListProperty<String> videoTags = new SimpleListProperty<>();
-    private final ObjectProperty<LocalPlaylist> selectedPlaylist = new SimpleObjectProperty<>();
-    private final ObjectProperty<LocalCategory> selectedCategory = new SimpleObjectProperty<>();
+    private final VisibilityStatusObjectProperty visibility = new VisibilityStatusObjectProperty();
+    private final ListProperty<String> videoTags = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final LocalPlaylistObjectProperty selectedPlaylist = new LocalPlaylistObjectProperty();
+    private final LocalCategoryObjectProperty selectedCategory = new LocalCategoryObjectProperty();
     private final BooleanProperty tellSubs = new SimpleBooleanProperty();
     private final StringProperty thumbnailPath = new SimpleStringProperty();
     private final BooleanProperty madeForKids = new SimpleBooleanProperty();

@@ -56,8 +56,13 @@ public class PresetManager extends ManagerBase {
                 Files.walk(oldPresetsDir, 3, FileVisitOption.FOLLOW_LINKS)
                         .forEach(file -> {
                             try {
-                                Files.copy(file, Paths.get(presetBackupsDir.toAbsolutePath().toString() + file.getFileName()));
-                            } catch (IOException ignored) {
+                                if (Files.isRegularFile(file.toAbsolutePath()))
+                                    Files.copy(file, Paths.get(presetBackupsDir.toAbsolutePath().toString(), file.getFileName().toString()));
+                            } catch (IOException e) {
+                                AlertUtils.exceptionDialog("Failed to update presets",
+                                        "Something went wrong when updating presets data to a newer version. Do not worry, " +
+                                                "there should be backups in the \"videouploader data\" directory",
+                                        e);
                             }
                         });
 
@@ -70,10 +75,15 @@ public class PresetManager extends ManagerBase {
                 }
 
                 config = presetMigrator.migrate(oldPresets);
+                writeConfigToFile(presetsPath);
 
                 // Delete old preset files
                 Files.walkFileTree(oldPresetsDir, new RecursiveDirectoryDeleter());
-            } catch (IOException ignored) {
+            } catch (Exception e) {
+                AlertUtils.exceptionDialog("Failed to update presets",
+                        "Something went wrong when updating presets data to a newer version. Do not worry, " +
+                                "there should be backups in the \"videouploader data\" directory",
+                        e);
             }
         } else if (Files.exists(presetsPath)) {
             // Data in json format found

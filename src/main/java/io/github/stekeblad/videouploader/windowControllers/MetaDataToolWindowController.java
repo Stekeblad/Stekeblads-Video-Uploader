@@ -1,6 +1,6 @@
 package io.github.stekeblad.videouploader.windowControllers;
 
-import io.github.stekeblad.videouploader.jfxExtension.IWindowController;
+import io.github.stekeblad.videouploader.extensions.jfx.IWindowController;
 import io.github.stekeblad.videouploader.tagProcessing.metaDataTagProcessor.MetaDataReader;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.FileUtils;

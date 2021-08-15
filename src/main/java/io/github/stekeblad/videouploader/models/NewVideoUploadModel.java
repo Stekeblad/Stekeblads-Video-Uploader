@@ -1,12 +1,13 @@
 package io.github.stekeblad.videouploader.models;
 
+import io.github.stekeblad.videouploader.extensions.jfx.objectProperties.FileObjectProperty;
 import javafx.beans.property.*;
 
 import java.io.File;
 
 public class NewVideoUploadModel extends NewVideoInfoBaseModel {
 
-    private final ObjectProperty<File> videoFile = new SimpleObjectProperty<>();
+    private final FileObjectProperty videoFile = new FileObjectProperty();
     private final StringProperty statusText = new SimpleStringProperty();
     private final StringProperty statusTextLink = new SimpleStringProperty();
     private final DoubleProperty uploadProgress = new SimpleDoubleProperty();

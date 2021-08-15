@@ -1,4 +1,4 @@
-package io.github.stekeblad.videouploader.jfxExtension;
+package io.github.stekeblad.videouploader.extensions.jfx;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

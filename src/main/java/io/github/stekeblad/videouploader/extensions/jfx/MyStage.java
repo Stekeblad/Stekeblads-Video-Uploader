@@ -1,10 +1,11 @@
-package io.github.stekeblad.videouploader.jfxExtension;
+package io.github.stekeblad.videouploader.extensions.jfx;
 
 import io.github.stekeblad.videouploader.managers.SettingsManager;
 import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.Constants;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -81,6 +82,15 @@ public class MyStage extends Stage {
                 }
             });
             cont.myInit();
+
+            // Trick to recover "lost" windows that opened outside the screen
+            // press ctrl + alt + shift + c and wish upon some magic
+            getScene().setOnKeyPressed((event) -> {
+                if (event.getCode() == KeyCode.C && event.isAltDown() && event.isControlDown() && event.isShiftDown()) {
+                    centerOnScreen();
+                    event.consume();
+                }
+            });
         }
     }
 }
