@@ -105,10 +105,13 @@ public class Uploader {
 
     /**
      * @return a set with the given cancelName of all uploads currently in the queue
+     * @implNote .toArray() is required as the keySet is bound to the tasks Map and changes in the map
+     * would be reflected in the set. That could cause ConcurrentModificationException even
+     * if synchronized is used here inside the method
      */
-    public Set<String> getUploadQueue() {
+    public String[] getUploadQueue() {
         synchronized (tasks) {
-            return tasks.keySet();
+            return tasks.keySet().toArray(new String[0]);
         }
     }
 
@@ -117,11 +120,14 @@ public class Uploader {
      * This method is intended to be used when the program is about to shut down and no new uploads should be added
      * to this instance after this method has been called.
      * @return a Set with the cancelName of all unfinished uploads that was aborted.
+     * @implNote .toArray() is required as the keySet is bound to the tasks Map and changes in the map
+     *      *           would be reflected in the set. That could cause ConcurrentModificationException even
+     *      *           if synchronized is used here inside the method
      */
-    public Set<String> kill() {
+    public String[] kill() {
         exec.shutdownNow();
         synchronized (tasks) {
-            return tasks.keySet();
+            return tasks.keySet().toArray(new String[0]);
         }
     }
 
