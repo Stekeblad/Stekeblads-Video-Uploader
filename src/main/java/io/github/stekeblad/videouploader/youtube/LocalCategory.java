@@ -31,4 +31,12 @@ public class LocalCategory implements Comparable<LocalCategory> {
     public int compareTo(@NotNull LocalCategory other) {
         return this.name.compareTo(other.getName());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LocalCategory that = (LocalCategory) o;
+        return id.equals(that.id);
+    }
 }

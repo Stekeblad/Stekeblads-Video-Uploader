@@ -200,8 +200,7 @@ public class YouTubeApiLayer {
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scope).setDataStoreFactory(fileFactory)
                 .build();
 
-        LocalServerReceiver localReceiver = new LocalServerReceiver.Builder().setPort(7835).build();
-        return new AuthorizationCodeInstalledApp(authFlow, localReceiver).authorize("user");
+        return new AuthorizationCodeInstalledApp(authFlow, new LocalServerReceiver()).authorize("user");
 
     }
 

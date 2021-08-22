@@ -259,7 +259,6 @@ public class Uploader {
         List<String> videoParts = Arrays.asList("snippet", "statistics", "status");
         YouTube.Videos.Insert videoInsert = myTube.videos()
                 .insert(videoParts, videoObject, videoFileStream);
-        videoInsert.setNotifySubscribers(video.isTellSubs());
 
         // getMediaHttpUploader for being able to report progress
         MediaHttpUploader uploader = videoInsert.getMediaHttpUploader();

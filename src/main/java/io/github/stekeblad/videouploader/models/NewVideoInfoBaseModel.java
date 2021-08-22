@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class NewVideoInfoBaseModel {
@@ -22,7 +23,6 @@ public class NewVideoInfoBaseModel {
     private final ListProperty<String> videoTags = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final LocalPlaylistObjectProperty selectedPlaylist = new LocalPlaylistObjectProperty();
     private final LocalCategoryObjectProperty selectedCategory = new LocalCategoryObjectProperty();
-    private final BooleanProperty tellSubs = new SimpleBooleanProperty();
     private final StringProperty thumbnailPath = new SimpleStringProperty();
     private final BooleanProperty madeForKids = new SimpleBooleanProperty();
 
@@ -103,18 +103,6 @@ public class NewVideoInfoBaseModel {
         this.selectedCategory.set(selectedCategory);
     }
 
-    public boolean isTellSubs() {
-        return tellSubs.get();
-    }
-
-    public BooleanProperty tellSubsProperty() {
-        return tellSubs;
-    }
-
-    public void setTellSubs(boolean tellSubs) {
-        this.tellSubs.set(tellSubs);
-    }
-
     public String getThumbnailPath() {
         return thumbnailPath.get();
     }
@@ -124,7 +112,7 @@ public class NewVideoInfoBaseModel {
     }
 
     public void setThumbnailPath(String thumbnailPath) {
-        this.thumbnailPath.set(thumbnailPath);
+        this.thumbnailPath.set(Objects.requireNonNullElse(thumbnailPath, ""));
     }
 
     public boolean isMadeForKids() {

@@ -32,8 +32,8 @@ public class UploadItemController extends VideoInfoItemController<NewVideoUpload
     public Button abortUploadButton;
     public Button hideButton;
 
-    private static final String NODE_ID_PROGRESS = "uploadProgress";
-    private static final String NODE_ID_STATUS = "status";
+    private static final String NODE_ID_PROGRESS = "_uploadProgress";
+    private static final String NODE_ID_STATUS = "_status";
 
     private static final String NODE_ID_BUTTON_SAVE = "save";
     private static final String NODE_ID_BUTTON_EDIT = "edit";

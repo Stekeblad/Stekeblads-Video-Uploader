@@ -37,7 +37,7 @@ public class AlertUtils {
      */
     private static Alert makeShortMsgAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.NONE);
-        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.initModality(Modality.WINDOW_MODAL);
         alert.setTitle(header);
         alert.setContentText(content);
         // To fix that messages is often truncated on my test Ubuntu machine:
@@ -91,7 +91,7 @@ public class AlertUtils {
             }));
         }
 
-        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initModality(Modality.WINDOW_MODAL);
         stage.setScene(alertDialog);
         stage.setTitle(header);
         stage.setAlwaysOnTop(true);

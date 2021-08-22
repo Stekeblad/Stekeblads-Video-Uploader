@@ -124,7 +124,11 @@ public class Translations {
                         "family \"%s\"%n", key, locale, translationFamily);
             }
         }
-        return fallback.getString(key); // if typo in key or translation is missing for default language I WANT AN EXCEPTION!
+        try {
+            return fallback.getString(key);
+        } catch (Exception e) {
+            return String.format("No string \"%s\" in \"%s\"", key, locale);
+        }
     }
 
     /**

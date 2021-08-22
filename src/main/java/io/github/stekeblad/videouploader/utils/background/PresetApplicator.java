@@ -175,7 +175,6 @@ public class PresetApplicator {
         upload.setVideoTags(videoTags);
         upload.setSelectedPlaylist(preset.getSelectedPlaylist());
         upload.setSelectedCategory(preset.getSelectedCategory());
-        upload.setTellSubs(preset.isTellSubs());
         upload.setMadeForKids(preset.isMadeForKids());
         upload.setThumbnailPath(preset.getThumbnailPath());
         upload.setVideoFile(videoFile);

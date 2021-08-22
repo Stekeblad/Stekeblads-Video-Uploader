@@ -38,7 +38,6 @@ public class PresetsWindowController {
     public AnchorPane presetWindow;
     public ListView<PresetItemController> listPresets;
     public ToolBar toolbar;
-    public Button btn_tips;
     public Button btn_addNewPreset;
     public Button btn_localizeCategories;
     public Button btn_managePlaylists;
@@ -78,11 +77,11 @@ public class PresetsWindowController {
         transPreset = TranslationsManager.getTranslation(TranslationBundles.PRESET_UPLOAD);
 
         // Children of Toolbars can not be detected through code currently (probably a bug)
+        //TODO: try remove on java 11
         btn_managePlaylists.setText(transPresetWin.getString("btn_managePlaylists"));
         btn_managePlaylists.setTooltip(new Tooltip(transPresetWin.getString("btn_managePlaylists_tt")));
         btn_localizeCategories.setText(transPresetWin.getString("btn_localizeCategories"));
         btn_localizeCategories.setTooltip(new Tooltip(transPresetWin.getString("btn_localizeCategories_tt")));
-        btn_tips.setText(transPresetWin.getString("btn_tips"));
         btn_addNewPreset.setText(transPresetWin.getString("btn_addNewPreset"));
         txt_nameNewPreset.setPromptText(transPresetWin.getString("txt_nameNewPreset_pt"));
 
@@ -226,7 +225,7 @@ public class PresetsWindowController {
             MyStage stage = new MyStage(WindowPropertyNames.LOCALIZE);
             stage.makeScene(fxmlLoader.load(), Constants.LOCALIZE_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_locCatWindowTitle"));
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.NONE);
             stage.prepareControllerAndShowAndWait(fxmlLoader.getController());
         } catch (IOException e) {
             e.printStackTrace();
@@ -246,7 +245,7 @@ public class PresetsWindowController {
             MyStage stage = new MyStage(WindowPropertyNames.PLAYLISTS);
             stage.makeScene(fxmlLoader.load(), Constants.PLAYLISTS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_manPlayWindowTitle"));
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.NONE);
             stage.prepareControllerAndShowAndWait(fxmlLoader.getController());
         } catch (IOException e) {
             e.printStackTrace();

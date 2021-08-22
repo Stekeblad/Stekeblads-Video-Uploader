@@ -60,4 +60,12 @@ public class LocalPlaylist implements Comparable<LocalPlaylist> {
         else
             return this.name.compareTo(other.getName());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LocalPlaylist that = (LocalPlaylist) o;
+        return id.equals(that.id);
+    }
 }

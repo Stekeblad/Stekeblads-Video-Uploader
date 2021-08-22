@@ -45,6 +45,9 @@ public class MyGsonFactory {
 
                 .registerTypeAdapter(ObjectProperty.class, new SimpleObjectPropertyInstanceCreator<>())
                 .registerTypeAdapter(VisibilityStatusObjectProperty.class, new SimpleObjectPropertySerializer.VisibilityStatusObjectSerializer())
+                .registerTypeAdapter(LocalPlaylistObjectProperty.class, new SimpleObjectPropertySerializer.LocalPlaylistObjectSerializer())
+                .registerTypeAdapter(LocalCategoryObjectProperty.class, new SimpleObjectPropertySerializer.LocalCategoryObjectSerializer())
+                .registerTypeAdapter(FileObjectProperty.class, new SimpleObjectPropertySerializer.FileObjectSerializer())
                 .registerTypeAdapter(VisibilityStatusObjectProperty.class, new SimpleObjectPropertyDeserializers.VisibilityStatusObjectPropertyDeserializer())
                 .registerTypeAdapter(LocalPlaylistObjectProperty.class, new SimpleObjectPropertyDeserializers.LocalPlaylistObjectPropertyDeserializer())
                 .registerTypeAdapter(LocalCategoryObjectProperty.class, new SimpleObjectPropertyDeserializers.LocalCategoryObjectPropertyDeserializer())

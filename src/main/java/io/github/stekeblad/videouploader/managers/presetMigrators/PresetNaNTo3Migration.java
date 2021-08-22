@@ -82,10 +82,13 @@ class PresetNaNTo3Migration {
                         category.ifPresent(newPreset::setSelectedCategory);
                         break;
                     case NODE_ID_TELL_SUBS:
-                        newPreset.setTellSubs(Boolean.parseBoolean(line.substring(colonIndex + 1)));
+                        // removed option no longer available
                         break;
                     case NODE_ID_THUMBNAIL:
-                        newPreset.setThumbnailPath(line.substring(colonIndex + 1));
+                        String thumbPath = line.substring(colonIndex + 1);
+                        if (thumbPath.equals("_")) // indicated "no thumbnail" in the old format
+                            thumbPath = ""; // now an empty string is used
+                        newPreset.setThumbnailPath(thumbPath);
                         break;
                     case NODE_ID_MADE_FOR_KIDS:
                         newPreset.setMadeForKids(Boolean.parseBoolean(line.substring(colonIndex + 1)));

@@ -25,7 +25,7 @@ public class PresetItemController extends VideoInfoItemController<NewVideoPreset
     private Consumer<NewVideoPresetModel> deleteButtonActionConsumer;
     private Consumer<NewVideoPresetModel> cloneButtonActionConsumer;
 
-    private static final String NODE_ID_PRESET_NAME = "presetName";
+    private static final String NODE_ID_PRESET_NAME = "_presetName";
     private static final String NODE_ID_BUTTON_SAVE = "save";
     private static final String NODE_ID_BUTTON_EDIT = "edit";
     private static final String NODE_ID_BUTTON_CANCEL = "cancel";

@@ -1,8 +1,11 @@
 package io.github.stekeblad.videouploader.ListControllers;
 
+import io.github.stekeblad.videouploader.extensions.jfx.stringConverters.LocalCategoryStringConverter;
+import io.github.stekeblad.videouploader.extensions.jfx.stringConverters.LocalPlaylistStringConverter;
 import io.github.stekeblad.videouploader.managers.CategoryManager;
 import io.github.stekeblad.videouploader.managers.PlaylistManager;
 import io.github.stekeblad.videouploader.models.NewVideoInfoBaseModel;
+import io.github.stekeblad.videouploader.utils.AlertUtils;
 import io.github.stekeblad.videouploader.utils.FileUtils;
 import io.github.stekeblad.videouploader.utils.background.OpenInBrowser;
 import io.github.stekeblad.videouploader.utils.translation.TranslationBundles;
@@ -11,6 +14,7 @@ import io.github.stekeblad.videouploader.utils.translation.TranslationsManager;
 import io.github.stekeblad.videouploader.youtube.LocalCategory;
 import io.github.stekeblad.videouploader.youtube.LocalPlaylist;
 import io.github.stekeblad.videouploader.youtube.VisibilityStatus;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -24,10 +28,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -40,7 +41,6 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
     public TextArea tags;
     public ChoiceBox<LocalPlaylist> playlist;
     public ChoiceBox<LocalCategory> category;
-    public CheckBox notifySubscribers;
     public ImageView thumbnail;
     public CheckBox madeForKids;
 
@@ -51,17 +51,17 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
     // Other fields
     protected T model;
     protected static Translations translations = null;
+    protected static Translations baseTrans = null;
 
     // Private constants
-    private static final String NODE_ID_TITLE = "title";
-    private static final String NODE_ID_DESCRIPTION = "description";
-    private static final String NODE_ID_CATEGORY = "category";
-    private static final String NODE_ID_TAGS = "tags";
-    private static final String NODE_ID_PLAYLIST = "playlist";
-    private static final String NODE_ID_VISIBILITY = "visibility";
-    private static final String NODE_ID_TELL_SUBS = "tellSubs";
-    private static final String NODE_ID_THUMBNAIL = "thumbNail";
-    private static final String NODE_ID_MADE_FOR_KIDS = "madeForKids";
+    private static final String NODE_ID_TITLE = "_title";
+    private static final String NODE_ID_DESCRIPTION = "_description";
+    private static final String NODE_ID_CATEGORY = "_category";
+    private static final String NODE_ID_TAGS = "_tags";
+    private static final String NODE_ID_PLAYLIST = "_playlist";
+    private static final String NODE_ID_VISIBILITY = "_visibility";
+    private static final String NODE_ID_THUMBNAIL = "_thumbNail";
+    private static final String NODE_ID_MADE_FOR_KIDS = "_madeForKids";
 
     private static final List<String> THUMBNAIL_FILE_FORMAT = Arrays.asList("*.jpg", "*.png");
     private static final long MAX_THUMB_SIZE = 2 * 1024 * 1024;
@@ -70,12 +70,16 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
     protected VideoInfoItemController(T infoItem, ReadOnlyDoubleProperty parentPrefWidthProperty) {
         if (translations == null)
             translations = TranslationsManager.getTranslation(TranslationBundles.PRESET_UPLOAD);
+        if (baseTrans == null)
+            baseTrans = TranslationsManager.getTranslation(TranslationBundles.BASE);
         if (infoItem == null)
             throw new NullPointerException("infoItem argument cannot be null");
         model = infoItem;
         constructPane();
         if (parentPrefWidthProperty != null)
             this.prefWidthProperty().bind(parentPrefWidthProperty.subtract(35));
+
+        translations.autoTranslate(this);
     }
 
     /**
@@ -91,7 +95,6 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
         tOut.setVideoTags(tIn.getVideoTags());
         tOut.setSelectedPlaylist(tIn.getSelectedPlaylist());
         tOut.setSelectedCategory(tIn.getSelectedCategory());
-        tOut.setTellSubs(tIn.isTellSubs());
         tOut.setThumbnailPath(tIn.getThumbnailPath());
         tOut.setMadeForKids(tIn.isMadeForKids());
     }
@@ -120,7 +123,6 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
                 .map((s) -> s = s.strip()).collect(Collectors.toList()));
         model.setSelectedPlaylist(playlist.getValue());
         model.setSelectedCategory(category.getValue());
-        model.setTellSubs(notifySubscribers.isSelected());
         model.setThumbnailPath(thumbnail.getImage().getUrl());
         model.setMadeForKids(madeForKids.isSelected());
     }
@@ -134,7 +136,6 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
         tags.setText(String.join(", ", model.getVideoTags()));
         playlist.getSelectionModel().select(model.getSelectedPlaylist());
         category.getSelectionModel().select(model.getSelectedCategory());
-        notifySubscribers.setSelected(model.isTellSubs());
         thumbnail.setImage(new Image(model.getThumbnailPath()));
         madeForKids.setSelected(model.isMadeForKids());
     }
@@ -144,13 +145,28 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
     // ------------------------------------------------------------------------
 
     private Image getSelectedOrDefaultImage(String thumbnailPath) {
+        try {
+            return getSelectedOrDefaultImage(thumbnailPath, false);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private Image getSelectedOrDefaultImage(String thumbnailPath, boolean rethrowException) throws IOException {
+        // Return default image if thumbnailPath is null
+        if (thumbnailPath == null || thumbnailPath.equals("") || thumbnailPath.equals("null"))
+            return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/images/no_image.png")));
+
         InputStream stream = null;
         Image image;
         try {
             try {
-                stream = new FileInputStream(new File(thumbnailPath));
+                stream = new FileInputStream(thumbnailPath);
             } catch (FileNotFoundException | NullPointerException e) {
-                stream = this.getClass().getResourceAsStream("/images/no_image.png");
+                if (rethrowException)
+                    throw new IOException("The following thumbnail file can not be found: " + thumbnailPath, e);
+
+                stream = Objects.requireNonNull(this.getClass().getResourceAsStream("/images/no_image.png"));
             }
             image = new Image(stream);
         } finally {
@@ -259,14 +275,21 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
         });
         playlist = new ChoiceBox<>(PlaylistManager.getPlaylistManager().getVisiblePlaylists());
         playlist.setId(NODE_ID_PLAYLIST);
+        playlist.setConverter(new LocalPlaylistStringConverter());
         playlist.getSelectionModel().select(model.getSelectedPlaylist());
         category = new ChoiceBox<>(CategoryManager.getCategoryManager().getCategories());
         category.setId(NODE_ID_CATEGORY);
+        category.setConverter(new LocalCategoryStringConverter());
         category.getSelectionModel().select(model.getSelectedCategory());
-        notifySubscribers = new CheckBox();
-        notifySubscribers.setId(NODE_ID_TELL_SUBS);
-        notifySubscribers.setSelected(model.isTellSubs());
-        thumbnail = new ImageView(model.getThumbnailPath());
+        try {
+            thumbnail = new ImageView(getSelectedOrDefaultImage(model.getThumbnailPath(), true));
+        } catch (Exception e) {
+            Platform.runLater(() -> AlertUtils.simpleClose(baseTrans.getString("app_name") + " - Thumbnail not found",
+                    "The following thumbnail for \"" + model.getVideoName() + "\" can not be found and was not loaded: " +
+                            model.getThumbnailPath()).show());
+            model.setThumbnailPath("");
+            thumbnail = new ImageView(getSelectedOrDefaultImage(null));
+        }
         thumbnail.setId(NODE_ID_THUMBNAIL);
         thumbnail.setFitHeight(90);
         thumbnail.setFitWidth(160);
@@ -281,12 +304,10 @@ public abstract class VideoInfoItemController<T extends NewVideoInfoBaseModel> e
         innerPane.add(playlist, 2, 0);
 
         innerPane.add(description, 0, 1, 1, 4);
-        innerPane.add(tags, 1, 1, 1, 2);
-        innerPane.add(madeForKids, 1, 3);
+        innerPane.add(tags, 1, 1, 1, 3);
+        innerPane.add(madeForKids, 1, 4);
 
         innerPane.add(thumbnail, 2, 1, 1, 3);
-
-        innerPane.add(notifySubscribers, 1, 4);
         innerPane.add(visibility, 2, 4);
 
         addNodeEvents();

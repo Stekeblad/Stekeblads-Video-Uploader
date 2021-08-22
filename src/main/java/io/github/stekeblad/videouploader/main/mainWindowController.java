@@ -214,7 +214,6 @@ public class mainWindowController implements IWindowController {
                 NewVideoUploadModel newUpload = new NewVideoUploadModel();
                 newUpload.setVideoName(videoFile.getName());
                 newUpload.setMadeForKids(false);
-                newUpload.setTellSubs(false);
                 newUpload.setVideoFile(videoFile);
 
                 UploadItemController uploadController = new UploadItemController(newUpload, listUploads.prefWidthProperty());
@@ -269,7 +268,7 @@ public class mainWindowController implements IWindowController {
             Stage stage = new Stage();
             stage.setTitle(transBasic.getString("app_presetWindowTitle"));
             stage.setScene(scene);
-            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
+            stage.initModality(Modality.NONE); // Make it always above mainWindow
             PresetsWindowController controller = fxmlLoader.getController();
             stage.setOnCloseRequest(controller::onWindowClose);
             controller.myInit(false);// TODO: verify that this is not needed
@@ -293,7 +292,7 @@ public class mainWindowController implements IWindowController {
             MyStage stage = new MyStage(WindowPropertyNames.SETTINGS);
             stage.makeScene(fxmlLoader.load(), Constants.SETTINGS_WINDOW_DIMENSIONS_RESTRICTION);
             stage.setTitle(transBasic.getString("app_settingsWindowTitle"));
-            stage.initModality(Modality.APPLICATION_MODAL); // Make it always above mainWindow
+            stage.initModality(Modality.NONE); // Make it always above mainWindow
             stage.prepareControllerAndShow(fxmlLoader.getController());
         } catch (IOException e) {
             AlertUtils.exceptionDialog(transBasic.getString("error"), transBasic.getString("errOpenWindow"), e);
