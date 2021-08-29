@@ -41,10 +41,12 @@ public class PresetApplicator {
      * @throws NotSupportedException if you try to change the callback while the PresetApplicator is working
      */
     public void setSuccessCallback(Consumer<VideoUpload> presetApplicatorSuccessCallback) throws NotSupportedException {
-        if (!tasks.keySet().isEmpty())
-            throw new NotSupportedException("Success callback can not be changed while the PresetApplicator is working");
-        else
-            successCallback = presetApplicatorSuccessCallback;
+        synchronized (tasks) {
+            if (!tasks.keySet().isEmpty())
+                throw new NotSupportedException("Success callback can not be changed while the PresetApplicator is working");
+            else
+                successCallback = presetApplicatorSuccessCallback;
+        }
     }
 
     /**
@@ -57,17 +59,21 @@ public class PresetApplicator {
      * @throws NotSupportedException if you try to change the callback while the PresetApplicator is working
      */
     public void setErrorCallback(BiConsumer<File, Throwable> presetApplicatorErrorCallback) throws NotSupportedException {
-        if (!tasks.keySet().isEmpty())
-            throw new NotSupportedException("Success callback can not be changed while the PresetApplicator is working");
-        else
-            errorCallback = presetApplicatorErrorCallback;
+        synchronized (tasks) {
+            if (!tasks.keySet().isEmpty())
+                throw new NotSupportedException("Success callback can not be changed while the PresetApplicator is working");
+            else
+                errorCallback = presetApplicatorErrorCallback;
+        }
     }
 
     /**
      * @return true if the PresetApplicator is working with apply a preset to one or more videos
      */
     public boolean getIsActive() {
-        return !tasks.keySet().isEmpty();
+        synchronized (tasks) {
+            return !tasks.keySet().isEmpty();
+        }
     }
 
     /**
@@ -75,9 +81,11 @@ public class PresetApplicator {
      *
      * @return a set with the names of all files that was queued but never finished processing
      */
-    public Set<String> kill() {
-        exec.shutdownNow();
-        return tasks.keySet();
+    public String[] kill() {
+        synchronized (tasks) {
+            exec.shutdownNow();
+            return tasks.keySet().toArray(new String[0]);
+        }
     }
 
     public void applyPreset(List<File> videoFiles, VideoPreset preset, int autoNum) {
@@ -101,7 +109,9 @@ public class PresetApplicator {
                         }
                     }
                     // remove the task from the list
-                    tasks.remove(cancelName);
+                    synchronized (tasks) {
+                        tasks.remove(cancelName);
+                    }
                     return null;
                 }
             };
@@ -110,8 +120,10 @@ public class PresetApplicator {
                     Platform.runLater(() -> errorCallback.accept(videoFile, newTask.getException()));
                 }
             });
-            Future futureTask = exec.submit(newTask);
-            tasks.put(cancelName, futureTask); // save the future to be able to abort the task
+            synchronized (tasks) {
+                Future futureTask = exec.submit(newTask);
+                tasks.put(cancelName, futureTask); // save the future to be able to abort the task
+            }
             autoNum++;
         }
 

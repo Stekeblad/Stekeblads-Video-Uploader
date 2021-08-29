@@ -19,7 +19,10 @@ import javafx.concurrent.Task;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -110,9 +113,9 @@ public class Uploader {
     /**
      * @return a set with the given cancelName of all uploads currently in the queue
      */
-    public Set<String> getUploadQueue() {
+    public String[] getUploadQueue() {
         synchronized (tasks) {
-            return tasks.keySet();
+            return tasks.keySet().toArray(new String[0]);
         }
     }
 
@@ -120,12 +123,13 @@ public class Uploader {
      * Aborts all uploads and shuts down the executor service that performs the background work.
      * This method is intended to be used when the program is about to shut down and no new uploads should be added
      * to this instance after this method has been called.
+     *
      * @return a Set with the cancelName of all unfinished uploads that was aborted.
      */
-    public Set<String> kill() {
+    public String[] kill() {
         exec.shutdownNow();
         synchronized (tasks) {
-            return tasks.keySet();
+            return tasks.keySet().toArray(new String[0]);
         }
     }
 

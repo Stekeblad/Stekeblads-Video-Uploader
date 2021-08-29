@@ -42,7 +42,6 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static io.github.stekeblad.videouploader.utils.Constants.*;
 import static io.github.stekeblad.videouploader.youtube.VideoInformationBase.MAX_THUMB_SIZE;
@@ -223,14 +222,13 @@ public class mainWindowController implements IWindowController {
             uploader.kill();
             return true;
         } else if (choice.equals(op3)) {
-
-            Set<String> tasks = uploader.kill();
-            tasks.forEach(s -> {
-                int index = getUploadIndexByName(s);
+            String[] tasks = uploader.kill();
+            for (String task : tasks) {
+                int index = getUploadIndexByName(task);
                 if (index != -1) { // If a task does not have a index it has been removed and is not interesting, or bugged with a bad id, skip them
                     configManager.saveWaitingUpload(uploadQueueVideos.get(index).toString(), String.valueOf(index));
                 }
-            });
+            }
             return true;
         }
         return false;
