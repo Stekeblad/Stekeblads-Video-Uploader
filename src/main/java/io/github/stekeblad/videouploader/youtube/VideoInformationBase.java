@@ -62,27 +62,27 @@ public class VideoInformationBase {
      * @return returns the Id of the button in the first button slot. Can be used to know what button is there at the moment
      */
     public String getButton1Id() {
-        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
-        verifyButtonExistence(buttonBox, 1);
-        return ((HBox) buttonBox).getChildren().get(0).getId();
+        HBox buttonBox = ensureButtonBox();
+        ensureButtonExistence(buttonBox, 1);
+        return buttonBox.getChildren().get(0).getId();
     }
 
     /**
      * @return returns the Id of the button in the second button slot. Can be used to know what button is there at the moment
      */
     public String getButton2Id() {
-        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
-        verifyButtonExistence(buttonBox, 2);
-        return ((HBox) buttonBox).getChildren().get(1).getId();
+        HBox buttonBox = ensureButtonBox();
+        ensureButtonExistence(buttonBox, 2);
+        return buttonBox.getChildren().get(1).getId();
     }
 
     /**
      * @return returns the Id of the button in the third button slot. Can be used to know what button is there at the moment
      */
     public String getButton3Id() {
-        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
-        verifyButtonExistence(buttonBox, 3);
-        return ((HBox) buttonBox).getChildren().get(2).getId();
+        HBox buttonBox = ensureButtonBox();
+        ensureButtonExistence(buttonBox, 3);
+        return buttonBox.getChildren().get(2).getId();
     }
 
     /**
@@ -192,11 +192,11 @@ public class VideoInformationBase {
      */
     public void setButton1(Button btn1) {
         if (btn1 == null)
-            throw new IllegalArgumentException("Button parameter can not be null");
+            throw new IllegalArgumentException("Button 1 parameter can not be null");
 
-        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
-        verifyButtonExistence(buttonBox, 1);
-        ((HBox) buttonBox).getChildren().set(0, btn1);
+        HBox buttonBox = ensureButtonBox();
+        ensureButtonExistence(buttonBox, 1);
+        buttonBox.getChildren().set(0, btn1);
     }
 
     /**
@@ -206,11 +206,11 @@ public class VideoInformationBase {
      */
     public void setButton2(Button btn2) {
         if (btn2 == null)
-            throw new IllegalArgumentException("Button parameter can not be null");
+            throw new IllegalArgumentException("Button 2 parameter can not be null");
 
-        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
-        verifyButtonExistence(buttonBox, 2);
-        ((HBox) buttonBox).getChildren().set(1, btn2);
+        HBox buttonBox = ensureButtonBox();
+        ensureButtonExistence(buttonBox, 2);
+        buttonBox.getChildren().set(1, btn2);
     }
 
     /**
@@ -220,11 +220,29 @@ public class VideoInformationBase {
      */
     public void setButton3(Button btn3) {
         if (btn3 == null)
-            throw new IllegalArgumentException("Button parameter can not be null");
+            throw new IllegalArgumentException("Button 3 parameter can not be null");
 
-        Node buttonBox = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
-        verifyButtonExistence(buttonBox, 3);
-        ((HBox) buttonBox).getChildren().set(2, btn3);
+        HBox buttonBox = ensureButtonBox();
+        ensureButtonExistence(buttonBox, 3);
+        buttonBox.getChildren().set(2, btn3);
+    }
+
+    /**
+     * In <a href="https://github.com/Stekeblad/Stekeblads-Video-Uploader/issues/36" target="_top">issue #36</a>
+     * the buttonBox happened to be null for a user. Not being able to figure out how that is possible I have
+     * to resort to testing for null and recreating it, risking other consequences...
+     *
+     * @return The buttonBox that holds the action buttons for this VideoInformationBase item.
+     */
+    private HBox ensureButtonBox() {
+        Node buttonBoxNode = videoBasePane.lookup("#" + paneId + NODE_ID_BUTTONSBOX);
+        if (buttonBoxNode instanceof HBox)
+            return (HBox) buttonBoxNode;
+
+        HBox buttonBox = new HBox(5);
+        buttonBox.setId(paneId + NODE_ID_BUTTONSBOX);
+        videoBasePane.add(buttonBox, 0, 5);
+        return buttonBox;
     }
 
     /**
@@ -233,8 +251,8 @@ public class VideoInformationBase {
      * @param buttonBox The buttonBox yo verify.
      * @param minSize   the minimum number of children's in the buttonBox required in the context of the caller.
      */
-    private void verifyButtonExistence(Node buttonBox, int minSize) {
-        ObservableList<Node> children = ((HBox) buttonBox).getChildren();
+    private void ensureButtonExistence(HBox buttonBox, int minSize) {
+        ObservableList<Node> children = buttonBox.getChildren();
         while (children.size() < minSize) {
             Button ghostBtn = new Button("");
             ghostBtn.setVisible(false);
@@ -766,6 +784,7 @@ public class VideoInformationBase {
         ghostBtn2.setVisible(false);
         Button ghostBtn3 = new Button("");
         ghostBtn3.setVisible(false);
+        // The buttonBox gets recreated in ensureButtonBox, if changed here, also update there!
         HBox buttonsBox = new HBox(5, ghostBtn1, ghostBtn2, ghostBtn3);
         buttonsBox.setId(getPaneId() + NODE_ID_BUTTONSBOX);
 
