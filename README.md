@@ -1,5 +1,11 @@
 # Stekeblad's Video Uploader
 
+## Project Closed
+
+Since 08:00, 3 april, 2022 UTC is this project closed. I will not be giving support or releasing new updates. The project will however remain here as archived meaning its still available for download and the wiki, existing issues or the source code can be consulted for help. It is also no longer possible to access YouTube without your own API key. [See this wiki page on how to use your own API key with Stekeblad's Video Uploder.](https://github.com/Stekeblad/Stekeblads-Video-Uploader/wiki/Personal-API-key)
+
+---
+
 ## Easier bulk uploads to YouTube
 Helps people who upload a lot of videos to YouTube by automatically
 setting video title, description, tags, playlist,
